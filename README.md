@@ -41,3 +41,26 @@ python3 identify.py path/to/directory
 you get two files:\
 **path/to/directory.log**  -> basic logging\
 **path/to/directory_modified.json** -> a json with the siegfried output of the original files that where processed
+
+### updating signatures
+
+siegfried\
+```sf -update```
+
+check [nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm](nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm)
+and adapt version in ```fileidentification/conf/droidsig2json.py``` and run it. you should get an updated **fmt2ext.json**
+
+you'll find a good resource for fileformats on\
+[nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new](nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new)
+
+
+### TODO
+
+**config/conceptual:**\
+decide on what file format to keep and to convert\
+office files such as doc, ppt, xls are converted with LibreOffice, this means it might affect layout 
+(or fuctions in xls)
+
+**coding:**\
+mostly marked in code. bigger issue are handling metadata such as exif etc. no preservation is currently implemented
+when files are converted, i.e. that information gets lost.

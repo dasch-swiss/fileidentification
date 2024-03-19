@@ -96,17 +96,19 @@ conversions: dict = {
     # fmt : [exec, target file container, args]
     ####
 
-    # Audio/Video
+    # Video
     # avi
     "fmt/5": ["ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"],
     # quicktime
     "x-fmt/384": ["ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"],
     # proRes
     "fmt/797": ["ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"],
-    # MPEG-2 Transport Stream
+    # MPEG-2 Transport Stream - mostly it contains an h.264 / h.265 videocodec, transcode it anyway or use -codec copy as arg?
     "fmt/585": ["ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"],
     # Video Object File (MPEG-2 subset)
     "fmt/425": ["ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"],
+    # ogg
+    "fmt/945": ["ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"],
     # ffv1
     # TODO do we archive ffv1 in Matroska Container? or Matroska Container in general? it can contain a lot of codecs
     "fmt/569": ["ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"],
@@ -115,6 +117,23 @@ conversions: dict = {
     # wmv
     "fmt/133": ["ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"],
     # ... TODO there's a lot more, add them step by step
+
+    # Audio
+    # aif
+    "fmt/414": ["ffmpeg", "wav", "-codec copy"],
+    # aifc
+    "x-fmt/136": ["ffmpeg", "mp3", "-codec copy"],
+    # what about flac etc?
+    # flac
+    "fmt/279": ["ffmpeg", "wav", ""],
+    "fmt/947": ["ffmpeg", "wav", ""],
+    # vorbis
+    "fmt/203": ["ffmpeg", "mp3", ""],
+    # opus
+    "fmt/946": ["ffmpeg", "mp3", ""],
+    # speex
+    "fmt/948": ["ffmpeg", "mp3", ""],
+
 
     # Images
     # Canon Raw
