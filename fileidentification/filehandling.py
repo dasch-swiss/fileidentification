@@ -68,7 +68,7 @@ class File:
         logging.info(f'did convert {self.filepath} to {outfile}')
 
 
-def check_against_policies(obj: Dict[str, Any], fmt2ext: dict, accepted: list, conversions: dict) \
+def check_against_policies(obj: Dict[str, Any], fmt2ext: dict, accepted: dict, conversions: dict) \
                            -> Union[dict[str, Any], None]:
 
     """
@@ -89,7 +89,7 @@ def check_against_policies(obj: Dict[str, Any], fmt2ext: dict, accepted: list, c
         return
 
     # check if the file throws any errors while open/processing it with the respective exec
-    check_fileintegrity(puid, obj)
+    check_fileintegrity(puid, obj, accepted, conversions)
 
     # file conversion according to the policies defined in conf/policies.py
     # case where there is a extension missmatch, rename file
@@ -135,8 +135,10 @@ def fetch_puid(obj: dict[str, Any]) -> tuple[dict[str, Any], Union[str, None]]:
     return obj, puid
 
 
-def check_fileintegrity(puid: str, obj: dict[str, Any]) -> None:
+def check_fileintegrity(puid: str, obj: dict[str, Any], accepted, conversions) -> None:
 
     # check stream integrity # TODO file integrity for other files than Audio/Video
-    if puid in ['fmt/569', 'fmt/5', 'fmt/199']:
+    if puid in accepted and accepted[puid][0] == "ffmpeg":
+        ffmpeg_analyse_stream(obj['filename'])
+    if puid in conversions and conversions[puid][0] == "ffmpeg":
         ffmpeg_analyse_stream(obj['filename'])
