@@ -1,7 +1,15 @@
 ### a script to identify file formats and convert them if necessary
 
 **disclaimer**: it has a lot of dependencies, i.e. siegfried, ffmpeg, imagemagick and LibreOffice needs to be installed.
-Except LibreOffice, it installs those packages if needed on the first time running the script.
+But they are useful anyway so you can install them using brew:
+```
+brew install richardlehane/digipres/siegfried
+brew install ffmpeg
+brew install imagemagick
+brew install ghostscript
+```
+for LibreOffice just fetch the dmg.<br>
+
 it's a first version, not tested a lot and for sure needs some more debugging... also, it is not optimised on speed, so please be patient.
 
 it does not delete or modify files directly, it adds converted/modified files in a folder named after that file. so your original files are untouched.
@@ -12,16 +20,16 @@ in **fileidentification/conf/policies.py**
 if the file is archived as it is, it skips.
 
 if the file has a extension missmatch, it renames a copy of it in a new folder named after the file:\
-**filename.wrongExt\
+**filename.wrongExt<br>
 filename/filename.ext**
 
 the same applies to converted files, including processing logs:\
-**filename.ext\
-filename/filename.ext\
+**filename.ext<br>
+filename/filename.ext<br>
 filename/filename.ext.log**
 
 if an error occurs whitin integrity checks, it appends the error log:\
-**corrupted.ext\
+**corrupted.ext<br>
 corrupted.ext.error.log**
 
 
@@ -31,10 +39,12 @@ corrupted.ext.error.log**
 
 ### usage
 
-run it in your ide or in terminal
-
+run it in your ide or in your terminal
+activating the venv<br>
+```source .venv/bin/active # this depends on your venv settings```
+<br>or<or>
+```poetry shell```
 ```
-poetry shell
 python3 identify.py path/to/directory
 ```
 

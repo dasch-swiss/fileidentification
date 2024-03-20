@@ -1,4 +1,3 @@
-import subprocess
 import shutil
 
 
@@ -14,28 +13,21 @@ def check() -> None:
 
     # siegfried
     if not cmd_exists("sf"):
-        print("installing siegfried, this can take a while...")
-        res = subprocess.run(["brew", "install", "richardlehane/digipres/siegfried"],
-                             capture_output=True, text=True)
-        if res.stderr:
-            print(f'got an error, while installing: \n {res.stderr}')
-        print(res.stdout)
+        print("you need siegfried for this to work, please install it with running this cmd in your terminal:")
+        print("brew install richardlehane/digipres/siegfried")
+        quit()
 
     # ffmpeg
     if not cmd_exists("ffmpeg"):
-        print("installing ffmpeg, this can take a while ...")
-        res = subprocess.run(["brew", "install", "ffmpeg"], capture_output=True, text=True)
-        if res.stderr:
-            print(f'got an error, while installing: \n {res.stderr}')
-        print(res.stdout)
+        print("you need ffmpeg for this to work, please install it with running this cmd in your terminal:")
+        print("brew install ffmpeg")
 
     # imagemagick
     if not cmd_exists("convert"):
-        print("installing imagemagick, this can take a while ... ")
-        res = subprocess.run(["brew", "install", "imagemagick"], capture_output=True, text=True)
-        if res.stderr:
-            print(f'got an error, while installing: \n {res.stderr}')
-        print(res.stdout)
+        print("you need imagemagick for this to work, please install it with running this cmd in your terminal:")
+        print("brew install imagemagick")
+        print("brew install ghostscript")
+        quit()
 
     # libreOffice (used headless)
     if not cmd_exists("/Applications/LibreOffice.app/Contents/MacOS/soffice"):
