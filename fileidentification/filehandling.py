@@ -5,7 +5,7 @@ import shlex
 import re
 import json
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from abc import ABC
 from typing import Union, Any, Dict, Type
 from .wrappers.wrappers import ffmpeg_analyse_stream
@@ -18,32 +18,36 @@ with open('fileidentification/conf/fmt2ext.json', 'r') as f:
 
 
 SFinfo: Type = Dict[str, Any]
-# single file information output of siegfried (json)
-# {
-#     "filename": "abs/path/to/file.ext",
-#     ...
-#     "matches": [
-#         {
-#             "id": "fmt/id",
-#             ...
-#             "warning": "some warnings"
-#         }
-#     ]
-# }
+"""
+single file information output of siegfried (json)
 
+has the following values among others
+
+{
+    "filename": "abs/path/to/file.ext",
+    "matches": [
+        {
+            "id": "puid",
+            "warning": "some warnings"
+        }
+    ]
+}
+"""
 
 @dataclass
 class File:
+
     filepath: str = None
     puid: str = None
-    target_dir: str = None
     filename: str = None  # without extension, this is different to the json output of siegfried, where its the abs path
-    migrated_filepath: str = None
+    origin_dir: str = None
+    target_dir: str = None
+    cleanup: dict = field(default_factory=dict)
 
     def _mkdir(self):
         """create a folder with the name of the file"""
         self.target_dir = os.path.splitext(self.filepath)[0]
-        self.filename = os.path.split(self.target_dir)[-1]
+        self.origin_dir, self.filename = os.path.split(self.target_dir)
         # case where there is no ext
         if not os.path.splitext(self.filepath)[1]:
             self.target_dir = f'{self.target_dir}Folder'
@@ -56,6 +60,9 @@ class File:
         target = os.path.join(self.target_dir, f'{self.filename}.{ext}')
         shutil.copyfile(self.filepath, target)
         logging.info(f'did rename {self.filepath} to {target}')
+        # add cleanup instructions, move and remove
+        self.cleanup['mv'] = [target, self.origin_dir]
+        self.cleanup['rm'] = [self.filepath, self.target_dir]
 
     # file migration
     def convert(self, args: list):
@@ -66,9 +73,9 @@ class File:
         # TODO Metadata such as exif... are lost when reencoded,
         #  need to implement something to copy some parts of these metadata?
 
-        self.migrated_filepath = os.path.join(self.target_dir, f'{self.filename}.{args[1]}')
+        target = os.path.join(self.target_dir, f'{self.filename}.{args[1]}')
         # set outputfile and log
-        outfile = shlex.quote(self.migrated_filepath)
+        outfile = shlex.quote(target)
         logfile = shlex.quote(os.path.join(self.target_dir, f'{self.filename}.log'))
         match args[0]:
             # construct command if its ffmpeg
@@ -89,27 +96,36 @@ class File:
         # run cmd in shell (and as a string, so [error]output is redirected to logfile)
         subprocess.run(cmd, shell=True)
         logging.info(f'did convert {self.filepath} to {outfile}')
+        # add cleanup instructions, move and remove
+        # only clean up when file conversion was successful
+        if os.path.isfile(target):
+            self.cleanup['mv'] = [target, self.origin_dir]
+            self.cleanup['rm'] = [self.filepath, self.target_dir]
+
 
 
 class FileHandler(ABC):
-    """
-    Object to run a json formatted siegfried output against preservation policies
-    """
+
     accepted: dict = accepted
     conversions: dict = conversions
     fmt2ext: dict = fmt2ext
+    cleanup: list = []
 
-    def run(self, sfinfos: list[SFinfo]) -> list:
+    def run(self, sfinfos: list[SFinfo], cleanup=False) -> tuple[list, list]:
         """
-        :param sfinfos: a list of json formatted file information (siegfried output)
-        :return modified: a list of json formatted file information for files that got converted, renamed
+        runs the files with the gathered siegfried information against the preservation policies
+        :param sfinfos: file information output from siegfried (json)
+        :param cleanup: bool if set to true, it replaces the original files with the converted ones, deletes created folders
+        :return modified: original file information of the files that got converted or renamed
         """
         modified: list = []
         for sfinfo in sfinfos:
             sfinfo = self._check_against_policies(sfinfo)
             if sfinfo:
                 modified.append(sfinfo)
-        return modified
+        if cleanup:
+            self._cleanup()
+        return modified, self.cleanup
 
     def _check_against_policies(self, sfinfo: SFinfo) -> Union[SFinfo, None]:
         """
@@ -119,6 +135,7 @@ class FileHandler(ABC):
 
         sfinfo, puid = self._fetch_puid(sfinfo)
         if not puid:
+            logging.error(f'could not handle {sfinfo['filename']}')
             return
 
         # os specific files we do not care, eg .DS_store etc #TODO there are more for sure
@@ -129,27 +146,30 @@ class FileHandler(ABC):
         self._check_fileintegrity(puid, sfinfo)
 
         # file conversion according to the policies defined in conf/policies.py
-        # case where there is a extension missmatch, rename file
+        # case where there is an extension missmatch, rename file
         if sfinfo['matches'][0]['warning'] == 'extension mismatch':
-            file = File(filepath=sfinfo['filename'], puid=sfinfo['matches'][0]['id'])
+            file = File(filepath=sfinfo['filename'], puid=puid)
             ext = self.fmt2ext[puid]['file_extensions'][0]
             logging.info(f'extension missmatch detected, file {sfinfo["filename"]} should end with {ext}')
             # if it needs to be converted anyway
-            if puid in conversions:
-                file.convert(conversions[puid])
+            if puid in self.conversions:
+                file.convert(self.conversions[puid])
+                self.cleanup.append(file.cleanup)
                 return sfinfo
             # if it needs just to be renamed
             file.rename(ext)
+            self.cleanup.append(file.cleanup)
             return sfinfo
 
         # case where file needs to be converted
-        if puid in conversions:
-            file = File(filepath=sfinfo['filename'], puid=sfinfo['matches'][0]['id'])
-            file.convert(conversions[puid])
+        if puid in self.conversions:
+            file = File(filepath=sfinfo['filename'], puid=puid)
+            file.convert(self.conversions[puid])
+            self.cleanup.append(file.cleanup)
             return sfinfo
 
         # case where file is accepted as it is, all good
-        if puid in accepted:
+        if puid in self.accepted:
             return
 
         # case where puid is neither in accepted nor in migration_config
@@ -165,7 +185,6 @@ class FileHandler(ABC):
                 logging.warning(f'could not detect fmt on {sfinfo['filename']} \n falling back on ext and assuming its {fmts[0]}')
                 puid = fmts[0]
             else:
-                logging.error(f'could not handle {sfinfo['filename']}')
                 return sfinfo, None
         else:
             puid = sfinfo['matches'][0]['id']
@@ -179,3 +198,14 @@ class FileHandler(ABC):
             ffmpeg_analyse_stream(sfinfo['filename'])
         if puid in self.conversions and self.conversions[puid][0] == "ffmpeg":
             ffmpeg_analyse_stream(sfinfo['filename'])
+
+    def _cleanup(self):
+        """cleans up the """
+        for task in self.cleanup:
+            for k in task.keys():
+                match k:
+                    case 'mv':
+                        shutil.move(task[k][0], task[k][1])
+                    case 'rm':
+                        os.remove(task[k][0])
+                        shutil.rmtree(task[k][1])

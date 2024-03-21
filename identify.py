@@ -16,11 +16,14 @@ def main():
     logging.basicConfig(filename=f'{path}.log', level=logging.INFO,  format='%(levelname)-8s %(message)s')
 
     filehandler = FileHandler()
-    sfinfos = sf_analyse(path)
-    modified = filehandler.run(sfinfos)
+    modified, cleanup = filehandler.run(sf_analyse(path))
 
-    with open(f'{path}_modified.json', 'w') as f:
-        json.dump(modified, f, indent=4, ensure_ascii=False)
+    if modified:
+        with open(f'{path}_modified.json', 'w') as f:
+            json.dump(modified, f, indent=4, ensure_ascii=False)
+    if cleanup:
+        with open(f'{path}_cleanup.json', 'w') as f:
+            json.dump(cleanup, f, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":

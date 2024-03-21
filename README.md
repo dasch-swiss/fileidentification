@@ -42,32 +42,45 @@ corrupted.ext.error.log**
 run it in your ide or in your terminal
 activating the venv<br>
 ```source .venv/bin/active # this depends on your venv settings```
-<br>or<or>
+<br>or<br>
 ```poetry shell```
 ```
 python3 identify.py path/to/directory
 ```
 
-you get two files:\
-**path/to/directory.log**  -> basic logging\
-**path/to/directory_modified.json** -> a json with the siegfried output of the original files that where processed
+you get three files:<br>
+**path/to/directory.log**  -> basic logging<br>
+**path/to/directory_modified.json** -> a json with the siegfried output of the original files that where processed<br>
+**path/to/directory_cleanup.json** -> a json with cleanup instructions
+
+### cleanup
+
+after checking the converted files, you can run<br>
+```
+python3 cleanup.py path/to/directory_cleanup.json
+```
+files that were renamed or converted are replaced by those, additional folder and conversion logs are deleted,
+if the conversion was successful.
+
+you can automate this step by setting the flag **cleanup=True** in the **filehandler.run()** method.
+
 
 ### updating signatures
 
-siegfried\
+siegfried<br>
 ```sf -update```
 
 check [nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm](nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm)
 and adapt version in ```fileidentification/conf/droidsig2json.py``` and run it. you should get an updated **fmt2ext.json**
 
-you'll find a good resource for fileformats on\
+you'll find a good resource for fileformats on<br>
 [nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new](nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new)
 
 
 ### TODO
 
 **config/conceptual:**\
-decide on what file format to keep and to convert\
+decide on what file format to keep and to convert<br>
 office files such as doc, ppt, xls are converted with LibreOffice, this means it might affect layout 
 (or fuctions in xls)
 
