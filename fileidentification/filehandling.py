@@ -8,8 +8,7 @@ import logging
 from dataclasses import dataclass, field
 from abc import ABC
 from typing import Union, Any, Dict, Type
-from .wrappers.wrappers import ffmpeg_analyse_stream
-
+from .wrappers.wrappers import ffmpeg_analyse_stream, sf_analyse
 
 
 SFinfo: Type = Dict[str, Any]
@@ -35,12 +34,13 @@ class File:
     filepath: str = None
     puid: str = None
     filename: str = None  # without extension, this is different to the json output of siegfried, where its the abs path
+    target: str = None
     origin_dir: str = None
     target_dir: str = None
     cleanup: dict = field(default_factory=dict)
 
     def _mkdir(self):
-        """create a folder with the name of the file"""
+        """create a folder with the name of the file, set origin_dir, filename"""
         self.target_dir = os.path.splitext(self.filepath)[0]
         self.origin_dir, self.filename = os.path.split(self.target_dir)
         # case where there is no ext
@@ -49,18 +49,35 @@ class File:
         if not os.path.exists(self.target_dir):
             os.mkdir(self.target_dir)
 
-    def rename(self, ext: str):
+    def _analyse_append_log(self, processing_log: str = None) -> SFinfo:
+        "analyse the created file with siegfried, "
+        if os.path.isfile(self.target):
+            sfinfo = sf_analyse(self.target)[0]
+        else:
+            # conversion error, nothing to analyse
+            sfinfo: dict = {}
+            sfinfo['error'] = f'conversion failed. see processing_log for more information'
+        processing_info = f'did process {self.filepath} to {self.target}'
+        logging.info(processing_info)
+        sfinfo['processing_info'] = processing_info
+        if processing_log:
+            sfinfo['processing_log'] = processing_log
+        return sfinfo
+
+    def rename(self, ext: str) -> SFinfo:
         """rename a copy of the file with the given ext"""
         self._mkdir()
-        target = os.path.join(self.target_dir, f'{self.filename}.{ext}')
-        shutil.copyfile(self.filepath, target)
-        logging.info(f'did rename {self.filepath} to {target}')
+        self.target = os.path.join(self.target_dir, f'{self.filename}.{ext}')
+        shutil.copyfile(self.filepath, self.target)
         # add cleanup instructions, move and remove
-        self.cleanup['mv'] = [target, self.origin_dir]
+        self.cleanup['mv'] = [self.target, self.origin_dir]
         self.cleanup['rm'] = [self.filepath, self.target_dir]
+        # log and return sfinfo of target
+        sfinfo = self._analyse_append_log()
+        return sfinfo
 
     # file migration
-    def convert(self, args: dict):
+    def convert(self, args: dict) -> SFinfo:
         """convert the file
         args: dict contains the name of the bin, the target container, and the additional arguments"""
         self._mkdir()
@@ -68,9 +85,9 @@ class File:
         # TODO Metadata such as exif... are lost when reencoded,
         #  need to implement something to copy some parts of these metadata?
 
-        target = os.path.join(self.target_dir, f'{self.filename}.{args["target_container"]}')
+        self.target = os.path.join(self.target_dir, f'{self.filename}.{args["target_container"]}')
         # set outputfile and log
-        outfile = shlex.quote(target)
+        outfile = shlex.quote(self.target)
         logfile = shlex.quote(os.path.join(self.target_dir, f'{self.filename}.log'))
         match args["bin"]:
             # construct command if its ffmpeg
@@ -90,27 +107,31 @@ class File:
 
         # run cmd in shell (and as a string, so [error]output is redirected to logfile)
         subprocess.run(cmd, shell=True)
-        logging.info(f'did convert {self.filepath} to {outfile}')
         # add cleanup instructions, move and remove
         # only clean up when file conversion was successful
-        if os.path.isfile(target):
-            self.cleanup['mv'] = [target, self.origin_dir]
+        if os.path.isfile(self.target):
+            self.cleanup['mv'] = [self.target, self.origin_dir]
             self.cleanup['rm'] = [self.filepath, self.target_dir]
-
+        # log and return sfinfo of target
+        with open(os.path.join(self.target_dir, f'{self.filename}.log'), 'r') as f:
+            processing_log = f.read()
+        sfinfo = self._analyse_append_log(processing_log)
+        return sfinfo
 
 
 class FileHandler(ABC):
 
     policies: dict = None
     fmt2ext: dict = None
-    cleanup: list = []
+    cleanup_instruction: list[dict] = []
 
-    def handle(self, sfinfos: list[SFinfo], cleanup=False) -> tuple[list, list]:
+    def handle(self, sfinfos: list[SFinfo], cleanup=False) -> Union[tuple[list, list], list]:
         """
-        runs the files with the gathered siegfried information against the preservation policies
+        runs siegfried information of the files against the preservation policies
         :param sfinfos: file information output from siegfried (json)
         :param cleanup: bool if set to true, it replaces the original files with the converted ones, deletes created folders
-        :return modified: original file information of the files that got converted or renamed
+        :returns modified: siegfried output of the processed file, with the processing logs and siegfried info of original file
+        :returns cleanup_instruction: a list with cleanup instructions if not cleanup is set to False (default)
         """
         modified: list = []
         for sfinfo in sfinfos:
@@ -119,15 +140,17 @@ class FileHandler(ABC):
                 modified.append(sfinfo)
         if cleanup:
             self._cleanup()
-        return modified, self.cleanup
+            return modified
+
+        return modified, self.cleanup_instruction
 
     def _check_against_policies(self, sfinfo: SFinfo) -> Union[SFinfo, None]:
         """
-        :param sfinfo: json object with metadata of a single file generated with siegfried
-        :return: the json object if any file manipulation occurred
+        :param sfinfo: dict with metadata of a single file generated with siegfried
+        :return: the dict if any file manipulation occurred
         """
 
-        sfinfo, puid = self._fetch_puid(sfinfo)
+        puid = self._fetch_puid(sfinfo)
         if not puid:
             logging.error(f'could not handle {sfinfo['filename']}')
             return
@@ -147,20 +170,23 @@ class FileHandler(ABC):
             logging.info(f'extension missmatch detected, file {sfinfo["filename"]} should end with {ext}')
             # if it needs to be converted anyway
             if not self.policies[puid]['accepted']:
-                file.convert(self.policies[puid])
-                self.cleanup.append(file.cleanup)
-                return sfinfo
+                processed_sfinfo = file.convert(self.policies[puid])
+                processed_sfinfo['original_file'] = sfinfo
+                self.cleanup_instruction.append(file.cleanup)
+                return processed_sfinfo
             # if it needs just to be renamed
-            file.rename(ext)
-            self.cleanup.append(file.cleanup)
-            return sfinfo
+            processed_sfinfo = file.rename(ext)
+            processed_sfinfo['original_file'] = sfinfo
+            self.cleanup_instruction.append(file.cleanup)
+            return processed_sfinfo
 
         # case where file needs to be converted
         if not self.policies[puid]['accepted']:
             file = File(filepath=sfinfo['filename'], puid=puid)
-            file.convert(self.policies[puid])
-            self.cleanup.append(file.cleanup)
-            return sfinfo
+            processed_sfinfo = file.convert(self.policies[puid])
+            processed_sfinfo['original_file'] = sfinfo
+            self.cleanup_instruction.append(file.cleanup)
+            return processed_sfinfo
 
         # case where file is accepted as it is, all good
         if self.policies[puid]['accepted']:
@@ -169,7 +195,7 @@ class FileHandler(ABC):
         # case where puid is neither in accepted nor in migration_config
         logging.warning(f'{puid} is not know in policies... please check {sfinfo['filename']} and append it to policies')
 
-    def _fetch_puid(self, sfinfo: SFinfo) -> tuple[SFinfo, Union[str, None]]:
+    def _fetch_puid(self, sfinfo: SFinfo) -> Union[str, None]:
         """parse the puid out of the json returned by siegfried"""
         if sfinfo['matches'][0]['id'] == 'UNKNOWN':
             # TODO fallback may need to be more elaborate, as it takes the first proposition of siegfried, i.e. fileext
@@ -179,11 +205,11 @@ class FileHandler(ABC):
                 logging.warning(f'could not detect fmt on {sfinfo['filename']} \n falling back on ext and assuming its {fmts[0]}')
                 puid = fmts[0]
             else:
-                return sfinfo, None
+                return
         else:
             puid = sfinfo['matches'][0]['id']
 
-        return sfinfo, puid
+        return puid
 
     def _check_fileintegrity(self, puid: str, sfinfo: SFinfo) -> None:
         """"""
@@ -191,10 +217,9 @@ class FileHandler(ABC):
         if self.policies[puid]["bin"] == "ffmpeg":
             ffmpeg_analyse_stream(sfinfo['filename'])
 
-
     def _cleanup(self):
         """cleans up the """
-        for task in self.cleanup:
+        for task in self.cleanup_instruction:
             for k in task.keys():
                 match k:
                     case 'mv':

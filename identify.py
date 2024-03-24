@@ -20,7 +20,7 @@ def main():
     modified, cleanup = filehandler.handle(sf_analyse(path))
 
     if modified:
-        with open(f'{path}_modified.json', 'w') as f:
+        with open(f'{path}_protocol.json', 'w') as f:
             json.dump(modified, f, indent=4, ensure_ascii=False)
     if cleanup:
         with open(f'{path}_cleanup.json', 'w') as f:
