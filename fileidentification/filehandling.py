@@ -9,12 +9,7 @@ from dataclasses import dataclass, field
 from abc import ABC
 from typing import Union, Any, Dict, Type
 from .wrappers.wrappers import ffmpeg_analyse_stream
-from .conf.policies import accepted, conversions
 
-
-# fmt2ext dict for mapping extension mismatch
-with open('fileidentification/conf/fmt2ext.json', 'r') as f:
-    fmt2ext = json.load(f)
 
 
 SFinfo: Type = Dict[str, Any]
@@ -65,33 +60,33 @@ class File:
         self.cleanup['rm'] = [self.filepath, self.target_dir]
 
     # file migration
-    def convert(self, args: list):
+    def convert(self, args: dict):
         """convert the file
-        args contains the name of the executable, the target container, and the arguments"""
+        args: dict contains the name of the bin, the target container, and the additional arguments"""
         self._mkdir()
 
         # TODO Metadata such as exif... are lost when reencoded,
         #  need to implement something to copy some parts of these metadata?
 
-        target = os.path.join(self.target_dir, f'{self.filename}.{args[1]}')
+        target = os.path.join(self.target_dir, f'{self.filename}.{args["target_container"]}')
         # set outputfile and log
         outfile = shlex.quote(target)
         logfile = shlex.quote(os.path.join(self.target_dir, f'{self.filename}.log'))
-        match args[0]:
+        match args["bin"]:
             # construct command if its ffmpeg
             case "ffmpeg":
-                cmd = f'ffmpeg -y -i {shlex.quote(self.filepath)} {args[2]} {outfile} 2> {logfile}'
+                cmd = f'ffmpeg -y -i {shlex.quote(self.filepath)} {args["processing_args"]} {outfile} 2> {logfile}'
             # construct command if its imagemagick
             case "convert":
-                cmd = f'convert {shlex.quote(self.filepath)} {args[2]} {outfile} 2> {logfile}'
+                cmd = f'convert {shlex.quote(self.filepath)} {args["processing_args"]} {outfile} 2> {logfile}'
             # construct command if its LibreOffice
             case "soffice":
-                cmd = f'/Applications/LibreOffice.app/Contents/MacOS/soffice {args[2]} {args[1]} {shlex.quote(self.filepath)}'
-                cmd = cmd + f' --outdir {shlex.quote(self.target_dir)} 2> {logfile}'
-            # no known exec selected
+                cmd = f'/Applications/LibreOffice.app/Contents/MacOS/soffice {args["processing_args"]} '
+                cmd = cmd + f'{args["target_container"]} {shlex.quote(self.filepath)}'
+                cmd = cmd + f' --outdir {shlex.quote(self.target_dir)} > {logfile}'
             case _:
-                print(f'check conversion config for {self.puid}')
-                return
+                print(f'unknown bin {args["bin"]} in policies. aborting ...')
+                quit()
 
         # run cmd in shell (and as a string, so [error]output is redirected to logfile)
         subprocess.run(cmd, shell=True)
@@ -106,12 +101,11 @@ class File:
 
 class FileHandler(ABC):
 
-    accepted: dict = accepted
-    conversions: dict = conversions
-    fmt2ext: dict = fmt2ext
+    policies: dict = None
+    fmt2ext: dict = None
     cleanup: list = []
 
-    def run(self, sfinfos: list[SFinfo], cleanup=False) -> tuple[list, list]:
+    def handle(self, sfinfos: list[SFinfo], cleanup=False) -> tuple[list, list]:
         """
         runs the files with the gathered siegfried information against the preservation policies
         :param sfinfos: file information output from siegfried (json)
@@ -152,8 +146,8 @@ class FileHandler(ABC):
             ext = self.fmt2ext[puid]['file_extensions'][0]
             logging.info(f'extension missmatch detected, file {sfinfo["filename"]} should end with {ext}')
             # if it needs to be converted anyway
-            if puid in self.conversions:
-                file.convert(self.conversions[puid])
+            if not self.policies[puid]['accepted']:
+                file.convert(self.policies[puid])
                 self.cleanup.append(file.cleanup)
                 return sfinfo
             # if it needs just to be renamed
@@ -162,14 +156,14 @@ class FileHandler(ABC):
             return sfinfo
 
         # case where file needs to be converted
-        if puid in self.conversions:
+        if not self.policies[puid]['accepted']:
             file = File(filepath=sfinfo['filename'], puid=puid)
-            file.convert(self.conversions[puid])
+            file.convert(self.policies[puid])
             self.cleanup.append(file.cleanup)
             return sfinfo
 
         # case where file is accepted as it is, all good
-        if puid in self.accepted:
+        if self.policies[puid]['accepted']:
             return
 
         # case where puid is neither in accepted nor in migration_config
@@ -194,10 +188,9 @@ class FileHandler(ABC):
     def _check_fileintegrity(self, puid: str, sfinfo: SFinfo) -> None:
         """"""
         # check stream integrity # TODO file integrity for other files than Audio/Video
-        if puid in self.accepted and self.accepted[puid][0] == "ffmpeg":
+        if self.policies[puid]["bin"] == "ffmpeg":
             ffmpeg_analyse_stream(sfinfo['filename'])
-        if puid in self.conversions and self.conversions[puid][0] == "ffmpeg":
-            ffmpeg_analyse_stream(sfinfo['filename'])
+
 
     def _cleanup(self):
         """cleans up the """
@@ -209,3 +202,22 @@ class FileHandler(ABC):
                     case 'rm':
                         os.remove(task[k][0])
                         shutil.rmtree(task[k][1])
+
+    def load_policies(self, policies_path: str, fmt2ext_path: str):
+        if os.path.isfile(policies_path):
+            with open(policies_path, 'r') as f:
+                self.policies = json.load(f)
+        if os.path.isfile(fmt2ext_path):
+            with open(fmt2ext_path, 'r') as f:
+                self.fmt2ext = json.load(f)
+
+        self._assure_policies()
+
+    def _assure_policies(self):
+        if not self.policies:
+            print('could not load policies. please check filepath')
+            quit()
+        for el in self.policies:
+            if self.policies[el]['bin'] not in ['', 'ffmpeg', 'convert', 'soffice']:
+                print(f'unknown bin {self.policies[el]["bin"]} found in policy {el}. aborting...')
+                quit()

@@ -16,7 +16,8 @@ def main():
     logging.basicConfig(filename=f'{path}.log', level=logging.INFO,  format='%(levelname)-8s %(message)s')
 
     filehandler = FileHandler()
-    modified, cleanup = filehandler.run(sf_analyse(path))
+    filehandler.load_policies("conf/policies.json", "conf/fmt2ext.json")
+    modified, cleanup = filehandler.handle(sf_analyse(path))
 
     if modified:
         with open(f'{path}_modified.json', 'w') as f:

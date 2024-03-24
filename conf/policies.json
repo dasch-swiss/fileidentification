@@ -1,0 +1,406 @@
+{
+    "x-fmt/392": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/11": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/12": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/13": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/353": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/42": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/43": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/44": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/199": {
+        "bin": "ffmpeg",
+        "accepted": true
+    },
+    "fmt/134": {
+        "bin": "ffmpeg",
+        "accepted": true
+    },
+    "fmt/6": {
+        "bin": "ffmpeg",
+        "accepted": true
+    },
+    "fmt/141": {
+        "bin": "ffmpeg",
+        "accepted": true
+    },
+    "fmt/142": {
+        "bin": "ffmpeg",
+        "accepted": true
+    },
+    "fmt/143": {
+        "bin": "ffmpeg",
+        "accepted": true
+    },
+    "fmt/95": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/354": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/476": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/477": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/478": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/479": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/480": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/481": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/1910": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/1911": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/1912": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/14": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/15": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/16": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/17": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/18": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/19": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/20": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/276": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/214": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/189": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/215": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/412": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/487": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/523": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/629": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/630": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/14": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/15": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/16": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/21": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/22": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/111": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/130": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/282": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/62": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/101": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/280": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/1474": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/1475": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/1476": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/1477": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/18": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/263": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/265": {
+        "bin": "",
+        "accepted": true
+    },
+    "x-fmt/266": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/1671": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/484": {
+        "bin": "",
+        "accepted": true
+    },
+    "fmt/5": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp4",
+        "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
+    },
+    "x-fmt/384": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp4",
+        "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
+    },
+    "fmt/797": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp4",
+        "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
+    },
+    "fmt/585": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp4",
+        "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
+    },
+    "fmt/425": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp4",
+        "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
+    },
+    "fmt/945": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp4",
+        "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
+    },
+    "fmt/569": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp4",
+        "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
+    },
+    "x-fmt/152": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp4",
+        "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
+    },
+    "fmt/133": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp4",
+        "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
+    },
+    "fmt/414": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "wav",
+        "processing_args": "-codec copy"
+    },
+    "x-fmt/136": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp3",
+        "processing_args": "-codec copy"
+    },
+    "fmt/279": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "wav",
+        "processing_args": ""
+    },
+    "fmt/947": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "wav",
+        "processing_args": ""
+    },
+    "fmt/203": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp3",
+        "processing_args": ""
+    },
+    "fmt/946": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp3",
+        "processing_args": ""
+    },
+    "fmt/948": {
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp3",
+        "processing_args": ""
+    },
+    "fmt/592": {
+        "bin": "convert",
+        "accepted": false,
+        "target_container": "jp2",
+        "processing_args": "-quality 90"
+    },
+    "fmt/40": {
+        "bin": "soffice",
+        "accepted": false,
+        "target_container": "docx",
+        "processing_args": "--headless --convert-to"
+    },
+    "fmt/609": {
+        "bin": "soffice",
+        "accepted": false,
+        "target_container": "docx",
+        "processing_args": "--headless --convert-to"
+    },
+    "fmt/39": {
+        "bin": "soffice",
+        "accepted": false,
+        "target_container": "docx",
+        "processing_args": "--headless --convert-to"
+    },
+    "fmt/125": {
+        "bin": "soffice",
+        "accepted": false,
+        "target_container": "pptx",
+        "processing_args": "--headless --convert-to"
+    },
+    "fmt/126": {
+        "bin": "soffice",
+        "accepted": false,
+        "target_container": "pptx",
+        "processing_args": "--headless --convert-to"
+    },
+    "fmt/181": {
+        "bin": "soffice",
+        "accepted": false,
+        "target_container": "pptx",
+        "processing_args": "--headless --convert-to"
+    },
+    "fmt/59": {
+        "bin": "soffice",
+        "accepted": false,
+        "target_container": "xlsx",
+        "processing_args": "--headless --convert-to"
+    },
+    "fmt/61": {
+        "bin": "soffice",
+        "accepted": false,
+        "target_container": "xlsx",
+        "processing_args": "--headless --convert-to"
+    },
+    "fmt/62": {
+        "bin": "soffice",
+        "accepted": false,
+        "target_container": "xlsx",
+        "processing_args": "--headless --convert-to"
+    }
+}
