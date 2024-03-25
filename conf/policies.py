@@ -1,12 +1,20 @@
+import json
+# import yaml
+
 ####
-# configuration
+# configuration template
 # accepted: a list of puid of files accepted as they are
 # conversions: a dict for puid of files this script does convert them. please pay attention to the pattern.
+# you can customise this for specific projects, i.e. comment out or add
+# run the script to get a policies.json
 ####
 
-# dict of accepted fmts
-# value is exec to test integrity
+policies_name: str = "policies" # name of the custom policy
+
 accepted: dict = {
+
+    # dict of accepted fmts
+    # [value] is bin to test integrity
 
     # Image
     "x-fmt/392": [''],  # JP2 (JPEG 2000 part 1)
@@ -94,7 +102,7 @@ accepted: dict = {
 conversions: dict = {
     ####
     # pattern
-    # fmt : [exec, target file container, args]
+    # fmt : [bin, target file container, args]
     ####
 
     # Video
@@ -156,3 +164,30 @@ conversions: dict = {
     "fmt/62": ["soffice", "xlsx", "--headless --convert-to"],
 
 }
+
+def main():
+    new_dic: dict = {}
+
+    for k in accepted:
+        add_dict = {}
+        add_dict['bin'] = accepted[k][0]
+        add_dict['accepted'] = True
+        new_dic[k] = add_dict
+
+    for k in conversions:
+        add_dict = {}
+        add_dict['bin'] = conversions[k][0]
+        add_dict['accepted'] = False
+        add_dict['target_container'] = conversions[k][1]
+        add_dict['processing_args'] = conversions[k][2]
+        new_dic[k] = add_dict
+
+    with open(policies_name, 'w') as f:
+        json.dump(new_dic, f, indent=4, ensure_ascii=False)
+
+    # with open('policies.yml', 'w') as f:
+    #     yaml.dump(new_dic, f, sort_keys=False)
+
+
+if __name__ == "__main__":
+    main()
