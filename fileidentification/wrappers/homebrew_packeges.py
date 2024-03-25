@@ -35,4 +35,3 @@ def check() -> None:
         print("... and its open source :) ")
         quit()
 
-    print("siegfried, ffmpeg, imagemagick seems to be installed, ready to go...")

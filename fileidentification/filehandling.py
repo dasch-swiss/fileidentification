@@ -5,6 +5,7 @@ import shlex
 import re
 import json
 import logging
+from pathlib import Path
 from dataclasses import dataclass, field
 from abc import ABC
 from typing import Union, Any, Dict, Type
@@ -124,27 +125,34 @@ class FileHandler(ABC):
     policies: dict = None
     fmt2ext: dict = None
     cleanup_instruction: list[dict] = []
+    failed: Path = None
 
-    def handle(self, sfinfos: list[SFinfo], cleanup=False) -> Union[tuple[list, list], list]:
+    def handle(self, sfinfos: list[SFinfo], root_path: Path,
+               cleanup: bool = False, strict: bool = False,) -> tuple[list, Union[list, None]]:
         """
         runs siegfried information of the files against the preservation policies
         :param sfinfos: file information output from siegfried (json)
+        :param root_path: root directory of the files to analyse
         :param cleanup: bool if set to true, it replaces the original files with the converted ones, deletes created folders
+        :param strict: bool if set to true, it moves unidentified files and files that are not defined in policies to
         :returns modified: siegfried output of the processed file, with the processing logs and siegfried info of original file
         :returns cleanup_instruction: a list with cleanup instructions if not cleanup is set to False (default)
         """
+        # folder to move failed files to
+        self.failed = Path(root_path, "FAILED")
+
         modified: list = []
         for sfinfo in sfinfos:
-            sfinfo = self._check_against_policies(sfinfo)
+            sfinfo = self._check_against_policies(sfinfo, strict)
             if sfinfo:
                 modified.append(sfinfo)
         if cleanup:
             self._cleanup()
-            return modified
+            return modified, None
 
         return modified, self.cleanup_instruction
 
-    def _check_against_policies(self, sfinfo: SFinfo) -> Union[SFinfo, None]:
+    def _check_against_policies(self, sfinfo: SFinfo, strict: bool) -> Union[SFinfo, None]:
         """
         :param sfinfo: dict with metadata of a single file generated with siegfried
         :return: the dict if any file manipulation occurred
@@ -152,24 +160,38 @@ class FileHandler(ABC):
 
         puid = self._fetch_puid(sfinfo)
         if not puid:
-            logging.error(f'could not handle {sfinfo['filename']}')
+            msg = f'failed to get puid from {sfinfo['filename']}'
+            logging.error(msg)
+            print(f'ERROR: {msg}')
+            self._move_failed(sfinfo['filename'])
             return
 
         # os specific files we do not care, eg .DS_store etc #TODO there are more for sure
         if puid in ['fmt/394']:
             return
 
-        # check if the file throws any errors while open/processing it with the respective exec
-        self._check_fileintegrity(puid, sfinfo)
+        # strict mode, move file and do not any further processing
+        if puid not in self.policies and strict:
+            self._move_failed(sfinfo['filename'])
+            msg = f'{puid} is not known in policies and running in strict mode... moving {sfinfo['filename']} to {self.failed}'
+            logging.error(msg)
+            print(f'ERROR: {msg}')
+            return
 
-        # file conversion according to the policies defined in conf/policies.py
+        # check if the file throws any errors while open/processing it with the respective bin
+        if puid in self.policies:
+            self._check_fileintegrity(sfinfo['filename'], puid)
+
+        ####
+        # file conversion according to the policies defined in conf/policies.json or externally loaded json file
+
         # case where there is an extension missmatch, rename file
         if sfinfo['matches'][0]['warning'] == 'extension mismatch':
             file = File(filepath=sfinfo['filename'], puid=puid)
             ext = self.fmt2ext[puid]['file_extensions'][0]
             logging.info(f'extension missmatch detected, file {sfinfo["filename"]} should end with {ext}')
             # if it needs to be converted anyway
-            if not self.policies[puid]['accepted']:
+            if puid in self.policies and not self.policies[puid]['accepted']:
                 processed_sfinfo = file.convert(self.policies[puid])
                 processed_sfinfo['original_file'] = sfinfo
                 self.cleanup_instruction.append(file.cleanup)
@@ -181,7 +203,7 @@ class FileHandler(ABC):
             return processed_sfinfo
 
         # case where file needs to be converted
-        if not self.policies[puid]['accepted']:
+        if puid in self.policies and not self.policies[puid]['accepted']:
             file = File(filepath=sfinfo['filename'], puid=puid)
             processed_sfinfo = file.convert(self.policies[puid])
             processed_sfinfo['original_file'] = sfinfo
@@ -189,11 +211,13 @@ class FileHandler(ABC):
             return processed_sfinfo
 
         # case where file is accepted as it is, all good
-        if self.policies[puid]['accepted']:
+        if puid in self.policies and self.policies[puid]['accepted']:
             return
 
-        # case where puid is neither in accepted nor in migration_config
-        logging.warning(f'{puid} is not know in policies... please check {sfinfo['filename']} and append it to policies')
+        # case where puid is not in policies
+        msg = f'{puid} is not known in policies... please check {sfinfo['filename']}'
+        logging.warning(msg)
+        print(f'WARNING: {msg}')
 
     def _fetch_puid(self, sfinfo: SFinfo) -> Union[str, None]:
         """parse the puid out of the json returned by siegfried"""
@@ -211,14 +235,19 @@ class FileHandler(ABC):
 
         return puid
 
-    def _check_fileintegrity(self, puid: str, sfinfo: SFinfo) -> None:
+    def _check_fileintegrity(self, filepath: str, puid: str) -> None:
         """"""
         # check stream integrity # TODO file integrity for other files than Audio/Video
         if self.policies[puid]["bin"] == "ffmpeg":
-            ffmpeg_analyse_stream(sfinfo['filename'])
+            ffmpeg_analyse_stream(filepath)
+
+    def _move_failed(self, file: str):
+        if not self.failed.exists():
+            os.mkdir(self.failed)
+        shutil.move(file, self.failed)
 
     def _cleanup(self):
-        """cleans up the """
+        """cleans up the mess"""
         for task in self.cleanup_instruction:
             for k in task.keys():
                 match k:
@@ -228,11 +257,11 @@ class FileHandler(ABC):
                         os.remove(task[k][0])
                         shutil.rmtree(task[k][1])
 
-    def load_policies(self, policies_path: str, fmt2ext_path: str):
-        if os.path.isfile(policies_path):
+    def load_policies(self, policies_path: Path, fmt2ext_path: Path):
+        if policies_path.is_file():
             with open(policies_path, 'r') as f:
                 self.policies = json.load(f)
-        if os.path.isfile(fmt2ext_path):
+        if fmt2ext_path.is_file():
             with open(fmt2ext_path, 'r') as f:
                 self.fmt2ext = json.load(f)
 

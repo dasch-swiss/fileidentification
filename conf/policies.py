@@ -9,6 +9,8 @@ import json
 # run the script to get a policies.json
 ####
 
+policies_name: str = "policies" # name of the custom policy
+
 accepted: dict = {
 
     # dict of accepted fmts
@@ -164,7 +166,6 @@ conversions: dict = {
 }
 
 def main():
-
     new_dic: dict = {}
 
     for k in accepted:
@@ -181,7 +182,7 @@ def main():
         add_dict['processing_args'] = conversions[k][2]
         new_dic[k] = add_dict
 
-    with open('policies.json', 'w') as f:
+    with open(policies_name, 'w') as f:
         json.dump(new_dic, f, indent=4, ensure_ascii=False)
 
     # with open('policies.yml', 'w') as f:
