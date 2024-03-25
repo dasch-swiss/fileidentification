@@ -28,7 +28,7 @@ the same applies to converted files, including processing logs:\
 filename/filename.ext<br>
 filename/filename.ext.log**
 
-if an error occurs whitin integrity checks, it appends the error log to the log file
+if an error occurs whitin integrity checks, it appends the error log to the basic log file
 
 
 ### installation
@@ -58,12 +58,12 @@ after checking the converted files, you can run<br>
 python3 cleanup.py path/to/directory_cleanup.json
 ```
 
-**NOTE** this affects your original file, as they are replaced.
+**NOTE** this affects your original files, as they are replaced.
 
 files that were renamed or converted are replaced by those, additional folder and conversion logs are deleted,
 if the conversion was successful.
 
-you can automate this step by setting the flag **cleanup=True** in the **filehandler.run()** method.
+you can automate this step by setting the flag --cleanup. see advanced usage.
 
 
 ### advanced usage
@@ -74,18 +74,22 @@ but you can also create your own policy, and with that, customise the output and
 some examples:<br>
 a policy for avi thats need to be transcoded to MPEG-4 Media File (Codec: AVC/H.264, Audio: AAC) looks like this
 ```
-"fmt/5": {
-        "bin": "ffmpeg",
-        "accepted": false,
-        "target_container": "mp4",
-        "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
+{
+    "fmt/5": {
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "mp4",
+            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
+    }
 }
 ```
 a policy for JPEG File Interchange Format - 1.0 that is accepted as it is
 ```
-"fmt/42": {
-        "bin": "",
-        "accepted": true
+{
+    "fmt/42": {
+            "bin": "",
+            "accepted": true
+    }
 }
 ```
 **key** is the puid (fmt/XXX)<br>
