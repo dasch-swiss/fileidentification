@@ -180,7 +180,9 @@ class FileHandler(ABC):
 
         # check if the file throws any errors while open/processing it with the respective bin
         if puid in self.policies:
-            self._check_fileintegrity(sfinfo['filename'], puid)
+            sfinfo = self._check_fileintegrity(sfinfo, puid)
+            if "error" in sfinfo and sfinfo['error'] == "fatal":
+                return sfinfo
 
         ####
         # file conversion according to the policies defined in conf/policies.json or externally loaded json file
@@ -235,11 +237,25 @@ class FileHandler(ABC):
 
         return puid
 
-    def _check_fileintegrity(self, filepath: str, puid: str) -> None:
+    def _check_fileintegrity(self, sfinfo: SFinfo, puid: str) -> SFinfo:
         """"""
         # check stream integrity # TODO file integrity for other files than Audio/Video
         if self.policies[puid]["bin"] == "ffmpeg":
-            ffmpeg_analyse_stream(filepath)
+            playable, error = ffmpeg_analyse_stream(sfinfo['filename'])
+            if not playable:
+                self._move_failed(sfinfo['filename'])
+                processing_info = f'file {sfinfo['filename']} is not playable, moved it to FAILED'
+                print(f'ERROR: {processing_info}')
+                new_sfinfo: dict = {}
+                new_sfinfo['error'] = "fatal"
+                new_sfinfo['processing_info'] = processing_info
+                new_sfinfo['error_log'] = error
+                new_sfinfo['original_file'] = sfinfo
+                return new_sfinfo
+            if error:
+                sfinfo['stream_error_log'] = error
+                return sfinfo
+        return sfinfo
 
     def _move_failed(self, file: str):
         if not self.failed.exists():
