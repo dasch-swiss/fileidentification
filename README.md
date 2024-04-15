@@ -247,4 +247,9 @@ it is implemented in wrappers.wrappers.Converter and conf.models.LibreOfficePdfS
 
 **coding:**\
 mostly marked in code. bigger issue are handling metadata such as exif etc. no preservation is currently implemented
-when files are converted, i.e. that information gets lost 
+when files are converted, i.e. that information gets lost
+
+**outlook**
+maybe it would be nice to make a python django app out of this, use a database (less files get written and read),
+and refactor it so a taskmanager can send tasks to workers.
+and there would be also a simple GUI...
