@@ -170,13 +170,13 @@ class Rsync:
         if server:
             cmd = ['rsync', '-av', source, f'{server.user}@{server.ip}:{dest}']
         if not dry:
-            res = subprocess.run(cmd, capture_output=True, text=True)
+            res = subprocess.run(cmd, capture_output=True)
             if res.stderr:
-                return True, res.stderr, cmd
+                return True, res.stderr.decode("utf-8", "backslashreplace"), cmd
             # if there is no error and not remote, remove original
             if not server:
                 os.remove(source)
-            return False, res.stdout, cmd
+            return False, res.stdout.decode("utf-8", "backslashreplace"), cmd
         else:
             return False, "", cmd
 
@@ -186,10 +186,10 @@ class Rsync:
             source = source.split(f'{server.user}/')[1]
         cmd = ['rsync', '-av', f'{server.user}@{server.ip}:{source}', dest+"/"]
         if not dry:
-            res = subprocess.run(cmd, capture_output=True, text=True)
+            res = subprocess.run(cmd, capture_output=True)
             if res.stderr:
-                return True, res.stderr, cmd
-            return False, res.stdout, cmd
+                return True, res.stderr.decode("utf-8", "backslashreplace"), cmd
+            return False, res.stdout.decode("utf-8", "backslashreplace"), cmd
         else:
             return False, "", cmd
 

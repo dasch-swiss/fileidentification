@@ -6,7 +6,7 @@ import shutil
 import json
 import typer
 from typing_extensions import Annotated
-from time import time
+from time import time, sleep
 from datetime import datetime
 from typer import secho, colors
 from enum import StrEnum
@@ -443,6 +443,14 @@ class Postprocessor:
         for sfinfo in sfinfos:
             if sfinfo.cu_table:
                 tb = sfinfo.cu_table
+                # delete the original if its mentioned, gets overwritten if mode.ADD
+                # remove it from already processed (e.g. if chain conversion)
+                if tb.delete_original and tb.delete_original.is_file():
+                    if not self.mode.ADD:
+                        os.remove(tb.delete_original)
+                        if processed:
+                            [processed.remove(el) for el in processed if
+                             sfinfo.derived_from.filename == el.filename]
                 # append hash to filename if the path already exists
                 if Path(tb.dest / tb.filename.name).is_file():
                     tb.dest = tb.dest / f'{tb.filename.stem}_{tb.filehash}{tb.filename.suffix}'
@@ -462,14 +470,6 @@ class Postprocessor:
                         if tb.wdir.is_dir() and not server:
                             shutil.rmtree(tb.wdir)
                         sfinfo.processing_logs.append(LogMsg(name='rsync', msg=msg))
-                        # delete the original if its mentioned, gets overwritten if mode.ADD
-                        # remove it from already processed (e.g. if chain conversion)
-                        if tb.delete_original and tb.delete_original.is_file():
-                            if not self.mode.ADD:
-                                os.remove(tb.delete_original)
-                                if processed:
-                                    [processed.remove(el) for el in processed if
-                                     sfinfo.derived_from.filename == el.filename]
                         stack.append(sfinfo)
                     else:  # rsync failed
                         secho(cmd, fg=colors.RED, bold=True)
@@ -729,6 +729,6 @@ def parse_protocol(files_dir) -> list[SfInfo]:
     else:
         if protocol != ProtocolErr.NOFILE:
             secho(f'WARNING: {protocol}, i might stumble parsing it', fg=colors.YELLOW)
-            time.sleep(0.5)
+            sleep(0.5)
             processed.extend(SFParser.read_protocol(Path(f'{files_dir}{FileOutput.PROTOCOL}')))
     return processed
