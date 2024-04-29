@@ -31,6 +31,8 @@ default_values: dict = {
     # ... TODO there's a lot more, keep_original them step by step
     # svg to jp2000
     "fmt/91": [False, "convert", "jp2", "-density 300", ["x-fmt/392"]],
+    "fmt/92": [False, "convert", "jp2", "-density 300", ["x-fmt/392"]],
+    "fmt/413": [False, "convert", "jp2", "-density 300", ["x-fmt/392"]],
 
     # Audio
     "fmt/134": [True, 'ffmpeg'],    # MPEG 1/2 Audio Layer 3 (MP3)

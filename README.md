@@ -228,12 +228,12 @@ to run it before cleanup (-c)
 siegfried<br>
 ```sf -update```
 
-check [nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm](nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm)
+check [https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm](nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm)
 and adapt version in ```conf/droidsig2json.py``` and run it. you should get an updated **fmt2ext.json** (its not
 automated because the site is painful to parse)
 
 you'll find a good resource for fileformats on<br>
-[nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new](nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new)
+[https://www.nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new](nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new)
 
 
 ### TODO
