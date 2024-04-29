@@ -3,10 +3,11 @@
 **disclaimer**: it has a lot of dependencies, i.e. siegfried to identify the files and
 ffmpeg, imagemagick and LibreOffice if you want to test and convert files.
 But they are useful anyway so you can install them for
-Mac OS X using brew:
+Mac OS X using brew (optionally install inkscape, but before imagemagick):
 ```
 brew install richardlehane/digipres/siegfried
 brew install ffmpeg
+brew install --cask inkscape
 brew install imagemagick
 brew install ghostscript
 ```
@@ -14,6 +15,7 @@ or for Linux depending on your distribution
 ```
 https://github.com/richardlehane/siegfried/wiki/Getting-started
 apt-get install ffmpeg
+https://inkscape.org/de/release/inkscape-1.2/gnulinux/ubuntu/ppa/dl/
 https://imagemagick.org/script/download.php#linux
 ```
 LibreOffice https://www.libreoffice.org/download/download-libreoffice/<br>
@@ -228,12 +230,12 @@ to run it before cleanup (-c)
 siegfried<br>
 ```sf -update```
 
-check [https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm](nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm)
+check https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm
 and adapt version in ```conf/droidsig2json.py``` and run it. you should get an updated **fmt2ext.json** (its not
 automated because the site is painful to parse)
 
 you'll find a good resource for fileformats on<br>
-[https://www.nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new](nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new)
+https://www.nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new
 
 
 ### TODO
@@ -245,7 +247,7 @@ office files such as doc, ppt, xls are converted with LibreOffice, this means it
 if you want to convert to pdf/A, you need libreOffice version 7.4+
 it is implemented in wrappers.wrappers.Converter and conf.models.LibreOfficePdfSettings
 
-when you convert svg, you might run into errors as the default library of imagemagick is not that good. easiest workaround
+**NOTE** when you convert svg, you might run into errors as the default library of imagemagick is not that good. easiest workaround
 is installing inkscape ( ```brew install --cask inkscape``` ), make sure that you reinstall imagemagick, so its uses inkscape
 as default for converting svg ( ```brew remove imagemagick``` , ```brew install imagemagick```)
 
