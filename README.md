@@ -245,6 +245,10 @@ office files such as doc, ppt, xls are converted with LibreOffice, this means it
 if you want to convert to pdf/A, you need libreOffice version 7.4+
 it is implemented in wrappers.wrappers.Converter and conf.models.LibreOfficePdfSettings
 
+when you convert svg, you might run into errors as the default library of imagemagick is not that good. easiest workaround
+is installing inkscape ( ```brew install --cask inkscape``` ), make sure that you reinstall imagemagick, so its uses inkscape
+as default for converting svg ( ```brew remove imagemagick``` , ```brew install imagemagick```)
+
 **coding:**\
 mostly marked in code. bigger issue are handling metadata such as exif etc. no preservation is currently implemented
 when files are converted, i.e. that information gets lost
