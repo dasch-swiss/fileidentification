@@ -140,7 +140,7 @@ class Converter:
                 cmd = f'ffmpeg -y -i {inputfile} {args["processing_args"]} {outfile} 2> {logfile}'
             # construct command if its imagemagick
             case "convert":
-                cmd = f'convert {inputfile} {args["processing_args"]} {outfile} 2> {logfile}'
+                cmd = f'convert {args["processing_args"]} {inputfile} {outfile} 2> {logfile}'
             # construct command if its LibreOffice
             case "soffice":
                 cmd = f'{soffice} {args["processing_args"]} {args["target_container"]} {inputfile} '

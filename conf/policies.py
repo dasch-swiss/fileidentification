@@ -29,7 +29,8 @@ default_values: dict = {
     # canon raw
     "fmt/592": [False, "convert", "jp2", "-quality 90", ["x-fmt/392"]],  # do we reduce the quality on raw files?
     # ... TODO there's a lot more, keep_original them step by step
-
+    # svg to jp2000
+    "fmt/91": [False, "convert", "jp2", "-density 300", ["fmt/43"]],
 
     # Audio
     "fmt/134": [True, 'ffmpeg'],    # MPEG 1/2 Audio Layer 3 (MP3)

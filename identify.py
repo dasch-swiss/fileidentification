@@ -1,6 +1,7 @@
 import shutil
 from pathlib import Path
 import typer
+from rich.progress import Progress, SpinnerColumn, TextColumn
 from typing_extensions import Annotated
 from conf.models import SfInfo, FileOutput, PathsConfig
 from fileidentification.wrappers import homebrew_packeges
@@ -76,7 +77,9 @@ def main(
     fh = FileHandler(mode=mode)
 
     # scan the directory with Siegfried
-    sfoutput = Sf.analyse(files_dir)
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"),transient=True,) as progress:
+        progress.add_task(description="analysing files with siegfried...", total=None)
+        sfoutput = Sf.analyse(files_dir)
     # get the json output from siegfried and parse it to SfInfo, appending the configured working dir
     sfinfos: [SfInfo] = []
     [sfinfos.append(fh.append_path_values(SFParser.to_SfInfo(metadata), files_dir, wdir)) for metadata in sfoutput]
@@ -116,7 +119,9 @@ def main(
                 raise typer.Exit()
 
     # apply the policies
-    [fh.apply_policies(sfinfo=sfinfo) for sfinfo in sfinfos]
+    with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"),transient=True,) as progress:
+        progress.add_task(description="applying policies, file integrity tests ...", total=None)
+        [fh.apply_policies(sfinfo=sfinfo) for sfinfo in sfinfos]
 
     if mode_inspect:
         if not mode_quiet:

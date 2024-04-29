@@ -288,10 +288,11 @@ class FileHandler:
             for puid in puids:
                 sample = self.ba.puid_unique[puid][0]
                 if not self.mode.QUIET:
-                    print(f'\n--> for [{puid}] {self.fmt2ext[puid]["name"]} {self.fmt2ext[puid]["file_extensions"]}\n'
-                          f'expecting {self.policies[puid]["expected"]}'
-                          f'{self.fmt2ext[self.policies[puid]["expected"][0]]["name"]} '
-                          f'{self.fmt2ext[self.policies[puid]["expected"][0]]["file_extensions"]}')
+                    if isinstance(self.policies[puid]["expected"], list):
+                        print(f'\n--> for [{puid}] {self.fmt2ext[puid]["name"]} {self.fmt2ext[puid]["file_extensions"]}\n'
+                              f'expecting {self.policies[puid]["expected"]}'
+                              f'{self.fmt2ext[self.policies[puid]["expected"][0]]["name"]} '
+                              f'{self.fmt2ext[self.policies[puid]["expected"][0]]["file_extensions"]}')
 
                     print(f'\ntesting it with:\n'
                           f'{Con.convert(sample, self.get_conversion_args(sample), dry=True)[1]}')
@@ -653,14 +654,14 @@ class RenderTables:
         if fh.pinned2convert:
             print("\n -------- file conversion settings -------")
             for puid in fh.ba.puid_unique:
-                if not fh.policies[puid]['accepted']:
+                if not fh.policies[puid]['accepted'] and isinstance(fh.policies[puid]["expected"], list):
                     print(f'\n--> for [{puid}] {fh.fmt2ext[puid]["name"]} {fh.fmt2ext[puid]["file_extensions"]}\n'
                           f'expecting {fh.policies[puid]["expected"]} '
                           f'{fh.fmt2ext[fh.policies[puid]["expected"][0]]["name"]} '
                           f'{fh.fmt2ext[fh.policies[puid]["expected"][0]]["file_extensions"]}')
 
     @staticmethod
-    def print_processing_table(self) -> None:
+    def print_processing_table(fh: FileHandler) -> None:
         # TODO
         pass
 
