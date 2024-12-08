@@ -41,7 +41,6 @@ class FileOutput(StrEnum):
     PROTOCOL = "_protocol.json"
     TMPSTATE = "_protocol.json.tmp"
     FAILED = "_rsync_failed.json"
-    REMOTESERVER = "_serverCon.json"
 
 
 # msg
@@ -239,16 +238,6 @@ class BasicAnalytics:
     @staticmethod
     def sort_by_filesize(sfinfos: list[SfInfo]) -> list[SfInfo]:
             return sorted(sfinfos, key=lambda x: x.filesize, reverse=False)
-
-
-@dataclass
-class ServerCon:
-    """connection to remote server, given there is a user on the remote server with sufficient privileges
-    :param ip the ip of the remote server
-    :param user the user used on the remote server
-    """
-    ip: str = field(default_factory=str)
-    user: str = field(default_factory=str)
 
 
 

@@ -17,7 +17,7 @@ from fileidentification.wrappers.wrappers import Siegfried as Sf, Ffmpeg, Conver
 from fileidentification.parser.parser import SFParser
 from fileidentification.helpers import format_bite_size, get_hash
 from conf.models import SfInfo, PathsConfig, CleanUpTable, LibreOfficePath, BasicAnalytics, LogTables, \
-    FileDiagnosticsMsg, PolicyMsg, FileProcessingErr, LogMsg, FileOutput, ServerCon, SiegfriedConf, ProtocolErr
+    FileDiagnosticsMsg, PolicyMsg, FileProcessingErr, LogMsg, FileOutput, SiegfriedConf, ProtocolErr
 from conf.policies import PoliciesGenerator
 from conf.policies import systemfiles
 
@@ -437,7 +437,7 @@ class Postprocessor:
         return sfinfo
 
     def cleanup(self, sfinfos: list[SfInfo], processed: list[SfInfo], files_dir: Path,
-                wdir: Path = None, server: ServerCon = None) \
+                wdir: Path = None) \
             -> list[SfInfo]:
         stack: [SfInfo] = []
         failed: [SfInfo] = []
@@ -456,11 +456,8 @@ class Postprocessor:
                 if Path(tb.dest / tb.filename.name).is_file():
                     tb.dest = tb.dest / f'{tb.filename.stem}_{tb.filehash}{tb.filename.suffix}'
                 source, dest = str(tb.filename), str(tb.dest)
-                # make an additional folder with hash if server, to be sure not to overwrite something
-                if server:
-                    dest = f'{tb.relative_path}/{tb.filename.stem}_{tb.filehash}/'
                 # move the file
-                rstatus, msg, cmd = Rsync.copy(source, dest, dry=self.mode.DRY, server=server)
+                rstatus, msg, cmd = Rsync.copy(source, dest, dry=self.mode.DRY)
                 if not self.mode.DRY:
                     # check if the return status is true
                     if not rstatus:
@@ -468,7 +465,7 @@ class Postprocessor:
                         sfinfo = self.set_relativepath(sfinfo, tb.dest)
                         sfinfo.cu_table = None
                         # only remove working dir if rsync is successful
-                        if tb.wdir.is_dir() and not server:
+                        if tb.wdir.is_dir():
                             shutil.rmtree(tb.wdir)
                         sfinfo.processing_logs.append(LogMsg(name='rsync', msg=msg))
                         stack.append(sfinfo)
@@ -486,9 +483,8 @@ class Postprocessor:
         stack.extend(processed)
         if failed:
             self.dump_json(failed, files_dir, FileOutput.FAILED)
-        # remove tmp protocol empty folders if exists, if not evoked with server params (i.e. sending it to remote)
-        if not server:
-            self._remove_tmp(wdir, files_dir)
+        # remove tmp protocol empty folders if exists
+        self._remove_tmp(wdir, files_dir)
 
         return stack
 
@@ -535,31 +531,6 @@ class Postprocessor:
             os.remove(f'{files_dir}{FileOutput.TMPSTATE}.sha256')
         if wdir.joinpath(PathsConfig.TEST).is_dir():
             shutil.rmtree(wdir.joinpath(PathsConfig.TEST))
-
-
-class PreProcessor:
-
-    def __init__(self, mode, policies):
-        self.mode: Mode = mode
-        self.policies = policies
-
-    def fetch_remote(self, sfinfos: list[SfInfo], server: ServerCon, files_dir) -> None:
-
-        failed: list[SfInfo] = []
-        for sfinfo in sfinfos:
-            if sfinfo.processed_as not in self.policies or not self.policies[sfinfo.processed_as]['accepted'] or self.mode.ADD:
-                err, msg, cmd = Rsync.fetch(str(sfinfo.filename), str(files_dir / sfinfo.filename.parent),
-                                            server, dry=self.mode.DRY)
-                if not self.mode.DRY:
-                    if err:
-                        print(f'could not fetch {sfinfo.filename}: {msg}')
-                        failed.append(sfinfo)
-                    else:
-                        sfinfo.processing_logs.append(LogMsg(name='rsync', msg=msg))
-                else:
-                    print(cmd)
-        if failed:
-            Postprocessor.dump_json(failed, files_dir, FileOutput.FAILED)
 
 
 class RenderTables:

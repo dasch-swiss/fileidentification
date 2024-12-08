@@ -5,7 +5,7 @@ import os
 from abc import ABC
 from pathlib import Path
 from typing import Union
-from conf.models import SiegfriedConf, SFoutput, SfInfo, LibreOfficePath, ErrorMsgFF, ErrorMsgIM, ServerCon, LibreOfficePdfSettings
+from conf.models import SiegfriedConf, SFoutput, SfInfo, LibreOfficePath, ErrorMsgFF, ErrorMsgIM, LibreOfficePdfSettings
 
 
 class Analytics(ABC):
@@ -162,35 +162,16 @@ class Converter:
 class Rsync:
 
     @staticmethod
-    def copy(source: str, dest: str, dry: bool = False,
-             server: ServerCon = None) -> tuple[bool, str, list]:
+    def copy(source: str, dest: str, dry: bool = False) -> tuple[bool, str, list]:
         """rsync the source to dest. if rsync did not return an error, delete source
         :returns True, stderr, cmd if there was an error, else False, stdout, cmd"""
         cmd = ['rsync', '-av', source, dest]
-        if server:
-            cmd = ['rsync', '-av', source, f'{server.user}@{server.ip}:{dest}']
         if not dry:
             res = subprocess.run(cmd, capture_output=True)
             if res.stderr:
                 return True, res.stderr.decode("utf-8", "backslashreplace"), cmd
-            # if there is no error and not remote, remove original
-            if not server:
-                os.remove(source)
+            # if there is no error remove original
+            os.remove(source)
             return False, res.stdout.decode("utf-8", "backslashreplace"), cmd
         else:
             return False, "", cmd
-
-    @staticmethod
-    def fetch(source: str, dest: str, server: ServerCon, dry: bool = False) -> tuple[bool, str, list]:
-        if f'{server.user}/' in source:
-            source = source.split(f'{server.user}/')[1]
-        cmd = ['rsync', '-av', f'{server.user}@{server.ip}:{source}', dest+"/"]
-        if not dry:
-            res = subprocess.run(cmd, capture_output=True)
-            if res.stderr:
-                return True, res.stderr.decode("utf-8", "backslashreplace"), cmd
-            return False, res.stdout.decode("utf-8", "backslashreplace"), cmd
-        else:
-            return False, "", cmd
-
-
