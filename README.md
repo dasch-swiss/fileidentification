@@ -119,9 +119,10 @@ a policy for Portable Network Graphics that is accepted as it is, but forced to 
 supported on image/audio/video, i.e. ffmpeg and imagemagick)<br>
 accepted values are:<br><br>
 "" [no program used, the file are also not tested for their integrity]<br>
-convert [use imagemagick]<br>
-ffmpeg [use ffmpeg]<br>
-soffice [use libre office]<br>
+**magick** [use imagemagick]<br>
+**ffmpeg** [use ffmpeg]<br>
+**soffice** [use libre office]<br>
+**inkscape** [use inkscape]<br>
 
 
 **target_container**: the container the file needs to be converted<br>
