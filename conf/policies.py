@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from conf.models import BasicAnalytics
+from conf.models import BasicAnalytics, Bin
 
 ####
 # configuration template
@@ -18,67 +18,67 @@ default_values: dict = {
     # bin is used to test file if accepted, if bin is empty string, no tests of this filetype are made
 
     # Image
-    "x-fmt/392": [True, 'convert'],  # JP2 (JPEG 2000 part 1)
-    "fmt/11": [True, 'convert'],     # PNG 1.0 / Portable Network Graphics
-    "fmt/12": [True, 'convert'],     # PNG 1.1 / Portable Network Graphics
-    "fmt/13": [True, 'convert'],     # PNG 1.2 / Portable Network Graphics
-    "fmt/353": [True, 'convert'],    # TIFF - Tagged Image File Format
-    "fmt/42": [True, 'convert'],     # JPEG File Interchange Format - 1.0
-    "fmt/43": [True, 'convert'],     # JPEG File Interchange Format - 1.01
-    "fmt/44": [True, 'convert'],     # JPEG File Interchange Format - 1.02
+    "x-fmt/392": [True, Bin.MAGICK],  # JP2 (JPEG 2000 part 1)
+    "fmt/11": [True, Bin.MAGICK],     # PNG 1.0 / Portable Network Graphics
+    "fmt/12": [True, Bin.MAGICK],     # PNG 1.1 / Portable Network Graphics
+    "fmt/13": [True, Bin.MAGICK],     # PNG 1.2 / Portable Network Graphics
+    "fmt/353": [True, Bin.MAGICK],    # TIFF - Tagged Image File Format
+    "fmt/42": [True, Bin.MAGICK],     # JPEG File Interchange Format - 1.0
+    "fmt/43": [True, Bin.MAGICK],     # JPEG File Interchange Format - 1.01
+    "fmt/44": [True, Bin.MAGICK],     # JPEG File Interchange Format - 1.02
     # canon raw
-    "fmt/592": [False, "convert", "jp2", "-quality 90", ["x-fmt/392"]],  # do we reduce the quality on raw files?
+    "fmt/592": [False, Bin.MAGICK, "tif", "", ["fmt/353"]],  # do we reduce the quality on raw files?
     # ... TODO there's a lot more, keep_original them step by step
     # svg to jp2000
-    "fmt/91": [False, "convert", "jp2", "-density 300", ["x-fmt/392"]],
-    "fmt/92": [False, "convert", "jp2", "-density 300", ["x-fmt/392"]],
-    "fmt/413": [False, "convert", "jp2", "-density 300", ["x-fmt/392"]],
+    "fmt/91": [False, Bin.MAGICK, "tif", "-density 300", ["fmt/353"]],
+    "fmt/92": [False, Bin.MAGICK, "tif", "-density 300", ["fmt/353"]],
+    "fmt/413": [False, Bin.MAGICK, "tif", "-density 300", ["fmt/353"]],
 
     # Audio
-    "fmt/134": [True, 'ffmpeg'],    # MPEG 1/2 Audio Layer 3 (MP3)
-    "fmt/6": [True, 'ffmpeg'],      # Waveform Audio File Format (WAVE)
-    "fmt/141": [True, 'ffmpeg'],
-    "fmt/142": [True, 'ffmpeg'],
-    "fmt/143": [True, 'ffmpeg'],
+    "fmt/134": [True, Bin.FFMPEG],    # MPEG 1/2 Audio Layer 3 (MP3)
+    "fmt/6": [True, Bin.FFMPEG],      # Waveform Audio File Format (WAVE)
+    "fmt/141": [True, Bin.FFMPEG],
+    "fmt/142": [True, Bin.FFMPEG],
+    "fmt/143": [True, Bin.FFMPEG],
     # aif
-    "fmt/414": [False, "ffmpeg", "wav", "-codec copy", ["fmt/141", "fmt/142", "fmt/143"]],
+    "fmt/414": [False, Bin.FFMPEG, "wav", "-codec copy", ["fmt/141", "fmt/142", "fmt/143"]],
     # alac
-    "fmt/596": [False, "ffmpeg", "wav", "-c:a pcm_s16le", ["fmt/141"]],
+    "fmt/596": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141"]],
     # aifc
-    "x-fmt/136": [False, "ffmpeg", "mp3", "-c:a libmp3lame", ["fmt/134"]],
+    "x-fmt/136": [False, Bin.FFMPEG, "mp3", "-c:a libmp3lame", ["fmt/134"]],
     # what about flac etc?
     # flac
-    "fmt/279": [False, "ffmpeg", "wav", "-c:a pcm_s16le", ["fmt/141"]],
-    "fmt/947": [False, "ffmpeg", "wav", "-c:a pcm_s16le", ["fmt/141"]],
+    "fmt/279": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141"]],
+    "fmt/947": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141"]],
     # vorbis
-    "fmt/203": [False, "ffmpeg", "mp3", "-c:a libmp3lame", ["fmt/134"]],
+    "fmt/203": [False, Bin.FFMPEG, "mp3", "-c:a libmp3lame", ["fmt/134"]],
     # opus
-    "fmt/946": [False, "ffmpeg", "mp3", "-c:a libmp3lame", ["fmt/134"]],
+    "fmt/946": [False, Bin.FFMPEG, "mp3", "-c:a libmp3lame", ["fmt/134"]],
     # speex
-    "fmt/948": [False, "ffmpeg", "mp3", "-c:a libmp3lame", ["fmt/134"]],
+    "fmt/948": [False, Bin.FFMPEG, "mp3", "-c:a libmp3lame", ["fmt/134"]],
 
     # Video
-    "fmt/199": [True, 'ffmpeg'],    # MPEG-4 Media File (Codec: AVC/H.264, Audio: AAC)
+    "fmt/199": [True, Bin.FFMPEG],    # MPEG-4 Media File (Codec: AVC/H.264, Audio: AAC)
     # avi
-    "fmt/5": [False, "ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
+    "fmt/5": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # quicktime
-    "x-fmt/384": [False, "ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
+    "x-fmt/384": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # proRes
-    "fmt/797": [False, "ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
+    "fmt/797": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # MPEG-2 Transport Stream:
     # mostly it contains a h.264 / h.265 videocodec, transcode it anyway or use -codec copy as arg?
-    "fmt/585": [False, "ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
+    "fmt/585": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # Video Object File (MPEG-2 subset)
-    "fmt/425": [False, "ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
+    "fmt/425": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # ogg
-    "fmt/945": [False, "ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
+    "fmt/945": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # ffv1
     # TODO do we archive ffv1 in Matroska Container? or Matroska Container in general? it can contain a lot of codecs
-    "fmt/569": [False, "ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
+    "fmt/569": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # dv
-    "x-fmt/152": [False, "ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
+    "x-fmt/152": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # wmv
-    "fmt/133": [False, "ffmpeg", "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
+    "fmt/133": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # ... TODO there's a lot more, keep_original them step by step
 
     # PDF/A recommended as archival format
@@ -122,17 +122,17 @@ default_values: dict = {
 
     # TODO i would recommend to convert them to the x version, as it's then xml based
     # Microsoft Word (doc)
-    "fmt/40": [False, "soffice", "docx", "--headless --convert-to", ["fmt/412"]],
-    "fmt/609": [False, "soffice", "docx", "--headless --convert-to", ["fmt/412"]],
-    "fmt/39": [False, "soffice", "docx", "--headless --convert-to", ["fmt/412"]],
+    "fmt/40": [False, Bin.SOFFICE, "docx", "--headless --convert-to", ["fmt/412"]],
+    "fmt/609": [False, Bin.SOFFICE, "docx", "--headless --convert-to", ["fmt/412"]],
+    "fmt/39": [False, Bin.SOFFICE, "docx", "--headless --convert-to", ["fmt/412"]],
     # Microsoft Powerpoint (ppt)
-    "fmt/125": [False, "soffice", "pptx", "--headless --convert-to", ["fmt/215"]],
-    "fmt/126": [False, "soffice", "pptx", "--headless --convert-to", ["fmt/215"]],
-    "fmt/181": [False, "soffice", "pptx", "--headless --convert-to", ["fmt/215"]],
+    "fmt/125": [False, Bin.SOFFICE, "pptx", "--headless --convert-to", ["fmt/215"]],
+    "fmt/126": [False, Bin.SOFFICE, "pptx", "--headless --convert-to", ["fmt/215"]],
+    "fmt/181": [False, Bin.SOFFICE, "pptx", "--headless --convert-to", ["fmt/215"]],
     # Microsoft Excel (xls)
-    "fmt/59": [False, "soffice", "xlsx", "--headless --convert-to", ["fmt/214"]],
-    "fmt/61": [False, "soffice", "xlsx", "--headless --convert-to", ["fmt/214"]],
-    "fmt/62": [False, "soffice", "xlsx", "--headless --convert-to", ["fmt/214"]],
+    "fmt/59": [False, Bin.SOFFICE, "xlsx", "--headless --convert-to", ["fmt/214"]],
+    "fmt/61": [False, Bin.SOFFICE, "xlsx", "--headless --convert-to", ["fmt/214"]],
+    "fmt/62": [False, Bin.SOFFICE, "xlsx", "--headless --convert-to", ["fmt/214"]],
 
     # Text
     "x-fmt/14": [True, ''],   # TXT - Plain Text (UTF-8, UTF-16, ISO 8859-1, ISO 8859-15, ASCII)

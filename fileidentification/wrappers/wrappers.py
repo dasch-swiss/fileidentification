@@ -5,7 +5,7 @@ import os
 from abc import ABC
 from pathlib import Path
 from typing import Union
-from conf.models import SiegfriedConf, SFoutput, SfInfo, LibreOfficePath, ErrorMsgFF, ErrorMsgIM, ServerCon, LibreOfficePdfSettings
+from conf.models import SiegfriedConf, SFoutput, SfInfo, LibreOfficePath, ErrorMsgFF, ErrorMsgIM, LibreOfficePdfSettings, Bin
 
 
 class Analytics(ABC):
@@ -136,13 +136,16 @@ class Converter:
 
         match args["bin"]:
             # construct command if its ffmpeg
-            case "ffmpeg":
+            case Bin.FFMPEG:
                 cmd = f'ffmpeg -y -i {inputfile} {args["processing_args"]} {outfile} 2> {logfile}'
             # construct command if its imagemagick
-            case "convert":
-                cmd = f'convert {args["processing_args"]} {inputfile} {outfile} 2> {logfile}'
+            case Bin.MAGICK:
+                cmd = f'magick {args["processing_args"]} {inputfile} {outfile} 2> {logfile}'
+            # construct command if its inkscape
+            case Bin.INCSCAPE:
+                cmd = f'inkscape --export-filename={outfile} {args["processing_args"]} {inputfile} 2> {logfile}'
             # construct command if its LibreOffice
-            case "soffice":
+            case Bin.SOFFICE:
                 cmd = f'{soffice} {args["processing_args"]} {args["target_container"]} {inputfile} '
                 # add the version if its pdf
                 if args["target_container"] == "pdf":
@@ -162,35 +165,16 @@ class Converter:
 class Rsync:
 
     @staticmethod
-    def copy(source: str, dest: str, dry: bool = False,
-             server: ServerCon = None) -> tuple[bool, str, list]:
+    def copy(source: str, dest: str, dry: bool = False) -> tuple[bool, str, list]:
         """rsync the source to dest. if rsync did not return an error, delete source
         :returns True, stderr, cmd if there was an error, else False, stdout, cmd"""
         cmd = ['rsync', '-av', source, dest]
-        if server:
-            cmd = ['rsync', '-av', source, f'{server.user}@{server.ip}:{dest}']
         if not dry:
             res = subprocess.run(cmd, capture_output=True)
             if res.stderr:
                 return True, res.stderr.decode("utf-8", "backslashreplace"), cmd
-            # if there is no error and not remote, remove original
-            if not server:
-                os.remove(source)
+            # if there is no error remove original
+            os.remove(source)
             return False, res.stdout.decode("utf-8", "backslashreplace"), cmd
         else:
             return False, "", cmd
-
-    @staticmethod
-    def fetch(source: str, dest: str, server: ServerCon, dry: bool = False) -> tuple[bool, str, list]:
-        if f'{server.user}/' in source:
-            source = source.split(f'{server.user}/')[1]
-        cmd = ['rsync', '-av', f'{server.user}@{server.ip}:{source}', dest+"/"]
-        if not dry:
-            res = subprocess.run(cmd, capture_output=True)
-            if res.stderr:
-                return True, res.stderr.decode("utf-8", "backslashreplace"), cmd
-            return False, res.stdout.decode("utf-8", "backslashreplace"), cmd
-        else:
-            return False, "", cmd
-
-

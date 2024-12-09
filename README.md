@@ -105,7 +105,7 @@ a policy for Portable Network Graphics that is accepted as it is, but forced to 
 {
     "fmt/13": {
         "format_name": "Portable Network Graphics",
-        "bin": "convert",
+        "bin": "magick",
         "accepted": true
         "force_protocol": true
     },
@@ -207,23 +207,6 @@ python3 chain.py path/to/directory --p presets/preset1 --p presets/preset2 ...
 **NOTE** as it is not possible to add flags to the iteration steps, each step is executed with the flags -acq
 (apply, cleanup, quiet), so if you want to keep some of the files you plan to convert in one of the steps, make sure
 that you set it in the respective policies accordingly.
-
-### remote
-
-there is a very basic script for handling files that are remote, given you have an Siegfried dump 
-```sf -json path/to/directory``` of the files, an ssh user for the server with sufficient rights (read/write for the
-folder) and you did already exchange keys with ssh-copy-id.
-```
-python3 remote.py path/to/the/siegfrieddump.json [-p path/to/policies -user: username -ip: ip]
-```
-it creates a folder named after the dump and fetches all the files from the server that are flagged to convert in the 
-given policies. than you can apply the policies with identify. if the converted files have to be approved by the owner 
-of the remote server, you can run
-```
-python3 python3 remote.py path/to/the/siegfrieddump.json --send
-```
-which sends the files from the working dir as well as the protocol to the server. if you need to do that, make sure
-to run it before cleanup (-c)
 
 ### updating signatures
 

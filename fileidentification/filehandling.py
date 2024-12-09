@@ -17,7 +17,7 @@ from fileidentification.wrappers.wrappers import Siegfried as Sf, Ffmpeg, Conver
 from fileidentification.parser.parser import SFParser
 from fileidentification.helpers import format_bite_size, get_hash
 from conf.models import SfInfo, PathsConfig, CleanUpTable, LibreOfficePath, BasicAnalytics, LogTables, \
-    FileDiagnosticsMsg, PolicyMsg, FileProcessingErr, LogMsg, FileOutput, ServerCon, SiegfriedConf, ProtocolErr
+    FileDiagnosticsMsg, PolicyMsg, FileProcessingErr, LogMsg, FileOutput, SiegfriedConf, ProtocolErr, Bin, CleanLog
 from conf.policies import PoliciesGenerator
 from conf.policies import systemfiles
 
@@ -120,7 +120,8 @@ class FileHandler:
 
         # case where file is accepted as it is, all good, append it to passed if flag in policies is true
         if self.policies[puid]['accepted']:
-            if self.policies[sfinfo.processed_as]['force_protocol']:
+            if ("force_protocol" in self.policies[sfinfo.processed_as].keys()
+                    and self.policies[sfinfo.processed_as]['force_protocol']):
                 self.pinned2protocol.append(Postprocessor.set_relativepath(sfinfo))
             return
 
@@ -172,9 +173,17 @@ class FileHandler:
             print('could not load policies. please check filepath... exit')
             raise typer.Exit(1)
         for el in self.policies:
-            if self.policies[el]['bin'] not in ['', 'ffmpeg', 'convert', 'soffice']:
-                print(f'unknown bin {self.policies[el]["bin"]} found in policies {el}... exit')
+            if self.policies[el]['bin'] not in Bin:
+                print(f'unknown bin {self.policies[el]["bin"]} found in policy {el} ... exit')
                 raise typer.Exit(1)
+            if not self.policies[el]['accepted']:
+                for k in ["target_container", "processing_args", "expected", "keep_original"]:
+                    if k not in self.policies[el].keys():
+                        print(f'your policies missing field {k} in policy {el} ... exit')
+                        raise typer.Exit(1)
+                if ";" in self.policies[el]["processing_args"]:
+                    print(f'; not allowed in processing_args. found in policy {el} ... exit')
+                    raise typer.Exit(1)
 
     def get_conversion_args(self, sfinfo: SfInfo) -> dict:
         return self.policies[sfinfo.processed_as]
@@ -234,7 +243,7 @@ class FileHandler:
 
         # get the specs and errors
         match self.policies[sfinfo.processed_as]["bin"]:
-            case "ffmpeg":
+            case Bin.FFMPEG:
                 if self.mode.DRY:
                     _, cmd, specs = Ffmpeg.is_corrupt(sfinfo, dry=True, verbose=self.mode.VERBOSE)
                     print([cmd])
@@ -244,7 +253,7 @@ class FileHandler:
                     sfinfo.codec_info.append(LogMsg(name='ffmpeg', msg=specs))
                 if error:
                     sfinfo.processing_logs.append(LogMsg(name='ffmpeg', msg=error))
-            case "convert":
+            case Bin.MAGICK:
                 if self.mode.DRY:
                     _, cmd, specs = ImageMagick.is_corrupt(sfinfo, dry=True)
                     print([cmd])
@@ -359,7 +368,7 @@ class FileConverter:
                 )
                 pcs_sfinfo.cu_table = cu_table
                 if not self.mode.QUIET:
-                    secho(f'\n[{sfinfo.filename} -> {target}]', fg=colors.GREEN, bold=True)
+                    secho(f'\n[{target}]', fg=colors.GREEN, bold=True)
             # set relative path in original file metadata, append it as derived_from to the converted one
             Postprocessor.set_relativepath(sfinfo)
             pcs_sfinfo.derived_from = sfinfo
@@ -399,6 +408,8 @@ class FileConverter:
             # replace abs path in logs, add name
             processing_log = None
             logtext = logfile_path.read_text().replace(f'{sfinfo.files_dir}/', "").replace(f'{sfinfo.wdir}/', "")
+            for str_el in CleanLog:
+                logtext = logtext.replace(str_el, "")
             if logtext != "":
                 processing_log = LogMsg(name=f'{args["bin"]}', msg=logtext)
 
@@ -437,7 +448,7 @@ class Postprocessor:
         return sfinfo
 
     def cleanup(self, sfinfos: list[SfInfo], processed: list[SfInfo], files_dir: Path,
-                wdir: Path = None, server: ServerCon = None) \
+                wdir: Path = None) \
             -> list[SfInfo]:
         stack: [SfInfo] = []
         failed: [SfInfo] = []
@@ -456,11 +467,8 @@ class Postprocessor:
                 if Path(tb.dest / tb.filename.name).is_file():
                     tb.dest = tb.dest / f'{tb.filename.stem}_{tb.filehash}{tb.filename.suffix}'
                 source, dest = str(tb.filename), str(tb.dest)
-                # make an additional folder with hash if server, to be sure not to overwrite something
-                if server:
-                    dest = f'{tb.relative_path}/{tb.filename.stem}_{tb.filehash}/'
                 # move the file
-                rstatus, msg, cmd = Rsync.copy(source, dest, dry=self.mode.DRY, server=server)
+                rstatus, msg, cmd = Rsync.copy(source, dest, dry=self.mode.DRY)
                 if not self.mode.DRY:
                     # check if the return status is true
                     if not rstatus:
@@ -468,7 +476,7 @@ class Postprocessor:
                         sfinfo = self.set_relativepath(sfinfo, tb.dest)
                         sfinfo.cu_table = None
                         # only remove working dir if rsync is successful
-                        if tb.wdir.is_dir() and not server:
+                        if tb.wdir.is_dir():
                             shutil.rmtree(tb.wdir)
                         sfinfo.processing_logs.append(LogMsg(name='rsync', msg=msg))
                         stack.append(sfinfo)
@@ -486,9 +494,8 @@ class Postprocessor:
         stack.extend(processed)
         if failed:
             self.dump_json(failed, files_dir, FileOutput.FAILED)
-        # remove tmp protocol empty folders if exists, if not evoked with server params (i.e. sending it to remote)
-        if not server:
-            self._remove_tmp(wdir, files_dir)
+        # remove tmp protocol empty folders if exists
+        self._remove_tmp(wdir, files_dir)
 
         return stack
 
@@ -535,31 +542,6 @@ class Postprocessor:
             os.remove(f'{files_dir}{FileOutput.TMPSTATE}.sha256')
         if wdir.joinpath(PathsConfig.TEST).is_dir():
             shutil.rmtree(wdir.joinpath(PathsConfig.TEST))
-
-
-class PreProcessor:
-
-    def __init__(self, mode, policies):
-        self.mode: Mode = mode
-        self.policies = policies
-
-    def fetch_remote(self, sfinfos: list[SfInfo], server: ServerCon, files_dir) -> None:
-
-        failed: list[SfInfo] = []
-        for sfinfo in sfinfos:
-            if sfinfo.processed_as not in self.policies or not self.policies[sfinfo.processed_as]['accepted'] or self.mode.ADD:
-                err, msg, cmd = Rsync.fetch(str(sfinfo.filename), str(files_dir / sfinfo.filename.parent),
-                                            server, dry=self.mode.DRY)
-                if not self.mode.DRY:
-                    if err:
-                        print(f'could not fetch {sfinfo.filename}: {msg}')
-                        failed.append(sfinfo)
-                    else:
-                        sfinfo.processing_logs.append(LogMsg(name='rsync', msg=msg))
-                else:
-                    print(cmd)
-        if failed:
-            Postprocessor.dump_json(failed, files_dir, FileOutput.FAILED)
 
 
 class RenderTables:
