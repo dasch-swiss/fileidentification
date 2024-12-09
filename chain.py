@@ -1,7 +1,7 @@
 import typer
 from pathlib import Path
 from typing import List, Optional
-from typing_extensions import Annotated, Tuple
+from typing_extensions import Annotated
 from conf.models import PathsConfig
 import identify
 

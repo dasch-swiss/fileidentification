@@ -14,6 +14,14 @@ class SiegfriedConf(StrEnum):
     MULTI = "256"
 
 
+class Bin(StrEnum):
+    MAGICK = "magick"
+    FFMPEG = "ffmpeg"
+    SOFFICE = "soffice"
+    INCSCAPE = "inkscape"
+    EMPTY = ""
+
+
 class LibreOfficePath(StrEnum):
     Darwin = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
     Linux = "libreoffice"
@@ -82,6 +90,12 @@ class ErrorMsgIM(StrEnum):
     magic1 = "identify: Cannot read"
     magic2 = "identify: Sanity check on directory count failed"
     magic3 = "identify: Failed to read directory"
+
+
+# some log msgs we don't want to have in the logs
+class CleanLog(StrEnum):
+    MACOSNSA = ("WARNING: Secure coding is not enabled for restorable state! Enable secure coding by implementing "
+             "NSApplicationDelegate.applicationSupportsSecureRestorableState: and returning YES.")
 
 
 @dataclass

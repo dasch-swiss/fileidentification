@@ -105,7 +105,7 @@ a policy for Portable Network Graphics that is accepted as it is, but forced to 
 {
     "fmt/13": {
         "format_name": "Portable Network Graphics",
-        "bin": "convert",
+        "bin": "magick",
         "accepted": true
         "force_protocol": true
     },

@@ -5,7 +5,7 @@ import os
 from abc import ABC
 from pathlib import Path
 from typing import Union
-from conf.models import SiegfriedConf, SFoutput, SfInfo, LibreOfficePath, ErrorMsgFF, ErrorMsgIM, LibreOfficePdfSettings
+from conf.models import SiegfriedConf, SFoutput, SfInfo, LibreOfficePath, ErrorMsgFF, ErrorMsgIM, LibreOfficePdfSettings, Bin
 
 
 class Analytics(ABC):
@@ -136,13 +136,16 @@ class Converter:
 
         match args["bin"]:
             # construct command if its ffmpeg
-            case "ffmpeg":
+            case Bin.FFMPEG:
                 cmd = f'ffmpeg -y -i {inputfile} {args["processing_args"]} {outfile} 2> {logfile}'
             # construct command if its imagemagick
-            case "convert":
-                cmd = f'convert {args["processing_args"]} {inputfile} {outfile} 2> {logfile}'
+            case Bin.MAGICK:
+                cmd = f'magick {args["processing_args"]} {inputfile} {outfile} 2> {logfile}'
+            # construct command if its inkscape
+            case Bin.INCSCAPE:
+                cmd = f'inkscape --export-filename={outfile} {args["processing_args"]} {inputfile} 2> {logfile}'
             # construct command if its LibreOffice
-            case "soffice":
+            case Bin.SOFFICE:
                 cmd = f'{soffice} {args["processing_args"]} {args["target_container"]} {inputfile} '
                 # add the version if its pdf
                 if args["target_container"] == "pdf":

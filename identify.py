@@ -136,9 +136,10 @@ def main(
     # start with conversion
     stack: list[SfInfo] = []
     if fh.pinned2convert:
-        if not mode_quiet:
-            print('... starting with file conversion. this may take a while ...')
-        stack = fh.convert(fh.pinned2convert)
+        with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"),
+                      transient=True) as progress:
+            progress.add_task(description="converting ...", total=None)
+            stack = fh.convert(fh.pinned2convert)
     else:
         Postprocessor.dump_json(fh.pinned2protocol, files_dir, FileOutput.PROTOCOL, sha256=True)
         if not mode_quiet:
