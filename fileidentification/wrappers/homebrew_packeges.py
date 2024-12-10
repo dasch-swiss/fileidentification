@@ -33,7 +33,7 @@ def check() -> None:
         quit()
 
     # imagemagick
-    if not cmd_exists("convert"):
+    if not cmd_exists("magick"):
         print("you need imagemagick for this to work, please install it with running this cmd in your terminal:")
         if platform.system() == "Darwin":
             print("brew install imagemagick")

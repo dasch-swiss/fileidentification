@@ -41,7 +41,6 @@ class PathsConfig(StrEnum):
     WDIR = "_WORKINGDIR"
     TEST = "_TEST"
     PRESETS = "presets"
-    DEFAULTPOLICIES = "presets/something"  # you can set here your own default policies if you have one in presets
 
 
 class FileOutput(StrEnum):

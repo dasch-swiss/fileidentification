@@ -218,8 +218,20 @@ check https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files
 and adapt version in ```conf/droidsig2json.py``` and run it. you should get an updated **fmt2ext.json** (its not
 automated because the site is painful to parse)
 
-you'll find a good resource for fileformats on<br>
+### useful links
+
+you'll find a good resource for query fileformats on<br>
 https://www.nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new
+<br/><br/>
+siegfried<br/>
+https://www.itforarchivists.com/siegfried/
+<br/><br/>
+signatures<br/>
+https://en.wikipedia.org/wiki/List_of_file_signatures
+<br/><br>
+recommendations on what file format to archive data<br/>
+kost: https://kost-ceco.ch/cms/de.html
+<br/>bundesarchiv:  https://www.bar.admin.ch/dam/bar/de/dokumente/konzepte_und_weisungen/archivtaugliche_dateiformate.1.pdf.download.pdf/archivtaugliche_dateiformate.pdf
 
 
 ### TODO
