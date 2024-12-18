@@ -93,6 +93,13 @@ class FileHandler:
             self.log_tables.append2policies(sfinfo, PolicyMsg.SKIPPED)
             return
 
+        # check if the file throws any errors while open/processing it with the respective bin
+        # return it when its fatal
+        if self._is_file_corrupt(sfinfo):
+            sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=f'{FileDiagnosticsMsg.CORRUPT}'))
+            self.move2failed(sfinfo)
+            return
+
         # case where there is an extension missmatch, rename the file if there is a unique ext
         if sfinfo.matches[0].warning == FileDiagnosticsMsg.EXTMISMATCH:
             if len(self.fmt2ext[puid]['file_extensions']) == 1:
@@ -105,13 +112,6 @@ class FileHandler:
                 # throw a warning if file is not going to be converted anyways
                 if self.policies[puid]['accepted']:
                     secho(f'WARNING: you should manually rename {sfinfo.filename}\n{sfinfo.processing_logs}', fg=colors.YELLOW)
-
-        # check if the file throws any errors while open/processing it with the respective bin
-        # return it when its fatal
-        if self._is_file_corrupt(sfinfo):
-            sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=f'{FileDiagnosticsMsg.CORRUPT}'))
-            self.move2failed(sfinfo)
-            return
 
         # case where file needs to be converted
         if not self.policies[puid]['accepted']:
@@ -258,7 +258,7 @@ class FileHandler:
                     _, cmd, specs = ImageMagick.is_corrupt(sfinfo, dry=True)
                     print([cmd])
                     return _
-                corrupt, error, specs = ImageMagick.is_corrupt(sfinfo)
+                corrupt, error, specs = ImageMagick.is_corrupt(sfinfo, verbose=self.mode.VERBOSE)
                 if specs:
                     sfinfo.codec_info.append(LogMsg(name='imagemagick', msg=specs))
                 if error:

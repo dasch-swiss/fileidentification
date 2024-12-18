@@ -26,6 +26,7 @@ default_values: dict = {
     "fmt/42": [True, Bin.MAGICK],     # JPEG File Interchange Format - 1.0
     "fmt/43": [True, Bin.MAGICK],     # JPEG File Interchange Format - 1.01
     "fmt/44": [True, Bin.MAGICK],     # JPEG File Interchange Format - 1.02
+    "fmt/1507": [True, Bin.MAGICK],   # Exchangeable Image File Format (Compressed) 2.3.x
     # canon raw
     "fmt/592": [False, Bin.MAGICK, "tif", "", ["fmt/353"]],  # do we reduce the quality on raw files?
     # ... TODO there's a lot more, keep_original them step by step
