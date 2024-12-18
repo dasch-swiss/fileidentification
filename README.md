@@ -185,8 +185,8 @@ when used in generating policies, it sets keep_original in the policies to true 
 **-d**<br>
 [--dry] dry run, prints out the cmds<br><br>
 **-v**<br>
-[--verbose] prints out more detailed diagnostics, lists every file in the report.txt and does deeper fileinspections on 
-video files<br><br>
+[--verbose] prints out more detailed diagnostics and does deeper file inspections on 
+video and image files<br><br>
 **-q**<br>
 [--quiet] just print errors and warnings<br><br>
 

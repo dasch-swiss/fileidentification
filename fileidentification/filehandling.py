@@ -594,11 +594,13 @@ class RenderTables:
 
             # we want the smallest file first for running the test in FileHandler.test_conversion()
             fh.ba.puid_unique[puid] = fh.ba.sort_by_filesize(fh.ba.puid_unique[puid])
-            if verbose:
-                print("\n")
-                [print(f'{format_bite_size(sfinfo.filesize): >19} {sfinfo.filename}')
-                 for sfinfo in fh.ba.puid_unique[puid]]
-                print("\n")
+
+            # uncomment if it should list every file
+            # if verbose:
+            #     print("\n")
+            #     [print(f'{format_bite_size(sfinfo.filesize): >19} {sfinfo.filename}')
+            #      for sfinfo in fh.ba.puid_unique[puid]]
+            #     print("\n")
 
     def print_diagnostic_table(self, fh: FileHandler) -> None:
         """lists all corrupt files with the respective errors thrown"""
