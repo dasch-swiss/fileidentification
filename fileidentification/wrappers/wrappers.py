@@ -90,6 +90,9 @@ class ImageMagick(Analytics):
         cmd = f'magick identify -regard-warnings {shlex.quote(str(sfinfo.filename))}'
         if dry:
             return False, cmd, ""
+        if verbose:
+            cmd = (f'magick identify -verbose -regard-warnings -format "%m %wx%h %g %z-bit %[channels] '
+                   f'quality:%[quality]" {shlex.quote(str(sfinfo.filename))}')
         res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         return ImageMagick.parse_output(sfinfo, res.stdout, res.stderr)
 

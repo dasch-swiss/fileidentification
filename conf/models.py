@@ -89,6 +89,7 @@ class ErrorMsgIM(StrEnum):
     magic1 = "identify: Cannot read"
     magic2 = "identify: Sanity check on directory count failed"
     magic3 = "identify: Failed to read directory"
+    magic4 = "data: premature end of data segment"
 
 
 # some log msgs we don't want to have in the logs
