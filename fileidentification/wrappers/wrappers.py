@@ -5,8 +5,8 @@ import os
 from abc import ABC
 from pathlib import Path
 from typing import Union
-from conf.models import SiegfriedConf, SFoutput, SfInfo, LibreOfficePath, ErrorMsgFF, ErrorMsgIM, LibreOfficePdfSettings, Bin
-
+from conf.models import SFoutput, SfInfo
+from conf.settings import SiegfriedConf, LibreOfficePath, ErrorMsgFF, ErrorMsgIM, LibreOfficePdfSettings, Bin
 
 class Analytics(ABC):
 
@@ -111,8 +111,7 @@ class ImageMagick(Analytics):
 
 class Converter:
     @staticmethod
-    def convert(sfinfo: SfInfo, args: dict, soffice: Path = LibreOfficePath.Darwin, dry: bool = False)\
-            -> tuple[Path, str, Path]:
+    def convert(sfinfo: SfInfo, args: dict, soffice: Path = LibreOfficePath.Darwin) -> tuple[Path, str, Path]:
         """converts a file (filepath from SfInfo.filename to the desired format passed by the args
 
         :params sfinfo the metadata object of the file
@@ -122,8 +121,8 @@ class Converter:
         :returns the constructed target path, the cmd run and the log path
         """
 
-        wdir = Path(sfinfo.wdir / sfinfo.relative_path / Path(f'{sfinfo.filename.stem}_{sfinfo.filehash}'))
-        if not wdir.exists() and not dry:
+        wdir = Path(sfinfo.wdir / sfinfo.relative_path / Path(f'{sfinfo.filename.stem}_{sfinfo.filehash[:6]}'))
+        if not wdir.exists():
             os.makedirs(wdir)
 
         # TODO Metadata such as exif... are lost when reencoded,
@@ -158,9 +157,8 @@ class Converter:
                 print(f'unknown bin {args["bin"]} in policies. aborting ...')
                 quit()
 
-        if not dry:
-            # run cmd in shell (and as a string, so [error]output is redirected to logfile)
-            subprocess.run(cmd, shell=True)
+        # run cmd in shell (and as a string, so [error]output is redirected to logfile)
+        subprocess.run(cmd, shell=True)
 
         return target, cmd, logfile_path
 
@@ -168,16 +166,13 @@ class Converter:
 class Rsync:
 
     @staticmethod
-    def copy(source: str, dest: str, dry: bool = False) -> tuple[bool, str, list]:
+    def copy(source: str | Path, dest: str | Path) -> tuple[bool, str, list]:
         """rsync the source to dest. if rsync did not return an error, delete source
         :returns True, stderr, cmd if there was an error, else False, stdout, cmd"""
-        cmd = ['rsync', '-av', source, dest]
-        if not dry:
-            res = subprocess.run(cmd, capture_output=True)
-            if res.stderr:
-                return True, res.stderr.decode("utf-8", "backslashreplace"), cmd
-            # if there is no error remove original
-            os.remove(source)
-            return False, res.stdout.decode("utf-8", "backslashreplace"), cmd
-        else:
-            return False, "", cmd
+        cmd = ['rsync', '-av', str(source), str(dest)]
+        res = subprocess.run(cmd, capture_output=True)
+        if res.stderr:
+            return True, res.stderr.decode("utf-8", "backslashreplace"), cmd
+        # if there is no error remove original
+        os.remove(source)
+        return False, res.stdout.decode("utf-8", "backslashreplace"), cmd

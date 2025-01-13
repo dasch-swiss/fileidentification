@@ -2,100 +2,10 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Type, Dict, Any, Optional
 from dataclasses import dataclass, field, asdict
+from conf.settings import FileProcessingErr, SiegfriedConf
 from enum import StrEnum
 from pathlib import Path
 
-
-
-# application settings
-class SiegfriedConf(StrEnum):
-    """siegfried parameters"""
-    ALG = "md5"
-    MULTI = "256"
-
-
-class Bin(StrEnum):
-    MAGICK = "magick"
-    FFMPEG = "ffmpeg"
-    SOFFICE = "soffice"
-    INCSCAPE = "inkscape"
-    EMPTY = ""
-
-
-class LibreOfficePath(StrEnum):
-    Darwin = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
-    Linux = "libreoffice"
-
-
-class LibreOfficePdfSettings(StrEnum):
-    # it needs libreoffice v7.4 + for this to work
-    version2a = ":writer_pdf_Export:{\"SelectPdfVersion\":{\"type\":\"long\",\"value\":\"2\"}}"
-    version1a = ":writer_pdf_Export:{\"SelectPdfVersion\":{\"type\":\"long\",\"value\":\"1\"}}"
-
-
-# paths
-class PathsConfig(StrEnum):
-    """default directory paths"""
-    FAILED = "_FAILED"
-    FMT2EXT = "conf/fmt2ext.json"
-    WDIR = "_WORKINGDIR"
-    TEST = "_TEST"
-    PRESETS = "presets"
-
-
-class FileOutput(StrEnum):
-    POLICIES = "_policies.json"
-    PROTOCOL = "_protocol.json"
-    TMPSTATE = "_protocol.json.tmp"
-    FAILED = "_rsync_failed.json"
-
-
-# msg
-class PolicyMsg(StrEnum):
-    FALLBACK = f'fmt not detected, falling back on ext'
-    NOTINPOLICIES = f'file format is not in policies. running strict mode: moved to {PathsConfig.FAILED}'
-    SKIPPED = "file format is not in policies, skipped"
-
-
-class FileDiagnosticsMsg(StrEnum):
-    EMPTYSOURCE = 'empty source, file removed'
-    CORRUPT = f'file is corrupt. moved it to {PathsConfig.FAILED}'
-    MINORERROR = "file has minor errors"
-    EXTMISMATCH = "extension mismatch"
-
-
-class FileProcessingErr(StrEnum):
-    PUIDFAIL = "failed to get fmt type"
-    CONVFAILED = "conversion failed"
-    NOTEXPECTEDFMT = "converted file did not match the expected fmt"
-    ESCAPED = "file escaped the policies assertion"
-    FAILEDMOVE = "failed to rsyc the file"
-
-
-class ProtocolErr(StrEnum):
-    NOHASH = "hash not found, cannot verify the file"
-    MODIFIED = "protocol got modified"
-    NOFILE = "protocol not found"
-
-
-# file corrupt errors to parse from wrappers.wrappers.Ffmpeg when in verbose mode
-class ErrorMsgFF(StrEnum):
-    ffmpeg_v = "Error opening input files"
-
-
-# file corrupt errors to parse form wrappers.wrappers.ImageMagick
-# there must be more... add them when encountered
-class ErrorMsgIM(StrEnum):
-    magic1 = "identify: Cannot read"
-    magic2 = "identify: Sanity check on directory count failed"
-    magic3 = "identify: Failed to read directory"
-    magic4 = "data: premature end of data segment"
-
-
-# some log msgs we don't want to have in the logs
-class CleanLog(StrEnum):
-    MACOSNSA = ("WARNING: Secure coding is not enabled for restorable state! Enable secure coding by implementing "
-             "NSApplicationDelegate.applicationSupportsSecureRestorableState: and returning YES.")
 
 
 @dataclass
@@ -194,7 +104,6 @@ class CleanUpTable:
             "dest": self.dest,
             "delete_original": self.delete_original,
             "wdir": self.wdir,
-            "filehash": self.filehash,
             "relative_path": self.relative_path
         }
         [res.update({key: f'{value}'}) for key, value in optional.items() if value is not None]
