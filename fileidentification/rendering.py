@@ -94,7 +94,8 @@ class RenderTables:
     @staticmethod
     def report2file(fh, path: Path) -> None:
         default = sys.stdout
-        with open(f'{path}_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt', 'a') as f:
+        out_file = f'{path}_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
+        with open(out_file, 'a') as f:
             sys.stdout = f
             RenderTables.print_siegfried_errors(fh)
             RenderTables.print_fileformats(fh, puids=[el for el in fh.ba.puid_unique])
@@ -102,4 +103,4 @@ class RenderTables:
             RenderTables.print_diagnostic_table(fh)
             sys.stdout = default
 
-        print(f'report written to {path}_report.txt')
+        print(f'report written to {out_file}')
