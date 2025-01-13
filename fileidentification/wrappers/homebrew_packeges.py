@@ -1,6 +1,5 @@
 import shutil
 import platform
-from conf.models import LibreOfficePath
 
 
 def cmd_exists(cmd):

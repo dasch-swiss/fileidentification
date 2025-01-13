@@ -53,8 +53,13 @@ python3 identify.py path/to/directory
 this does generate a default policies file according to the settings in conf/policies.py<br>
 you get:<br>
 **path/to/directory_policies.json**  -> the policies for that folder<br>
-**path/to/directory_report.txt** -> a report about the filetypes, duplicates etc. and planned conversions<br>
-as an addition, it moves corrupted files to a foler path/to/directory_FAILED
+**path/to/directory_report.txt** -> a report about the filetypes, duplicates<br>
+
+### file integrity tests
+```
+python3 identify.py path/to/directory -i
+```
+tests the files for their integrity and moves corrupted files to a foler path/to/directory_FAILED
 
 ### applying the policies
 if you're happy with the policies, you can apply them with<br>
@@ -68,11 +73,11 @@ if you're happy with the outcome you can replace the parent files with the conve
 python3 identify.py path/to/directory -c
 ```
 this also deletes all temporary folders and you get a<br>
-**path/to/directory_protocol.json** -> listing all file modification in the diretory<br>
+**path/to/directory_changeLog.json** -> listing all file modification in the directory<br>
 
-if you don't need these three intermediate states, you can simply run
+if you don't need these intermediate states, you can simply run
 ```
-python3 identify.py path/to/directory -ac
+python3 identify.py path/to/directory -iac
 ```
 which does all at once
 ### advanced usage
@@ -96,42 +101,43 @@ a policy for Audio/Video Interleaved Format thats need to be transcoded to MPEG-
             "expected": [
             "fmt/199"
             ],
-            "force_protocol": false
     }
 }
 ```
-a policy for Portable Network Graphics that is accepted as it is, but forced to be mentioned it in the protocol (by default only converted files are)
+a policy for Portable Network Graphics that is accepted as it is, but forced to be mentioned it in the changlog (by default only converted files are)
 ```
 {
     "fmt/13": {
         "format_name": "Portable Network Graphics",
         "bin": "magick",
         "accepted": true
-        "force_protocol": true
+        "force_log": true
     },
 }
 ```
-**key** is the puid (fmt/XXX)<br>
-(**format_name** optional)<br>
-**accepted**: bool, false if the file needs to be converted<br>
-**keep_original**: bool, whether to keep the parent of the converted file, default is false<br>
-**bin**: program to convert the file or test the file (testing currently only is 
-supported on image/audio/video, i.e. ffmpeg and imagemagick)<br>
-accepted values are:<br><br>
-"" [no program used, the file are also not tested for their integrity]<br>
-**magick** [use imagemagick]<br>
-**ffmpeg** [use ffmpeg]<br>
-**soffice** [use libre office]<br>
-**inkscape** [use inkscape]<br>
+<br/><br/>
 
+| key                                             | is the puid (fmt/XXX)                                                                                                                         |
+|-------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| **format_name** (optional)                      | **str**                                                                                                                                       |
+| **bin**                                         | **str**: program to convert the file or test the file (testing currently only is supported on image/audio/video, i.e. ffmpeg and imagemagick) |
+| **accepted**                                    | **bool**: false if the file needs to be converted                                                                                             |
+| **keep_original** (required if not accepted)    | **bool**: whether to keep the parent of the converted file, default is true                                                                   |
+| **target_container** (required if not accepted) | **str**: the container the file needs to be converted                                                                                         |
+| **processing_args** (required if not accepted)  | **str**: the arguments used with bin                                                                                                          |
+| **expected** (required if not accepted)         | **list**: the expected file format for the converted file                                                                                     |
+| **force_log** (optional)                        | **bool**: if the files of this format are forced to be mentioned in the changeLog even if the format is accepted.                             |
 
-**target_container**: the container the file needs to be converted<br>
-**processing_args**: the arguments used with bin<br>
-**expected** the expected file format for the converted file<br>
-**force_protocol**: bool, if the files of this format are forced to be mentioned in the protocol. default false
-(only the modified files are mentioned in the protocol)<br>
-<br>
-you can test an entire policies file (given that the path is path/to/directory_policies.json, otherwise pass 
+<br/><br/>accepted values for **bin** are:<br/>
+
+|**""** | no program used, the file are also not tested for their integrity |
+| - | - |
+|**magick** | use imagemagick |
+|**ffmpeg** | use ffmpeg |
+|**soffice** | use libre office |
+|**inkscape** | use inkscape |
+
+<br/><br/>you can test an entire policies file (given that the path is path/to/directory_policies.json, otherwise pass 
 the path to the file with -p) with
 ```
 python3 identify.py path/to/directory -t
@@ -162,6 +168,8 @@ the default setting for file conversion are in **conf/policies.py**, you can add
 settings such as default path values or hash algorithm are at the top of the **conf/models.py** file
 
 ### options
+**-i**<br>
+[--integrity-tests] tests the files for their integrity<br><br>
 **-a**<br>
 [--apply] applies the policies<br><br>
 **-c**<br>
@@ -179,11 +187,9 @@ when used in generating policies, it does not add blank ones for formats that ar
 [--blank] creates a blank policies based on the files encountered in the given directory<br><br>
 **-e**<br>
 [--extend-policies] append filetypes found in the directory to the given policies if they are missing in it.<br><br>
-**-k**<br>
-[--keep] this overrides the keep_original value in the policies and sets it to true when cleaning up.<br>
-when used in generating policies, it sets keep_original in the policies to true (default false)<br><br>
 **-d**<br>
-[--dry] dry run, prints out the cmds<br><br>
+[--delete-original] this overrides the keep_original value in the policies and sets it to false when cleaning up.<br>
+when used in generating policies, it sets keep_original in the policies to false (default true)<br><br>
 **-v**<br>
 [--verbose] prints out more detailed diagnostics and does deeper file inspections on 
 video and image files<br><br>
@@ -193,21 +199,13 @@ video and image files<br><br>
 ### iterations
 
 as the SfInfo objects of converted files have an **derived_from** attribute that is again a SfInfo object of its parent, 
-and an existing protocol is extended if a folder is run against a different policy, the protocol keeps track of all
+and an existing changeLog is extended if a folder is run against a different policy, the changeLog keeps track of all
 iterations.<br>
-so iterations like A -> B, B -> C, ... is logged in one protocol.<br>
+so iterations like A -> B, B -> C, ... is logged in one changeLog.<br>
 <br>
 e.g. if you have different types of doc and docx files in a folder, you dont allow doc and you want a pdf as an addition 
-to the docx files, and a thumbnail of the first page of the pdf ... , you can save the respective presets: the first doc 
--> docx, the second docx -> pdf with "keep_original": true ...
-<br>
-then you can use
-```
-python3 chain.py path/to/directory --p presets/preset1 --p presets/preset2 ...
-```
-**NOTE** as it is not possible to add flags to the iteration steps, each step is executed with the flags -acq
-(apply, cleanup, quiet), so if you want to keep some of the files you plan to convert in one of the steps, make sure
-that you set it in the respective policies accordingly.
+to the docx files, and a thumbnail of the first page of the pdf ...
+
 
 ### updating signatures
 

@@ -1,7 +1,8 @@
 import re
 import json
 from pathlib import Path
-from conf.models import SFoutput, SfInfo, Match, SiegfriedConf, PolicyMsg, LogMsg, CleanUpTable
+from conf.models import SFoutput, SfInfo, Match, SiegfriedConf, LogMsg, CleanUpTable
+from conf.settings import PolicyMsg
 
 
 class SFParser:
@@ -83,7 +84,7 @@ class SFParser:
         return sfinfo
 
     @staticmethod
-    def read_protocol(path: Path) -> list[SfInfo]:
+    def read_changelog(path: Path) -> list[SfInfo]:
         sfinfos: list[SfInfo] = []
         with open(path, 'r') as f:
             dump = json.load(f)

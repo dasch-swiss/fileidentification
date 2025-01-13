@@ -1,7 +1,8 @@
 import json
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from conf.models import BasicAnalytics, Bin
+from conf.models import BasicAnalytics
+from conf.settings import Bin, FileOutput
 
 ####
 # configuration template
@@ -59,7 +60,8 @@ default_values: dict = {
     "fmt/948": [False, Bin.FFMPEG, "mp3", "-c:a libmp3lame", ["fmt/134"]],
 
     # Video
-    "fmt/199": [True, Bin.FFMPEG],    # MPEG-4 Media File (Codec: AVC/H.264, Audio: AAC)
+    # MPEG-4 Media File (Codec: AVC/H.264, Audio: AAC)
+    "fmt/199": [True, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # avi
     "fmt/5": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # quicktime
@@ -168,11 +170,11 @@ class PolicyParams:
     format_name: str = field(default_factory=str)
     bin: str = field(default_factory=str)
     accepted: bool = True
-    keep_original: bool = False
+    keep_original: bool = True
     target_container: str = field(default_factory=str)
     processing_args: str = field(default_factory=str)
     expected: str = field(default_factory=str)
-    force_protocol: bool = False
+    force_log: bool = False
 
 
 @dataclass
@@ -180,11 +182,11 @@ class PoliciesGenerator:
 
     fmt2ext: dict = field(default_factory=dict)
 
-    def gen_policies(self, outpath: Path, ba: BasicAnalytics, strict: bool = False, keep: bool = False,
+    def gen_policies(self, outpath: Path, ba: BasicAnalytics, strict: bool = False, keep: bool = True,
                      blank: bool = False, extend: dict[str, PolicyParams] = None) -> tuple[dict, BasicAnalytics]:
 
         policies: dict = {}
-        jsonfile = f'{outpath}_policies.json'
+        jsonfile = f'{outpath}{FileOutput.POLICIES}'
 
         # blank caveat
         if blank:
@@ -215,7 +217,13 @@ class PoliciesGenerator:
                     policy = {'format_name': self.fmt2ext[puid]['name'],
                               'bin': default_values[puid][1],
                               'accepted': True,
-                              'force_protocol': False}
+                              'force_log': False}
+                    # update policy if it's mp4 -> depends on streams if it's converted
+                    if puid in ['fmt/199']:
+                        policy.update({'keep_original': keep,
+                              'target_container': default_values[puid][2],
+                              'processing_args': default_values[puid][3],
+                              'expected': default_values[puid][4]})
                 # if the filety is not accepted
                 else:
                     policy = {'format_name': self.fmt2ext[puid]['name'],
@@ -224,8 +232,7 @@ class PoliciesGenerator:
                               'keep_original': keep,
                               'target_container': default_values[puid][2],
                               'processing_args': default_values[puid][3],
-                              'expected': default_values[puid][4],
-                              'force_protocol': False}
+                              'expected': default_values[puid][4]}
 
                 policies[puid] = policy
 
