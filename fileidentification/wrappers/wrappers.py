@@ -78,6 +78,14 @@ class Ffmpeg(Analytics):
             return True, std_out, std_err
         return False, std_out, std_err
 
+    @staticmethod
+    def streams_as_json(sfinfo: SfInfo) -> Union[json, None]:
+        cmd = ["ffprobe", sfinfo.filename, "-show_streams", "-output_format", "json"]
+        res = subprocess.run(cmd, capture_output=True)
+        streams = json.loads(res.stdout)['streams']
+        return streams
+
+
 
 class ImageMagick(Analytics):
 
@@ -139,6 +147,8 @@ class Converter:
         match args["bin"]:
             # construct command if its ffmpeg
             case Bin.FFMPEG:
+                if sfinfo.processed_as in ['fmt/199']:
+                    cmd = f'ffmpeg -y -i {inputfile}  {outfile} 2> {logfile}'
                 cmd = f'ffmpeg -y -i {inputfile} {args["processing_args"]} {outfile} 2> {logfile}'
             # construct command if its imagemagick
             case Bin.MAGICK:

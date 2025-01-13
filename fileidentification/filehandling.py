@@ -78,7 +78,7 @@ class FileHandler:
 
         # check if the file throws any errors while open/processing it with the respective bin
         if self._is_file_corrupt(sfinfo):
-            sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=f'{FileDiagnosticsMsg.CORRUPT}'))
+            sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=f'{FileDiagnosticsMsg.ERROR}'))
             self._move2failed(sfinfo)
             return
 
@@ -118,6 +118,12 @@ class FileHandler:
         if not self.policies[puid]['accepted']:
             self.pinned2convert.append(sfinfo)
             return
+
+        # check if mp4 has correct stream (i.e. h264 and aac)
+        if puid in ['fmt/199']:
+            if not self._has_valid_streams(sfinfo):
+                self.pinned2convert.append(sfinfo)
+                return
 
         # case where file is accepted as it is, all good, append it to passed if flag in policies is true
         if self.policies[puid]['accepted']:
@@ -162,27 +168,35 @@ class FileHandler:
         # get the specs and errors
         match self.policies[sfinfo.processed_as]["bin"]:
             case Bin.FFMPEG:
-                corrupt, error, specs = Ffmpeg.is_corrupt(sfinfo, verbose=self.mode.VERBOSE)
+                error, warning, specs = Ffmpeg.is_corrupt(sfinfo, verbose=self.mode.VERBOSE)
                 if specs:
                     sfinfo.codec_info.append(LogMsg(name='ffmpeg', msg=specs))
-                if error:
-                    sfinfo.processing_logs.append(LogMsg(name='ffmpeg', msg=error))
+                if warning:
+                    sfinfo.processing_logs.append(LogMsg(name='ffmpeg', msg=warning))
             case Bin.MAGICK:
-                corrupt, error, specs = ImageMagick.is_corrupt(sfinfo, verbose=self.mode.VERBOSE)
+                error, warning, specs = ImageMagick.is_corrupt(sfinfo, verbose=self.mode.VERBOSE)
                 if specs:
                     sfinfo.codec_info.append(LogMsg(name='imagemagick', msg=specs))
-                if error:
-                    sfinfo.processing_logs.append(LogMsg(name='imagemagick', msg=error))
+                if warning:
+                    sfinfo.processing_logs.append(LogMsg(name='imagemagick', msg=warning))
             case _:
                 return False
 
-        if corrupt:
-            self.log_tables.append2diagnostics(sfinfo, FileDiagnosticsMsg.CORRUPT)
-            return True
         if error:
-            self.log_tables.append2diagnostics(sfinfo, FileDiagnosticsMsg.MINORERROR)
+            self.log_tables.append2diagnostics(sfinfo, FileDiagnosticsMsg.ERROR)
+            return True
+        if warning:
+            self.log_tables.append2diagnostics(sfinfo, FileDiagnosticsMsg.WARNING)
             return False
         return False
+
+    def _has_valid_streams(self, sfinfo: SfInfo) -> bool:
+        streams = Ffmpeg.streams_as_json(sfinfo)
+        for stream in streams:
+            if stream['codec_name'] not in ['h264', 'aac']:
+                print(stream['codec_name'])
+                return False
+            return True
 
     def _load_policies(self, policies_path: Path):
         if policies_path.is_file():
@@ -270,6 +284,8 @@ class FileHandler:
             test_conv = FileConverter(policies=self.policies)
 
             for puid in puids:
+                # we want the smallest file first for running the test in FileHandler.test_conversion()
+                self.ba.puid_unique[puid] = self.ba.sort_by_filesize(self.ba.puid_unique[puid])
                 sample = self.ba.puid_unique[puid][0]
                 if not self.mode.QUIET:
                     if isinstance(self.policies[puid]["expected"], list):
@@ -385,6 +401,7 @@ class FileHandler:
 
         if not self.mode.QUIET:
             print('did clean up')
+        raise typer.Exit()
 
 
 class FileConverter:

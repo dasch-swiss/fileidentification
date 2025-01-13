@@ -53,22 +53,19 @@ class RenderTables:
                    pn = fh.ba.presets[puid]
                 print(f'{nbr}    {size: >10}    {puid: <10}    {pn: <10}    {"": <9}    {fmtname}')
 
-            # we want the smallest file first for running the test in FileHandler.test_conversion()
-            fh.ba.puid_unique[puid] = fh.ba.sort_by_filesize(fh.ba.puid_unique[puid])
-
     @staticmethod
     def print_diagnostic_table(fh) -> None:
         """lists all corrupt files with the respective errors thrown"""
         if fh.log_tables.diagnostics:
-            if FileDiagnosticsMsg.CORRUPT.name in fh.log_tables.diagnostics.keys():
-                print("\n----------- corrupt -----------")
-                for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.CORRUPT.name]:
+            if FileDiagnosticsMsg.ERROR.name in fh.log_tables.diagnostics.keys():
+                print("\n----------- errors -----------")
+                for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.ERROR.name]:
                     print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
                     print(sfinfo.processing_logs)
             if fh.mode.VERBOSE:
-                if FileDiagnosticsMsg.MINORERROR.name in fh.log_tables.diagnostics.keys():
-                    print("\n----------- minor errors -----------")
-                    for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.MINORERROR.name]:
+                if FileDiagnosticsMsg.WARNING.name in fh.log_tables.diagnostics.keys():
+                    print("\n----------- warnings -----------")
+                    for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.WARNING.name]:
                         print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
                         print(sfinfo.processing_logs)
                 if FileDiagnosticsMsg.EXTMISMATCH.name in fh.log_tables.diagnostics.keys():

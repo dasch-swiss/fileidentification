@@ -81,6 +81,7 @@ def main(
     if test_puid:
         fh.test_policies(files_dir, wdir, puid=test_puid)
     if test_policies:
+        fh.apply_policies()
         fh.test_policies(files_dir, wdir)
 
     # apply policies

@@ -60,7 +60,8 @@ default_values: dict = {
     "fmt/948": [False, Bin.FFMPEG, "mp3", "-c:a libmp3lame", ["fmt/134"]],
 
     # Video
-    "fmt/199": [True, Bin.FFMPEG],    # MPEG-4 Media File (Codec: AVC/H.264, Audio: AAC)
+    # MPEG-4 Media File (Codec: AVC/H.264, Audio: AAC)
+    "fmt/199": [True, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # avi
     "fmt/5": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # quicktime
@@ -217,6 +218,12 @@ class PoliciesGenerator:
                               'bin': default_values[puid][1],
                               'accepted': True,
                               'force_log': False}
+                    # update policy if it's mp4 -> depends on streams if it's converted
+                    if puid in ['fmt/199']:
+                        policy.update({'keep_original': keep,
+                              'target_container': default_values[puid][2],
+                              'processing_args': default_values[puid][3],
+                              'expected': default_values[puid][4]})
                 # if the filety is not accepted
                 else:
                     policy = {'format_name': self.fmt2ext[puid]['name'],

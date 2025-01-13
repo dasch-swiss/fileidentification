@@ -53,8 +53,8 @@ class PolicyMsg(StrEnum):
 
 class FileDiagnosticsMsg(StrEnum):
     EMPTYSOURCE = 'empty source, file removed'
-    CORRUPT = f'file is corrupt. moved it to {PathsConfig.FAILED}'
-    MINORERROR = "file has minor errors"
+    ERROR = f'file is corrupt. moved it to {PathsConfig.FAILED}'
+    WARNING = "file has warnings"
     EXTMISMATCH = "extension mismatch"
 
 
