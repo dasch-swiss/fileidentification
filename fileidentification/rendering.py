@@ -29,29 +29,30 @@ class RenderTables:
     @staticmethod
     def print_fileformats(fh, puids: list[str]):
         print("\n----------- fileformats -----------")
+        print(f"{'no. of files': <13} | {'combined size': <14} | {'fmt type': <10} | {'policy': <10} | {'bin (associated program)': <25} | {'format name'}")
         for puid in puids:
             bytes_size: int = 0
             for sfinfo in fh.ba.puid_unique[puid]:
                 bytes_size += sfinfo.filesize
             fh.ba.total_size[puid] = bytes_size
             size = format_bite_size(bytes_size)
-            nbr, fmtname, = f'{len(fh.ba.puid_unique[puid]): >5}', f'{fh.fmt2ext[puid]["name"]}'
+            nbr, fmtname, = len(fh.ba.puid_unique[puid]), f'{fh.fmt2ext[puid]["name"]}'
             if fh.mode.STRICT and puid not in fh.policies:
                 pn = "strict"
-                secho(f'{nbr}    {size: >10}    {puid: <10}    {pn: <10}    {"": <9}    {fmtname}', fg=colors.RED)
+                secho(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {"": <25} | {fmtname}', fg=colors.RED)
             if puid in fh.policies and not fh.policies[puid]['accepted']:
                 bin = fh.policies[puid]['bin']
                 pn = ""
                 if fh.ba.presets and puid in fh.ba.presets:
                    pn = fh.ba.presets[puid]
-                secho(f'{nbr}    {size: >10}    {puid: <10}    {pn: <10}    {bin: <10}   {fmtname}', fg=colors.YELLOW)
+                secho(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {bin: <25} | {fmtname}', fg=colors.YELLOW)
             if puid in fh.policies and fh.policies[puid]['accepted']:
                 pn = ""
                 if fh.ba.blank and puid in fh.ba.blank:
                     pn = "blank"
                 if fh.ba.presets and puid in fh.ba.presets:
                    pn = fh.ba.presets[puid]
-                print(f'{nbr}    {size: >10}    {puid: <10}    {pn: <10}    {"": <9}    {fmtname}')
+                print(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {"": <25} | {fmtname}')
 
     @staticmethod
     def print_diagnostic_table(fh) -> None:
