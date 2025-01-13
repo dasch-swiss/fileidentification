@@ -10,6 +10,7 @@ brew install ffmpeg
 brew install --cask inkscape
 brew install imagemagick
 brew install ghostscript
+brew install libreoffice
 ```
 or for Linux depending on your distribution
 ```
@@ -36,15 +37,17 @@ SfInfo objects that got enriched with the the file (conversion) processing logs
 
 ### installation
 
+If you don't have [poetry](https://python-poetry.org/) installed, install it with
+```curl -sSL https://install.python-poetry.org | python3 - ```.
+
+Then, create a virtual environment with the python dependencies:
 ```poetry install```
 
 ### usage
 
 run it in your ide or in your terminal
-activating the venv<br>
-```source .venv/bin/active # this depends on your venv settings```
-<br>or<br>
-```poetry shell```
+Find out how to activate your virtual environment with `poetry env activate`.
+(You have to execute the command given to you by the previous command.)
 
 ### generating policies
 ```
