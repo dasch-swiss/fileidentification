@@ -395,7 +395,7 @@ class FileHandler:
 
         with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True) as prog:
             prog.add_task(description=f'moving files from {wdir.stem} to {files_dir.stem}...', total=None)
-            stack = Postprocessor.cleanup(stack, processed, files_dir, wdir)
+            stack = Postprocessor.cleanup(stack, processed, files_dir, wdir, self.mode.ADD)
             stack.extend(self.pinned2log)
             Postprocessor.dump_json(stack, files_dir, FileOutput.CHANGELOG, sha256=True)
 
@@ -508,7 +508,9 @@ class Postprocessor:
         return sfinfo
 
     @staticmethod
-    def cleanup(sfinfos: list[SfInfo], processed: list[SfInfo], files_dir: Path, wdir: Path = None) -> list[SfInfo]:
+    def cleanup(sfinfos: list[SfInfo], processed: list[SfInfo], files_dir: Path, wdir: Path = None, add = True)\
+            -> list[SfInfo]:
+
         stack: [SfInfo] = []
         failed: [SfInfo] = []
         for sfinfo in sfinfos:
@@ -517,6 +519,10 @@ class Postprocessor:
                 # delete the original if its mentioned, remove it from already processed
                 if tb.delete_original and tb.delete_original.is_file():
                     os.remove(tb.delete_original)
+                    if processed:
+                        [processed.remove(el) for el in processed if sfinfo.derived_from.filename == el.filename]
+                if not tb.delete_original and not add:
+                    os.remove(Path(files_dir, sfinfo.derived_from.filename))
                     if processed:
                         [processed.remove(el) for el in processed if sfinfo.derived_from.filename == el.filename]
                 # append hash to filename if the path already exists
