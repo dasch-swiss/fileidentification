@@ -37,15 +37,17 @@ SfInfo objects that got enriched with the the file (conversion) processing logs
 
 ### installation
 
+If you don't have [poetry](https://python-poetry.org/) installed, install it with
+```curl -sSL https://install.python-poetry.org | python3 - ```.
+
+Then, create a virtual environment with the python dependencies:
 ```poetry install```
 
 ### usage
 
 run it in your ide or in your terminal
-activating the venv<br>
-```source .venv/bin/activate # this depends on your venv settings```
-<br>or<br>
-execute the command given by `poetry env activate`
+Find out how to activate your virtual environment with `poetry env activate`.
+(You have to execute the command given to you by the previous command.)
 
 ### generating policies
 ```
