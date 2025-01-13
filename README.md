@@ -10,6 +10,7 @@ brew install ffmpeg
 brew install --cask inkscape
 brew install imagemagick
 brew install ghostscript
+brew install libreoffice
 ```
 or for Linux depending on your distribution
 ```
@@ -42,9 +43,9 @@ SfInfo objects that got enriched with the the file (conversion) processing logs
 
 run it in your ide or in your terminal
 activating the venv<br>
-```source .venv/bin/active # this depends on your venv settings```
+```source .venv/bin/activate # this depends on your venv settings```
 <br>or<br>
-```poetry shell```
+execute the command given by `poetry env activate`
 
 ### generating policies
 ```
