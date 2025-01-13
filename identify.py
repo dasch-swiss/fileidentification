@@ -61,9 +61,10 @@ def main(
     mode = Mode(ADD=False if delete_original else True, STRICT=mode_strict, VERBOSE=mode_verbose, QUIET=mode_quiet)
     fh = FileHandler(mode=mode)
 
-    # cleanup caveat, if cmd is run with flag --cleanup
+    # cleanup caveat, if cmd is run with flag --cleanup and files already converted (i.e. there's a changLog.json.tmp )
     if cleanup and Path(f'{files_dir}{FileOutput.TMPSTATE}').is_file():
         fh.clean_up(files_dir, wdir)
+        raise typer.Exit()
 
     # save policies caveat
     if save_policies:

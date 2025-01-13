@@ -4,7 +4,7 @@ from enum import StrEnum
 # application settings
 class SiegfriedConf(StrEnum):
     """siegfried parameters"""
-    ALG = "md5"
+    ALG = "sha256"
     MULTI = "256"
 
 

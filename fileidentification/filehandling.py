@@ -401,7 +401,6 @@ class FileHandler:
 
         if not self.mode.QUIET:
             print('did clean up')
-        raise typer.Exit()
 
 
 class FileConverter:
