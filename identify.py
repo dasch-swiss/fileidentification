@@ -20,7 +20,7 @@ def main(
         apply: Annotated[bool, typer.Option("--apply", "-a", help="apply the [pinned] conversions")] = False,
         cleanup: Annotated[bool, typer.Option("--cleanup", "-c",
             help="removes all temporary items and moves the converted files to the folder of its original file"
-                 "[with -d also passed: it replaces the original files with the converted one]")] = False,
+                 "[with -d: it replaces the original files with the converted one]")] = False,
         policies_path: Annotated[Path, typer.Option("--policies-path", "-p",
             help="path to the json file with the policies")] = None,
         blank: Annotated[bool, typer.Option("--blank", "-b",
@@ -32,13 +32,13 @@ def main(
         test_policies: Annotated[bool, typer.Option("--test", "-t",
             help="test all file conversions from the policies with a respective sample of the directory")] = None,
         delete_original: Annotated[bool, typer.Option("--delete-original", "-d",
-            help="when generating policies: it sets the keep_original flag to true (default false)."
-                 "[with -c also passed: the flag in the policies is ignored and originals are not deleted]")] = False,
+            help="when generating policies: it sets the keep_original flag to false (default true)."
+                 "[with -c: the the keep_original flag in the policies is ignored and originals are deleted]")] = False,
         mode_strict: Annotated[bool, typer.Option("--strict", "-s",
             help="when generating policies: non default filetypes are not added as blank policies."
                  "when applying policies: moves the files that are not listed in the policies to folder FAILED.")] = False,
         mode_verbose: Annotated[bool, typer.Option("--verbose", "-v",
-            help="lists every file in report, every minor error and does deeper file inspection on video files")] = False,
+            help="catches more warnings on video and image files during the integrity tests")] = False,
         mode_quiet: Annotated[bool, typer.Option("--quiet", "-q",
             help="just print errors and warnings")] = False,
         save_policies: Annotated[bool, typer.Option("--save-policies", "-S",
