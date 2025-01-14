@@ -37,11 +37,23 @@ SfInfo objects that got enriched with the the file (conversion) processing logs
 
 ### installation
 
-If you don't have [poetry](https://python-poetry.org/) installed, install it with
-```curl -sSL https://install.python-poetry.org | python3 - ```.
+If you don't have [uv](https://docs.astral.sh/uv/) installed, install it with
 
-Then, create a virtual environment with the python dependencies:
-```poetry install```
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Then, you can use `uv run` to run the fileidentification script:
+
+```bash
+uv run identify.py testdata   
+```
+
+By prepending `uv run` before `identify.py`,
+`uv` executes the script in a virtual environment that contains all necessary python dependencies.
+(The virtual environment can optionally be activated with `source .venv/bin/activate`,
+but this is not necessary when using `uv run`.)
+
 
 ### usage
 

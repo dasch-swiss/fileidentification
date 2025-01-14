@@ -1,18 +1,17 @@
-[tool.poetry]
+[project]
 name = "fileidentification"
 version = "0.1.0"
 description = ""
 authors = []
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = "^3.12"
-lxml = "^5.1.0"
-requests = "^2.31.0"
-typer = "^0.10.0"
-rich = "^13.7.1"
-
+requires-python = ">=3.12"
+dependencies = [
+    "lxml>=5.1.0",
+    "requests>=2.31.0",
+    "typer>=0.10.0",
+    "rich>=13.7.1",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
