@@ -4,8 +4,8 @@ from typing_extensions import Annotated
 from conf.models import SfInfo
 from conf.settings import FileOutput, PathsConfig
 from fileidentification.wrappers import homebrew_packeges
-from fileidentification.filehandling import FileHandler, Postprocessor, Mode, save_policies_from
-from fileidentification.rendering import RenderTables
+from fileidentification.filehandling import FileHandler, Postprocessor, Mode
+from fileidentification.output import RenderTables
 
 # check for the dependencies
 homebrew_packeges.check()
@@ -30,7 +30,7 @@ def main(
         test_puid: Annotated[str, typer.Option("--test-filetype", "-tf",
             help="test a puid from the policies with a respective sample of the directory")] = None,
         test_policies: Annotated[bool, typer.Option("--test", "-t",
-            help="test all file conversions from the policies with a respective sample of the directory")] = None,
+            help="test all file conversions from the policies with a respective sample of the directory")] = False,
         delete_original: Annotated[bool, typer.Option("--delete-original", "-d",
             help="when generating policies: it sets the keep_original flag to false (default true)."
                  "[with -c: the the keep_original flag in the policies is ignored and originals are deleted]")] = False,
@@ -58,25 +58,28 @@ def main(
         wdir = tmp_dir
 
     # the file handler with the respective mode,
-    mode = Mode(ADD=False if delete_original else True, STRICT=mode_strict, VERBOSE=mode_verbose, QUIET=mode_quiet)
+    mode = Mode(KEEPORIGINAL=False if delete_original else True, STRICT=mode_strict, VERBOSE=mode_verbose, QUIET=mode_quiet)
     fh = FileHandler(mode=mode)
 
     # cleanup caveat, if cmd is run with flag --cleanup and files already converted (i.e. there's a changLog.json.tmp )
     if cleanup and Path(f'{files_dir}{FileOutput.TMPSTATE}').is_file():
-        fh.clean_up(files_dir, wdir)
+        fh.cleanup(files_dir, wdir)
+        Postprocessor.dump_json(fh.log_tables.processingerr, files_dir, FileOutput.FAILED)
         raise typer.Exit()
 
     # save policies caveat
     if save_policies:
-        save_policies_from(files_dir)
+        Postprocessor.save_policies_from(files_dir)
 
     # generate a list of SfInfo objects out of the target folder and generate policies
-    fh.gen_sfinfos(files_dir, wdir)
+    fh.load_sfinfos(files_dir, wdir)
     fh.manage_policies(files_dir, policies_path, blank, extend)
 
     # file integrity tests
     if integrity_tests:
         fh.integrity_tests()
+    if not apply:
+        Postprocessor.dump_json(fh.sfinfos, files_dir, FileOutput.TMPSTATE, sha256=True)
 
     # policies testing
     if test_puid:
@@ -93,12 +96,13 @@ def main(
 
     # cleanup
     if cleanup:
-        fh.clean_up(files_dir, wdir, stack)
+        fh.cleanup(files_dir, wdir, stack)
     else:
         Postprocessor.dump_json(fh.pinned2log, files_dir, FileOutput.CHANGELOG, sha256=True)
         Postprocessor.dump_json(stack, files_dir, FileOutput.TMPSTATE, sha256=True)
 
     RenderTables.report2file(fh, files_dir)
+    Postprocessor.dump_json(fh.log_tables.processingerr, files_dir, FileOutput.FAILED)
 
 
 if __name__ == "__main__":

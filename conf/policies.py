@@ -173,7 +173,7 @@ class PolicyParams:
     keep_original: bool = True
     target_container: str = field(default_factory=str)
     processing_args: str = field(default_factory=str)
-    expected: str = field(default_factory=str)
+    expected: list = field(default_factory=list)
     force_log: bool = False
 
 

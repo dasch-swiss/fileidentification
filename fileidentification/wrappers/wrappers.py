@@ -147,8 +147,6 @@ class Converter:
         match args["bin"]:
             # construct command if its ffmpeg
             case Bin.FFMPEG:
-                if sfinfo.processed_as in ['fmt/199']:
-                    cmd = f'ffmpeg -y -i {inputfile}  {outfile} 2> {logfile}'
                 cmd = f'ffmpeg -y -i {inputfile} {args["processing_args"]} {outfile} 2> {logfile}'
             # construct command if its imagemagick
             case Bin.MAGICK:
@@ -183,6 +181,4 @@ class Rsync:
         res = subprocess.run(cmd, capture_output=True)
         if res.stderr:
             return True, res.stderr.decode("utf-8", "backslashreplace"), cmd
-        # if there is no error remove original
-        os.remove(source)
         return False, res.stdout.decode("utf-8", "backslashreplace"), cmd

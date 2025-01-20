@@ -33,7 +33,7 @@ and writes out a default **policies.json**. in a second iteration, it applies th
 (probes the file - if it is corrupt - if file format is accepted or it need to be converted).
 then it converts the files flagged for conversion, verifies their output.
 
-it writes all relevant metadata to a protocol.json containing a sequence of
+it writes all relevant metadata to a changeLog.json containing a sequence of
 SfInfo objects that got enriched with the the file (conversion) processing logs 
 (so all file manipulation and format issues are logged).
 

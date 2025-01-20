@@ -41,7 +41,7 @@ class FileOutput(StrEnum):
     POLICIES = "_policies.json"
     CHANGELOG = "_changeLog.json"
     TMPSTATE = "_changeLog.json.tmp"
-    FAILED = "_rsync_failed.json"
+    FAILED = "_failed.json"
 
 
 # msg
@@ -62,11 +62,10 @@ class FileProcessingErr(StrEnum):
     PUIDFAIL = "failed to get fmt type"
     CONVFAILED = "conversion failed"
     NOTEXPECTEDFMT = "converted file did not match the expected fmt"
-    ESCAPED = "file escaped the policies assertion"
     FAILEDMOVE = "failed to rsyc the file"
 
 
-class ChangLogErr(StrEnum):
+class ChangeLogErr(StrEnum):
     NOHASH = "hash not found, cannot verify the file"
     MODIFIED = "changelog got modified"
     NOFILE = "changelog not found"
