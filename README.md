@@ -128,7 +128,7 @@ a policy for Audio/Video Interleaved Format thats need to be transcoded to MPEG-
             "format_name": "Audio/Video Interleaved Format",  # optional
             "bin": "ffmpeg",
             "accepted": false,
-            "keep_original": true,
+            "delete_original": true,
             "target_container": "mp4",
             "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
             "expected": [
@@ -158,7 +158,7 @@ a policy for Portable Network Graphics that is accepted as it is, but forced to 
 | **format_name** (optional)                      | **str**                                                                                                                                       |
 | **bin**                                         | **str**: program to convert the file or test the file (testing currently only is supported on image/audio/video, i.e. ffmpeg and imagemagick) |
 | **accepted**                                    | **bool**: false if the file needs to be converted                                                                                             |
-| **keep_original** (required if not accepted)    | **bool**: whether to keep the parent of the converted file, default is true                                                                   |
+| **delete_original** (required if not accepted)  | **bool**: whether to keep the parent of the converted file, default is false                                                                  |
 | **target_container** (required if not accepted) | **str**: the container the file needs to be converted                                                                                         |
 | **processing_args** (required if not accepted)  | **str**: the arguments used with bin                                                                                                          |
 | **expected** (required if not accepted)         | **list**: the expected file format for the converted file                                                                                     |
@@ -241,9 +241,9 @@ when used in generating policies, it does not add blank ones for formats that ar
 **-e**<br>
 [--extend-policies] append filetypes found in the directory to the given policies if they are missing in it.<br><br>
 **-d**<br>
-[--delete-original] this overwrites the keep_original value in the policies and sets it to false when cleaning up. so
+[--delete-original] this overwrites the delete_original value in the policies and sets it to true when cleaning up. so
 the original files are deleted.<br>
-when used in generating policies, it sets keep_original in the policies to false (default true)<br><br>
+when used in generating policies, it sets delete_original in the policies to true (default false)<br><br>
 **-q**<br>
 [--quiet] just print errors and warnings<br><br>
 

@@ -82,8 +82,10 @@ class Ffmpeg(Analytics):
     def streams_as_json(sfinfo: SfInfo) -> Union[json, None]:
         cmd = ["ffprobe", sfinfo.filename, "-show_streams", "-output_format", "json"]
         res = subprocess.run(cmd, capture_output=True)
-        streams = json.loads(res.stdout)['streams']
-        return streams
+        if not res.stderr:
+            streams = json.loads(res.stdout)['streams']
+            return streams
+        return
 
 
 
@@ -175,7 +177,7 @@ class Rsync:
 
     @staticmethod
     def copy(source: str | Path, dest: str | Path) -> tuple[bool, str, list]:
-        """rsync the source to dest. if rsync did not return an error, delete source
+        """rsync the source to dest.
         :returns True, stderr, cmd if there was an error, else False, stdout, cmd"""
         cmd = ['rsync', '-av', str(source), str(dest)]
         res = subprocess.run(cmd, capture_output=True)

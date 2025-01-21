@@ -58,11 +58,12 @@ def main(
         wdir = tmp_dir
 
     # the file handler with the respective mode,
-    mode = Mode(KEEPORIGINAL=False if delete_original else True, STRICT=mode_strict, VERBOSE=mode_verbose, QUIET=mode_quiet)
+    mode = Mode(DELETEORIGINAL=delete_original, STRICT=mode_strict, VERBOSE=mode_verbose, QUIET=mode_quiet)
     fh = FileHandler(mode=mode)
 
     # cleanup caveat, if cmd is run with flag --cleanup and files already converted (i.e. there's a changLog.json.tmp )
     if cleanup and Path(f'{files_dir}{FileOutput.TMPSTATE}').is_file():
+        fh.manage_policies(files_dir, policies_path)
         fh.cleanup(files_dir, wdir)
         Postprocessor.dump_json(fh.log_tables.processingerr, files_dir, FileOutput.FAILED)
         raise typer.Exit()
@@ -101,7 +102,7 @@ def main(
         Postprocessor.dump_json(fh.pinned2log, files_dir, FileOutput.CHANGELOG, sha256=True)
         Postprocessor.dump_json(stack, files_dir, FileOutput.TMPSTATE, sha256=True)
 
-    RenderTables.report2file(fh, files_dir)
+    # RenderTables.report2file(fh, files_dir)
     Postprocessor.dump_json(fh.log_tables.processingerr, files_dir, FileOutput.FAILED)
 
 

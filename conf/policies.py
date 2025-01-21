@@ -170,7 +170,7 @@ class PolicyParams:
     format_name: str = field(default_factory=str)
     bin: str = field(default_factory=str)
     accepted: bool = True
-    keep_original: bool = True
+    delete_original: bool = False
     target_container: str = field(default_factory=str)
     processing_args: str = field(default_factory=str)
     expected: list = field(default_factory=list)
@@ -182,7 +182,7 @@ class PoliciesGenerator:
 
     fmt2ext: dict = field(default_factory=dict)
 
-    def gen_policies(self, outpath: Path, ba: BasicAnalytics, strict: bool = False, keep: bool = True,
+    def gen_policies(self, outpath: Path, ba: BasicAnalytics, strict: bool = False, delete_original: bool = False,
                      blank: bool = False, extend: dict[str, PolicyParams] = None) -> tuple[dict, BasicAnalytics]:
 
         policies: dict = {}
@@ -220,7 +220,7 @@ class PoliciesGenerator:
                               'force_log': False}
                     # update policy if it's mp4 -> depends on streams if it's converted
                     if puid in ['fmt/199']:
-                        policy.update({'keep_original': keep,
+                        policy.update({'delete_original': delete_original,
                               'target_container': default_values[puid][2],
                               'processing_args': default_values[puid][3],
                               'expected': default_values[puid][4]})
@@ -229,7 +229,7 @@ class PoliciesGenerator:
                     policy = {'format_name': self.fmt2ext[puid]['name'],
                               'bin': default_values[puid][1],
                               'accepted': False,
-                              'keep_original': keep,
+                              'delete_original': delete_original,
                               'target_container': default_values[puid][2],
                               'processing_args': default_values[puid][3],
                               'expected': default_values[puid][4]}

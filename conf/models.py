@@ -99,7 +99,6 @@ class CleanUpTable:
         optional = {
             "filename": self.filename,
             "dest": self.dest,
-            # "delete_original": self.delete_original,
             "wdir": self.wdir,
             "relative_path": self.relative_path
         }
