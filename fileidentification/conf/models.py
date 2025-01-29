@@ -2,7 +2,7 @@ from __future__ import annotations
 import datetime
 from typing import Type, Dict, Any, Optional
 from dataclasses import dataclass, field, asdict
-from conf.settings import SiegfriedConf
+from fileidentification.conf.settings import SiegfriedConf
 from enum import StrEnum
 from pathlib import Path
 

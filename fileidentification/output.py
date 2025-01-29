@@ -1,6 +1,6 @@
 from typer import secho, colors
-from conf.settings import SiegfriedConf, FileDiagnosticsMsg
-from conf.models import LogMsg
+from fileidentification.conf.settings import SiegfriedConf, FileDiagnosticsMsg
+from fileidentification.conf.models import LogMsg
 from fileidentification.helpers import format_bite_size
 
 

@@ -5,8 +5,8 @@ import os
 from abc import ABC
 from pathlib import Path
 from typing import Union, Any
-from conf.models import SFoutput, SfInfo
-from conf.settings import SiegfriedConf, LibreOfficePath, ErrorMsgFF, ErrorMsgIM, LibreOfficePdfSettings, Bin
+from fileidentification.conf.models import SFoutput, SfInfo
+from fileidentification.conf.settings import SiegfriedConf, LibreOfficePath, ErrorMsgFF, ErrorMsgIM, LibreOfficePdfSettings, Bin
 
 
 class Analytics(ABC):
@@ -90,7 +90,7 @@ class ImageMagick(Analytics):
         whether it can be open at all. it returns [True, "stderr"]. for minor errors [False, "stderr"].
         if everithing ok [False, ""]"""
 
-        cmd = f'magick identify -regard-warnings -format "%m %wx%h %g %z-bit %[channels]" {shlex.quote(str(sfinfo.path))}'
+        cmd = f'magick identify -format "%m %wx%h %g %z-bit %[channels]" {shlex.quote(str(sfinfo.path))}'
 
         if verbose:
             cmd = (f'magick identify -verbose -regard-warnings -format "%m %wx%h %g %z-bit %[channels]" '

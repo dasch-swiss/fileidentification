@@ -41,7 +41,7 @@ class PathsConfig(StrEnum):
     TEST = "_TEST"
     PRESETS = "presets"
     # do not change this
-    FMT2EXT = "conf/fmt2ext.json"
+    FMT2EXT = "fileidentification/conf/fmt2ext.json"
 
 
 class JsonOutput(StrEnum):

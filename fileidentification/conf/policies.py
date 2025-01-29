@@ -1,8 +1,8 @@
 import json
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from conf.models import BasicAnalytics
-from conf.settings import Bin, JsonOutput
+from fileidentification.conf.models import BasicAnalytics
+from fileidentification.conf.settings import Bin, JsonOutput
 
 ####
 # configuration template

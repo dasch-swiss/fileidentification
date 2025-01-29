@@ -1,8 +1,8 @@
 import re
 import json
 from pathlib import Path
-from conf.models import SFoutput, SfInfo, Match, Status, SiegfriedConf, LogMsg
-from conf.settings import PolicyMsg
+from fileidentification.conf.models import SFoutput, SfInfo, Match, Status, SiegfriedConf, LogMsg
+from fileidentification.conf.settings import PolicyMsg
 
 
 class SFParser:

@@ -18,11 +18,11 @@ from fileidentification.wrappers import homebrew_packeges
 from fileidentification.parser.parser import SFParser
 from fileidentification.output import RenderTables
 from fileidentification.helpers import get_hash
-from conf.settings import (PathsConfig, LibreOfficePath, FileDiagnosticsMsg, PolicyMsg, FileProcessingMsg,
-                           JsonOutput, Bin, ChangeLogErr)
-from conf.models import SfInfo, BasicAnalytics, LogTables, LogMsg
-from conf.policies import PoliciesGenerator
-from conf.policies import systemfiles
+from fileidentification.conf.settings import (PathsConfig, LibreOfficePath, FileDiagnosticsMsg, PolicyMsg, FileProcessingMsg,
+                                              JsonOutput, Bin, ChangeLogErr)
+from fileidentification.conf.models import SfInfo, BasicAnalytics, LogTables, LogMsg
+from fileidentification.conf.policies import PoliciesGenerator
+from fileidentification.conf.policies import systemfiles
 
 
 @dataclass
@@ -283,9 +283,11 @@ class FileHandler:
 
     def load_sfinfos(self, root_folder: Path, wdir: Path):
 
+        # set path to log.json, use parent of root_folder if it is a file
+        logpath_root = root_folder.parent if root_folder.is_file() else root_folder
         # if there is a log, try to read from there
-        if Path(f'{root_folder}{JsonOutput.LOG}').is_file():
-            self.stack = Postprocessor.parse_changelog(root_folder)
+        if Path(f'{logpath_root}{JsonOutput.LOG}').is_file():
+            self.stack = Postprocessor.parse_log(logpath_root)
             # append the directories values
             [sfinfo.set_processing_paths(root_folder, wdir) for sfinfo in self.stack if not sfinfo.status.removed]
 
@@ -393,6 +395,7 @@ class FileHandler:
                         self._remove(derived_from)
                 # create absolute filepath
                 dest_abs = root_folder / sfinfo.dest / sfinfo.filename.name
+                print(dest_abs)
                 # append hash to filename if the path already exists
                 if dest_abs.is_file():
                     dest_abs = Path(dest_abs.parent, f'{sfinfo.filename.stem}_{sfinfo.filehash[:6]}{sfinfo.filename.suffix}')
@@ -460,6 +463,9 @@ class FileHandler:
             self.save_policies_from(root_folder)
         # generate a list of SfInfo objects out of the target folder and generate policies
         self.load_sfinfos(root_folder, wdir)
+        # set to parent if root_folder is file
+        if root_folder.is_file():
+            root_folder = root_folder.parent
         self.manage_policies(root_folder, policies_path, blank, extend)
         # remove tmp caveat
         if remove_tmp:
@@ -486,6 +492,8 @@ class FileHandler:
         self.write_logs(root_folder, csv)
 
     def _set_working_dir(self, root_folder: Path, tmp_dir: Path | None) -> Path:
+        if root_folder.is_file():
+            root_folder = root_folder.parent
         if not tmp_dir and not PathsConfig.WDIR.__contains__("/"):
             return Path(f'{root_folder}_{PathsConfig.WDIR}')
         wdir = Path(PathsConfig.WDIR)
@@ -581,7 +589,7 @@ class FileConverter:
 
         sfinfo.wdir = sfinfo.wdir / PathsConfig.TEST
         start = time()
-        test, _, cmd = self.convert(sfinfo)
+        test, cmd = self.convert(sfinfo)
         duration = time() - start
         return test, duration, cmd
 
@@ -608,33 +616,26 @@ class Postprocessor:
             Path(f'{outfile}.sha256').write_text(get_hash(outfile))
 
     @staticmethod
-    def _verify_file(file: Path, sha256: bool = False) -> Path | str:
+    def _verify_file(file: Path) -> Path | str:
         """verifies file with hash"""
-        if not file.is_file():
-            return ChangeLogErr.NOFILE
-        else:
-            if not sha256:
+        if Path(f'{file}.sha256').is_file():
+            sha256 = Path(f'{file}.sha256').read_text()
+            if sha256 == get_hash(file):
                 return file
-            if sha256 and Path(f'{file}.sha256').is_file():
-                sha256 = Path(f'{file}.sha256').read_text()
-                if not sha256 == get_hash(file):
-                    return ChangeLogErr.MODIFIED
-                return file
-            return ChangeLogErr.NOHASH
+            return ChangeLogErr.MODIFIED
+        return ChangeLogErr.NOHASH
 
     @staticmethod
-    def parse_changelog(root_folder: Path) -> list[SfInfo]:
+    def parse_log(root_folder: Path) -> list[SfInfo]:
 
-        changelog_path = Postprocessor._verify_file(Path(f'{root_folder}{JsonOutput.LOG}'), sha256=True)
+        log_path = Postprocessor._verify_file(Path(f'{root_folder}{JsonOutput.LOG}'))
         stack: list[SfInfo] = []
-        if isinstance(changelog_path, Path):
-            stack.extend(SFParser.read_changelog(changelog_path))
+        if isinstance(log_path, Path):
+            stack.extend(SFParser.read_changelog(log_path))
         else:
-            secho(f'ERROR: {changelog_path} when trying to read {root_folder}{JsonOutput.LOG}', fg=colors.RED, bold=True)
-            if changelog_path != ChangeLogErr.NOFILE:
-                os.rename(f'{root_folder}{JsonOutput.LOG}',
-                          f'{root_folder}_{datetime.now().strftime("%Y%m%d_%H%M%S")}{JsonOutput.LOG}')
-
+            secho(f'ERROR: {log_path} when trying to read {root_folder}{JsonOutput.LOG}', fg=colors.RED, bold=True)
+            os.rename(f'{log_path}{JsonOutput.LOG}',
+                      f'{log_path}_{datetime.now().strftime("%Y%m%d_%H%M%S")}{JsonOutput.LOG}')
         return stack
 
     @staticmethod
