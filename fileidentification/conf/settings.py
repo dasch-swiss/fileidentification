@@ -29,47 +29,51 @@ class LibreOfficePdfSettings(StrEnum):
 
 # paths
 class PathsConfig(StrEnum):
-    """default directory paths"""
-    FAILED = "_FAILED"
-    FMT2EXT = "conf/fmt2ext.json"
-    WDIR = "_WORKINGDIR"
+    """default directory paths.
+    WDIR: the working directory. it adds the string to the root_folder -> path/to/folder_WORKINGDIR
+    if the string contains a slash, it's treated as a path.
+    REMOVED: folder name within WDIR to store the files that got removed from root_folder during processing.
+    TEST: folder name within WDIR to store the outcome of testing policies
+    PRESETS: path relative to the script root
+    """
+    WDIR = "WORKINGDIR"
+    REMOVED = "_REMOVED"
     TEST = "_TEST"
     PRESETS = "presets"
+    # do not change this
+    FMT2EXT = "fileidentification/conf/fmt2ext.json"
 
 
-class FileOutput(StrEnum):
+class JsonOutput(StrEnum):
     POLICIES = "_policies.json"
-    CHANGELOG = "_changeLog.json"
-    TMPSTATE = "_changeLog.json.tmp"
-    FAILED = "_rsync_failed.json"
+    LOG = "_log.json"
+    FAILED = "_failed.json"
 
 
 # msg
 class PolicyMsg(StrEnum):
     FALLBACK = f'fmt not detected, falling back on ext'
-    NOTINPOLICIES = f'file format is not in policies. running strict mode: moved to {PathsConfig.FAILED}'
+    NOTINPOLICIES = f'file format is not in policies. running strict mode: file removed'
     SKIPPED = "file format is not in policies, skipped"
 
 
 class FileDiagnosticsMsg(StrEnum):
-    EMPTYSOURCE = 'empty source, file removed'
-    ERROR = f'file is corrupt. moved it to {PathsConfig.FAILED}'
+    EMPTYSOURCE = 'empty source'
+    ERROR = f'file is corrupt: removed'
     WARNING = "file has warnings"
     EXTMISMATCH = "extension mismatch"
 
 
-class FileProcessingErr(StrEnum):
+class FileProcessingMsg(StrEnum):
     PUIDFAIL = "failed to get fmt type"
     CONVFAILED = "conversion failed"
-    NOTEXPECTEDFMT = "converted file did not match the expected fmt"
-    ESCAPED = "file escaped the policies assertion"
+    NOTEXPECTEDFMT = "converted file does not match the expected fmt."
     FAILEDMOVE = "failed to rsyc the file"
 
 
-class ChangLogErr(StrEnum):
-    NOHASH = "hash not found, cannot verify the file"
-    MODIFIED = "changelog got modified"
-    NOFILE = "changelog not found"
+class ChangeLogErr(StrEnum):
+    NOHASH = "hash not found, cannot verify the the _log.json"
+    MODIFIED = "_log.json got modified"
 
 
 # file corrupt errors to parse from wrappers.wrappers.Ffmpeg when in verbose mode

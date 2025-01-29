@@ -1,8 +1,8 @@
 import json
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from conf.models import BasicAnalytics
-from conf.settings import Bin, FileOutput
+from fileidentification.conf.models import BasicAnalytics
+from fileidentification.conf.settings import Bin, JsonOutput
 
 ####
 # configuration template
@@ -170,11 +170,10 @@ class PolicyParams:
     format_name: str = field(default_factory=str)
     bin: str = field(default_factory=str)
     accepted: bool = True
-    keep_original: bool = True
+    remove_original: bool = False
     target_container: str = field(default_factory=str)
     processing_args: str = field(default_factory=str)
-    expected: str = field(default_factory=str)
-    force_log: bool = False
+    expected: list = field(default_factory=list)
 
 
 @dataclass
@@ -182,11 +181,11 @@ class PoliciesGenerator:
 
     fmt2ext: dict = field(default_factory=dict)
 
-    def gen_policies(self, outpath: Path, ba: BasicAnalytics, strict: bool = False, keep: bool = True,
+    def gen_policies(self, outpath: Path, ba: BasicAnalytics, strict: bool = False, remove_original: bool = False,
                      blank: bool = False, extend: dict[str, PolicyParams] = None) -> tuple[dict, BasicAnalytics]:
 
         policies: dict = {}
-        jsonfile = f'{outpath}{FileOutput.POLICIES}'
+        jsonfile = f'{outpath}{JsonOutput.POLICIES}'
 
         # blank caveat
         if blank:
@@ -216,11 +215,10 @@ class PoliciesGenerator:
                 if default_values[puid][0]:
                     policy = {'format_name': self.fmt2ext[puid]['name'],
                               'bin': default_values[puid][1],
-                              'accepted': True,
-                              'force_log': False}
+                              'accepted': True}
                     # update policy if it's mp4 -> depends on streams if it's converted
                     if puid in ['fmt/199']:
-                        policy.update({'keep_original': keep,
+                        policy.update({'remove_original': remove_original,
                               'target_container': default_values[puid][2],
                               'processing_args': default_values[puid][3],
                               'expected': default_values[puid][4]})
@@ -229,7 +227,7 @@ class PoliciesGenerator:
                     policy = {'format_name': self.fmt2ext[puid]['name'],
                               'bin': default_values[puid][1],
                               'accepted': False,
-                              'keep_original': keep,
+                              'remove_original': remove_original,
                               'target_container': default_values[puid][2],
                               'processing_args': default_values[puid][3],
                               'expected': default_values[puid][4]}

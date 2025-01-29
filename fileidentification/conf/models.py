@@ -1,11 +1,10 @@
 from __future__ import annotations
-from datetime import datetime
+import datetime
 from typing import Type, Dict, Any, Optional
 from dataclasses import dataclass, field, asdict
-from conf.settings import FileProcessingErr, SiegfriedConf
+from fileidentification.conf.settings import SiegfriedConf
 from enum import StrEnum
 from pathlib import Path
-
 
 
 @dataclass
@@ -15,7 +14,7 @@ class LogMsg:
     timestamp: str = field(default_factory=str)
 
     def __post_init__(self):
-        self.timestamp = str(datetime.now())
+        self.timestamp = str(datetime.datetime.now(datetime.UTC))
 
 
 @dataclass
@@ -29,17 +28,20 @@ class SfInfo:
     filehash: str = ""
     matches: Optional[list[Match]] = field(default_factory=list)
     # added during processing
+    status: Status = None
     processed_as: Optional[str] = None
     codec_info: Optional[list[LogMsg]] = field(default_factory=list)
-    processing_error: Optional[FileProcessingErr] = None
     processing_logs: Optional[list[LogMsg]] = field(default_factory=list)
-    # siegfried output of original if converted
+    # if converted
     derived_from: Optional[SfInfo] = None
-    # paths, tmp items used during processing, they are not written out to final protocol
-    relative_path: Optional[Path] = None
-    files_dir: Optional[Path] = None
+    dest: Optional[Path] = None
+    # paths used during processing, they are not written out to status.json
+    path: Optional[Path] = None
+    root_folder: Optional[Path] = None
     wdir: Optional[Path] = None
-    cu_table: Optional[CleanUpTable] = None
+
+    def __post_init__(self):
+        self.status = Status()
 
     def as_dict(self):
         """return the class as dict, with Path as string, None values skipped, recursiv for derived_from"""
@@ -55,21 +57,32 @@ class SfInfo:
                                for key, value in asdict(match).items()}
                               for match in self.matches]
 
-        # optional values added during processing
+        # values added during processing
+
+        res['status'] = asdict(self.status)
+
         if self.processed_as:
             res['processed_as'] = self.processed_as
         if self.codec_info:
             res['codec_info'] = [{k: v for k, v in asdict(el).items()} for el in self.codec_info]
         if self.processing_logs:
             res['processing_logs'] = [{k: v for k, v in asdict(el).items()} for el in self.processing_logs]
-        # temp values used during processing, getting removed at the end
-        if self.cu_table:
-            res['cu_table'] = self.cu_table.as_dict()
-
         if self.derived_from:
             res['derived_from'] = self.derived_from.as_dict()
+        if self.dest:
+            res['dest'] = f'{self.dest}'
 
         return res
+
+    def set_processing_paths(self, root_folder: Path, wdir: Path, initial=False):
+        if root_folder.is_file():
+            root_folder = root_folder.parent
+        self.root_folder = root_folder
+        self.wdir = wdir
+        if initial:
+            self.filename = self.filename.parent.relative_to(root_folder) / self.filename.name
+        if not self.dest:
+            self.path = self.root_folder / self.filename
 
 
 @dataclass
@@ -86,52 +99,28 @@ class Match:
 
 
 @dataclass
-class CleanUpTable:
-    """
-    table to store the postprocessing info about moving and deleting files and directories
-    """
-    filename: Path = None
-    dest: Path = None
-    delete_original: Path = None
-    wdir: Path = None
-    filehash: str = None
-    relative_path: Path = None
-
-    def as_dict(self):
-        res = {}
-        optional = {
-            "filename": self.filename,
-            "dest": self.dest,
-            "delete_original": self.delete_original,
-            "wdir": self.wdir,
-            "relative_path": self.relative_path
-        }
-        [res.update({key: f'{value}'}) for key, value in optional.items() if value is not None]
-        return res
+class Status:
+    """status of the file: removed, pending for conversion or added"""
+    removed: bool = False
+    pending: bool = False
+    added: bool = False
 
 
 @dataclass
 class LogTables:
     """table to store errors and warnings"""
 
-    policies: dict[StrEnum.name, list[SfInfo]] = field(default_factory=dict)
     diagnostics: dict[StrEnum.name, list[SfInfo]] = field(default_factory=dict)
-    processingerr: dict[StrEnum.name, list[SfInfo]] = field(default_factory=dict)
+    errors: list[tuple[LogMsg, SfInfo]] = field(default_factory=list)
 
-    def append2policies(self, sfinfo: SfInfo, reason: StrEnum):
-        if reason.name not in self.policies:
-            self.policies[reason.name] = []
-        self.policies[reason.name].append(sfinfo)
-
-    def append2diagnostics(self, sfinfo: SfInfo, reason: StrEnum):
+    def diagnostics_add(self, sfinfo: SfInfo, reason: StrEnum):
         if reason.name not in self.diagnostics:
             self.diagnostics[reason.name] = []
         self.diagnostics[reason.name].append(sfinfo)
 
-    def append2processingerr(self, sfinfo: SfInfo, reason: StrEnum):
-        if reason.name not in self.processingerr:
-            self.processingerr[reason.name] = []
-        self.processingerr[reason.name].append(sfinfo)
+    def dump_errors(self):
+        [el[1].processing_logs.append(el[0]) for el in self.errors]
+        return [el[1] for el in self.errors]
 
 
 @dataclass

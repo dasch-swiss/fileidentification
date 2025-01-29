@@ -24,16 +24,15 @@ https://imagemagick.org/script/download.php#linux
 ```
 LibreOffice https://www.libreoffice.org/download/download-libreoffice/<br>
 
-it's a first version, not tested a lot and for sure needs some more debugging... also, it is not optimised on speed,
-especially when converting files. the idea was to write a script that has some default file conversion but is at the same
-time highly customisable.<br>
+it is not optimised on speed, especially when converting files. the idea was to write a script that has some 
+default file conversion but is at the same time highly customisable.<br>
 <br>
 the script turns the output from siegfried into a SfInfo dataclass per file, looks up the policies defined in **conf/policies.py**
 and writes out a default **policies.json**. in a second iteration, it applies the policies 
-(probes the file - if it is corrupt - if file format is accepted or it need to be converted).
+probes the file - if it is corrupt - if file format is accepted or it need to be converted).
 then it converts the files flagged for conversion, verifies their output.
 
-it writes all relevant metadata to a protocol.json containing a sequence of
+it writes all relevant metadata to a log.json containing a sequence of
 SfInfo objects that got enriched with the the file (conversion) processing logs 
 (so all file manipulation and format issues are logged).
 
@@ -71,7 +70,10 @@ uv run identify.py path/to/directory
 this does generate a default policies file according to the settings in conf/policies.py<br>
 you get:<br>
 **path/to/directory_policies.json**  -> the policies for that folder<br>
-**path/to/directory_report.txt** -> an overview about the filetypes, duplicates<br>
+**path/to/directory_log.json** -> the technical metadata of all the files in the folder<br><br>
+if you run it against a single file ( path/to/file.ext ) the json are located in the parent of that file:
+**path/to.file_policies.json**
+**path/to.file_log.json**
 
 ### file integrity tests
 
@@ -79,8 +81,10 @@ you get:<br>
 uv run identify.py path/to/directory -i
 ```
 
-tests the files for their integrity and moves corrupted files to a folder path/to/directory_FAILED<br><br>
-you can also add the flag -v (--verbose) for more detailed inspection. see **options** below
+tests the files for their integrity and moves corrupted files to a folder path/to/directory_WORKINGDIR/_REMOVED. 
+the affected SfInfos in the log.json are flagged with removed<br><br>
+you can also add the flag -v (--verbose) for more detailed inspection. (see **options** below)
+
 
 ### applying the policies
 
@@ -90,27 +94,38 @@ if you're happy with the policies, you can apply them with<br>
 uv run identify.py path/to/directory -a
 ```
 
-you get the converted files in path/to/directory_WORKINGDIR<br>
+you get the converted files in path/to/directory_WORKINGDIR (default) with the log.txt next to it. <br><br>
+You can set the path of the workingdir either
+with the option -w path/to/workingdir (see **options** below) or change it permanent in **conf/settings.py**<br>
 
-### cleanup
+### remove temp
 
 if you're happy with the outcome you can run<br>
 
 ```
-uv run identify.py path/to/directory -c
+uv run identify.py path/to/directory -r
 ```
 
-this also deletes all temporary folders and moves the converted file next to their parents. you get a<br>
-**path/to/directory_changeLog.json** -> listing all file modification in the directory<br><br>
-if you don't want to keep the parents of the converted files, you can add the flag -d (--delete-original). 
+this deletes all temporary folders and moves the converted file next to their parents. <br><br>
+if you don't want to keep the parents of the converted files, you can add the flag -x (--remove-original). 
 this replaces the parent files with the converted ones. see **options** below.<br><br>
-if you don't need these intermediate states, you can simply run
+if you don't need these intermediate states, and e.g. want the script run in verbose mode, you can simply run a combination
+of those flags
 
 ```
-uv run identify.py path/to/directory -iac
+uv run identify.py path/to/directory -ariv
 ```
 
-which does all at once
+which does all at once.
+
+### log, status and output
+
+the **path/to/directory_log.json** takes track of all modifications and appends logs of what changed in the folder. e.g. if a 
+file got removed from the folder, the respective json object of that file gets an entry **"status": {"removed": true}**,
+so it is documented what files got removed from the folder. its kind of a simple database.
+if you wish a simpler csv output, you can anytime you run the script add the flag **--csv**, which converts the log.json
+of the actual status of the directory to a csv. as an addition, you get also a mapping file (if you need to replace the paths
+of converted files somewhere else)
 
 ### advanced usage
 
@@ -128,7 +143,7 @@ a policy for Audio/Video Interleaved Format thats need to be transcoded to MPEG-
             "format_name": "Audio/Video Interleaved Format",  # optional
             "bin": "ffmpeg",
             "accepted": false,
-            "keep_original": true,
+            "delete_original": true,
             "target_container": "mp4",
             "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
             "expected": [
@@ -138,7 +153,7 @@ a policy for Audio/Video Interleaved Format thats need to be transcoded to MPEG-
 }
 ```
 
-a policy for Portable Network Graphics that is accepted as it is, but forced to be mentioned it in the changlog (by default only converted files are)
+a policy for Portable Network Graphics that is accepted as it is, but gets tested
 
 ```
 {
@@ -146,8 +161,7 @@ a policy for Portable Network Graphics that is accepted as it is, but forced to 
         "format_name": "Portable Network Graphics",
         "bin": "magick",
         "accepted": true
-        "force_log": true
-    },
+    }
 }
 ```
 
@@ -158,11 +172,10 @@ a policy for Portable Network Graphics that is accepted as it is, but forced to 
 | **format_name** (optional)                      | **str**                                                                                                                                       |
 | **bin**                                         | **str**: program to convert the file or test the file (testing currently only is supported on image/audio/video, i.e. ffmpeg and imagemagick) |
 | **accepted**                                    | **bool**: false if the file needs to be converted                                                                                             |
-| **keep_original** (required if not accepted)    | **bool**: whether to keep the parent of the converted file, default is true                                                                   |
-| **target_container** (required if not accepted) | **str**: the container the file needs to be converted                                                                                         |
+| **remove_original** (required if not accepted)  | **bool**: whether to keep the parent of the converted file in the directory, default is true                                                  |
+| **target_container** (required if not accepted) | **str**: the container the file needs to be converted to                                                                                      |
 | **processing_args** (required if not accepted)  | **str**: the arguments used with bin                                                                                                          |
 | **expected** (required if not accepted)         | **list**: the expected file format for the converted file                                                                                     |
-| **force_log** (optional)                        | **bool**: if the files of this format are forced to be mentioned in the changeLog even if the format is accepted.                             |
 
 <br><br>accepted values for **bin** are:<br>
 
@@ -177,7 +190,7 @@ a policy for Portable Network Graphics that is accepted as it is, but forced to 
 the path to the file with -p) with
 
 ```
-python3 identify.py path/to/directory -t
+uv run identify.py path/to/directory -t
 ```
 
 if you just want to test a specific policy, append f and the puid
@@ -186,7 +199,7 @@ if you just want to test a specific policy, append f and the puid
 uv run identify.py path/to/directory -tf fmt/XXX
 ```
 
-the testconversions are located in path/to/directory_WORKINGDIR/_TEST
+the test conversions are located in _WORKINGDIR/_TEST
 
 ### presets
 
@@ -225,8 +238,12 @@ this can take a significantly longer based on what files you have. As an additio
 it handles some warnings as an error. e.g. it moves images that have an incomplete data stream into the _FAILED folder<br><br>
 **-a**<br>
 [--apply] applies the policies<br><br>
-**-c**<br>
-[--clean-up] removes all temporary items and adds the converted files next to their parents.<br><br>
+**-r**<br>
+[--remove-tmp] removes all temporary items and adds the converted files next to their parents.<br><br>
+**-x**<br>
+[--remove-original] this overwrites the remove_original value in the policies and sets it to true when removing the tmp
+files. the original files are moved to the _REMOVED folder in the WORKINGDIR.<br>
+when used in generating policies, it sets remove_original in the policies to true (default false)<br><br>
 **-p path/to/policies.json**<br>
 [--policies-path] load a custom policies json file<br><br>
 **-w path/to/workingdir**<br>
@@ -240,130 +257,46 @@ when used in generating policies, it does not add blank ones for formats that ar
 [--blank] creates a blank policies based on the files encountered in the given directory<br><br>
 **-e**<br>
 [--extend-policies] append filetypes found in the directory to the given policies if they are missing in it.<br><br>
-**-d**<br>
-[--delete-original] this overwrites the keep_original value in the policies and sets it to false when cleaning up. so
-the original files are deleted.<br>
-when used in generating policies, it sets keep_original in the policies to false (default true)<br><br>
+**-S**<br>
+[--save-policies] save the policies in presets
 **-q**<br>
 [--quiet] just print errors and warnings<br><br>
+**--csv**<br>
+get an additional output as csv aside from the log.json<br><br>
+**--convert**<br>
+re-convert the files that failed during file conversion<br><br>
 
 ### iterations
 
 as the SfInfo objects of converted files have an **derived_from** attribute that is again a SfInfo object of its parent, 
-and an existing changeLog is extended if a folder is run against a different policy, the changeLog keeps track of all
+and an existing log.json is extended if a folder is run against a different policy, the log.json keeps track of all
 iterations.<br>
-so iterations like A -> B, B -> C, ... is logged in one changeLog.<br>
+so iterations like A -> B, B -> C, ... is logged in one log.json.<br>
 <br>
 e.g. if you have different types of doc and docx files in a folder, you dont allow doc (delete them) 
-and you want a pdf as an addition to the docx files. here's an example of what the changeLog for one doc file would look like
+and you want a pdf as an addition to the docx files.
+
+
+### implementing it in your code
+
+as long as you have all the dependencies installed and run python **version >=3.12**, have **typer >=0.10.0**,
+**lxml>=5.1.0** and **requests>=2.31.0** installed in your project, you can copy the fileidentification folder in your project and import it to your code
+
 
 ```
-{
-    "test.pdf": {
-        "filename": "test.pdf",
-        "filesize": 331348,
-        "modified": "2025-01-14T12:04:43+01:00",
-        "errors": "",
-        "sha256": "0ae273edcb5b88ca231b310e3d2d574597a52044e6b2c84173a00b08c2f7ab40",
-        "matches": [
-            {
-                "ns": "pronom",
-                "id": "fmt/477",
-                "format": "Acrobat PDF/A - Portable Document Format",
-                "version": "2b",
-                "mime": "application/pdf",
-                "class": "Page Description",
-                "basis": "extension match pdf; byte match at [[0 8] [73932 44] [73984 73]] (signature 1/2)",
-                "warning": ""
-            }
-        ],
-        "processed_as": "fmt/477",
-        "processing_logs": [
-            {
-                "name": "soffice",
-                "msg": "convert test.docx as a Writer document -> test_cbbfb3/test.pdf using filter : writer_pdf_Export:{\"SelectPdfVersion\":{\"type\":\"long\",\"value\":\"2\"}}\n",
-                "timestamp": "2025-01-14 12:04:43.233084"
-            },
-            {
-                "name": "rsync",
-                "msg": "building file list ... done\ntest.pdf\n\nsent 331515 bytes  received 42 bytes  663114.00 bytes/sec\ntotal size is 331348  speedup is 1.00\n",
-                "timestamp": "2025-01-14 12:04:43.278817"
-            }
-        ],
-        "derived_from": {
-            "filename": "test.docx",
-            "filesize": 10744,
-            "modified": "2025-01-14T12:02:33+01:00",
-            "errors": "",
-            "sha256": "cbbfb392315fa4836e44ce42154e174400780cb9528b901a312f666b5ae8842f",
-            "matches": [
-                {
-                    "ns": "pronom",
-                    "id": "fmt/412",
-                    "format": "Microsoft Word for Windows",
-                    "version": "2007 onwards",
-                    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    "class": "Word Processor",
-                    "basis": "extension match docx; container name [Content_Types].xml with byte match at 993, 94 (signature 1/3)",
-                    "warning": ""
-                }
-            ],
-            "processed_as": "fmt/412"
-        }
-    },
-    "test.docx": {
-        "filename": "test.docx",
-        "filesize": 10744,
-        "modified": "2025-01-14T12:02:33+01:00",
-        "errors": "",
-        "sha256": "cbbfb392315fa4836e44ce42154e174400780cb9528b901a312f666b5ae8842f",
-        "matches": [
-            {
-                "ns": "pronom",
-                "id": "fmt/412",
-                "format": "Microsoft Word for Windows",
-                "version": "2007 onwards",
-                "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "class": "Word Processor",
-                "basis": "extension match docx; container name [Content_Types].xml with byte match at 993, 94 (signature 1/3)",
-                "warning": ""
-            }
-        ],
-        "processed_as": "fmt/412",
-        "processing_logs": [
-            {
-                "name": "soffice",
-                "msg": "convert test.doc as a Writer document -> test_92dee5/test.docx using filter : Office Open XML Text\n",
-                "timestamp": "2025-01-14 12:04:43.265942"
-            },
-            {
-                "name": "rsync",
-                "msg": "building file list ... done\ntest.docx\n\nsent 10872 bytes  received 42 bytes  21828.00 bytes/sec\ntotal size is 10744  speedup is 0.98\n",
-                "timestamp": "2025-01-14 12:04:43.265960"
-            }
-        ],
-        "derived_from": {
-            "filename": "test.doc",
-            "filesize": 149504,
-            "modified": "2024-11-18T12:02:39+01:00",
-            "errors": "",
-            "sha256": "92dee513326d81121317cf8435b34c7d45e301bc9b07b2624fdedf98f9aa8347",
-            "matches": [
-                {
-                    "ns": "pronom",
-                    "id": "fmt/40",
-                    "format": "Microsoft Word Document",
-                    "version": "97-2003",
-                    "mime": "application/msword",
-                    "class": "Word Processor",
-                    "basis": "extension match doc; container name CompObj with byte match at 78, 20; name WordDocument with name only",
-                    "warning": ""
-                }
-            ],
-            "processed_as": "fmt/40"
-        }
-    }
-}
+from fileidentification.filehandling import FileHandler
+
+
+fh = FileHandler()
+fh.run(path/to/directory)
+# this runs it with default parameters (flags -ivarq), but change the parameters to your needs
+
+
+# or if you just want to do integrity tests
+fh.integrity_tests(path/to/directoy)
+# log it at some point and have an additional csv
+fh.write_logs(path/where/to/log, to_csv=True)
+
 ```
 
 
@@ -395,22 +328,13 @@ kost: https://kost-ceco.ch/cms/de.html
 
 ### TODO
 
-**config/conceptual:**\
-decide on what file format to keep and to convert<br>
-office files such as doc, ppt, xls are converted with LibreOffice, this means it might affect layout 
+[ ] preserve some of the exiftags that are not technical during converting files<br>
+[ ] implement a (fast) way to test office documents on their integrity
 
-if you want to convert to pdf/A, you need libreOffice version 7.4+
+**NOTE**
+if you want to convert to pdf/A, you need libreOffice version 7.4+<br>
 it is implemented in wrappers.wrappers.Converter and conf.models.LibreOfficePdfSettings
-
-**NOTE** when you convert svg, you might run into errors as the default library of imagemagick is not that good. easiest workaround
+<br><br>
+when you convert svg, you might run into errors as the default library of imagemagick is not that good. easiest workaround
 is installing inkscape ( ```brew install --cask inkscape``` ), make sure that you reinstall imagemagick, so its uses inkscape
 as default for converting svg ( ```brew remove imagemagick``` , ```brew install imagemagick```)
-
-**coding:**\
-mostly marked in code. bigger issue are handling metadata such as exif etc. no preservation is currently implemented
-when files are converted, i.e. that information gets lost
-
-**outlook**
-maybe it would be nice to make a python django app out of this, use a database (less files get written and read),
-and refactor it so a taskmanager can send tasks to workers.
-and there would be also a simple GUI...
