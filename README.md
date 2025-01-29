@@ -24,9 +24,8 @@ https://imagemagick.org/script/download.php#linux
 ```
 LibreOffice https://www.libreoffice.org/download/download-libreoffice/<br>
 
-it's not tested a lot and for sure needs some more debugging... also, it is not optimised on speed,
-especially when converting files. the idea was to write a script that has some default file conversion but is at the same
-time highly customisable.<br>
+it is not optimised on speed, especially when converting files. the idea was to write a script that has some 
+default file conversion but is at the same time highly customisable.<br>
 <br>
 the script turns the output from siegfried into a SfInfo dataclass per file, looks up the policies defined in **conf/policies.py**
 and writes out a default **policies.json**. in a second iteration, it applies the policies 
@@ -71,7 +70,10 @@ uv run identify.py path/to/directory
 this does generate a default policies file according to the settings in conf/policies.py<br>
 you get:<br>
 **path/to/directory_policies.json**  -> the policies for that folder<br>
-**path/to/directory_log.json** -> the technical metadata of all the files in the folder<br>
+**path/to/directory_log.json** -> the technical metadata of all the files in the folder<br><br>
+if you run it against a single file ( path/to/file.ext ) the json are located in the parent of that file:
+**path/to.file_policies.json**
+**path/to.file_log.json**
 
 ### file integrity tests
 
@@ -79,9 +81,10 @@ you get:<br>
 uv run identify.py path/to/directory -i
 ```
 
-tests the files for their integrity and moves corrupted files to a folder path/to/directory_REMOVED. the affected
-SfInfos in the log.json are flagged with removed<br><br>
-you can also add the flag -v (--verbose) for more detailed inspection. see **options** below
+tests the files for their integrity and moves corrupted files to a folder path/to/directory_WORKINGDIR/_REMOVED. 
+the affected SfInfos in the log.json are flagged with removed<br><br>
+you can also add the flag -v (--verbose) for more detailed inspection. (see **options** below)
+
 
 ### applying the policies
 
@@ -104,15 +107,25 @@ uv run identify.py path/to/directory -r
 ```
 
 this deletes all temporary folders and moves the converted file next to their parents. <br><br>
-if you don't want to keep the parents of the converted files, you can add the flag -d (--delete-original). 
+if you don't want to keep the parents of the converted files, you can add the flag -x (--remove-original). 
 this replaces the parent files with the converted ones. see **options** below.<br><br>
-if you don't need these intermediate states, you can simply run
+if you don't need these intermediate states, and e.g. want the script run in verbose mode, you can simply run a combination
+of those flags
 
 ```
-uv run identify.py path/to/directory -iar
+uv run identify.py path/to/directory -ariv
 ```
 
 which does all at once.
+
+### log, status and output
+
+the **path/to/directory_log.json** takes track of all modifications and appends logs of what changed in the folder. e.g. if a 
+file got removed from the folder, the respective json object of that file gets an entry **"status": {"removed": true}**,
+so it is documented what files got removed from the folder. its kind of a simple database.
+if you wish a simpler csv output, you can anytime you run the script add the flag **--csv**, which converts the log.json
+of the actual status of the directory to a csv. as an addition, you get also a mapping file (if you need to replace the paths
+of converted files somewhere else)
 
 ### advanced usage
 
@@ -140,7 +153,7 @@ a policy for Audio/Video Interleaved Format thats need to be transcoded to MPEG-
 }
 ```
 
-a policy for Portable Network Graphics that is accepted as it is
+a policy for Portable Network Graphics that is accepted as it is, but gets tested
 
 ```
 {
@@ -159,8 +172,8 @@ a policy for Portable Network Graphics that is accepted as it is
 | **format_name** (optional)                      | **str**                                                                                                                                       |
 | **bin**                                         | **str**: program to convert the file or test the file (testing currently only is supported on image/audio/video, i.e. ffmpeg and imagemagick) |
 | **accepted**                                    | **bool**: false if the file needs to be converted                                                                                             |
-| **delete_original** (required if not accepted)  | **bool**: whether to keep the parent of the converted file, default is false                                                                  |
-| **target_container** (required if not accepted) | **str**: the container the file needs to be converted                                                                                         |
+| **remove_original** (required if not accepted)  | **bool**: whether to keep the parent of the converted file in the directory, default is true                                                  |
+| **target_container** (required if not accepted) | **str**: the container the file needs to be converted to                                                                                      |
 | **processing_args** (required if not accepted)  | **str**: the arguments used with bin                                                                                                          |
 | **expected** (required if not accepted)         | **list**: the expected file format for the converted file                                                                                     |
 
@@ -186,7 +199,7 @@ if you just want to test a specific policy, append f and the puid
 uv run identify.py path/to/directory -tf fmt/XXX
 ```
 
-the test conversions are located in WORKINGDIR/_TEST
+the test conversions are located in _WORKINGDIR/_TEST
 
 ### presets
 
@@ -227,6 +240,10 @@ it handles some warnings as an error. e.g. it moves images that have an incomple
 [--apply] applies the policies<br><br>
 **-r**<br>
 [--remove-tmp] removes all temporary items and adds the converted files next to their parents.<br><br>
+**-x**<br>
+[--remove-original] this overwrites the remove_original value in the policies and sets it to true when removing the tmp
+files. the original files are moved to the _REMOVED folder in the WORKINGDIR.<br>
+when used in generating policies, it sets remove_original in the policies to true (default false)<br><br>
 **-p path/to/policies.json**<br>
 [--policies-path] load a custom policies json file<br><br>
 **-w path/to/workingdir**<br>
@@ -240,12 +257,14 @@ when used in generating policies, it does not add blank ones for formats that ar
 [--blank] creates a blank policies based on the files encountered in the given directory<br><br>
 **-e**<br>
 [--extend-policies] append filetypes found in the directory to the given policies if they are missing in it.<br><br>
-**-d**<br>
-[--delete-original] this overwrites the delete_original value in the policies and sets it to true when cleaning up. so
-the original files are deleted.<br>
-when used in generating policies, it sets delete_original in the policies to true (default false)<br><br>
+**-S**<br>
+[--save-policies] save the policies in presets
 **-q**<br>
 [--quiet] just print errors and warnings<br><br>
+**--csv**<br>
+get an additional output as csv aside from the log.json<br><br>
+**--convert**<br>
+re-convert the files that failed during file conversion<br><br>
 
 ### iterations
 
@@ -257,6 +276,28 @@ so iterations like A -> B, B -> C, ... is logged in one log.json.<br>
 e.g. if you have different types of doc and docx files in a folder, you dont allow doc (delete them) 
 and you want a pdf as an addition to the docx files.
 
+
+### implementing it in your code
+
+as long as you have all the dependencies installed and run python **version >=3.12**, have **typer >=0.10.0**,
+**lxml>=5.1.0** and **requests>=2.31.0** installed in your project, you can copy the fileidentification folder in your project and import it to your code
+
+
+```
+from fileidentification.filehandling import FileHandler
+
+
+fh = FileHandler()
+fh.run(path/to/directory)
+# this runs it with default parameters (flags -ivarq), but change the parameters to your needs
+
+
+# or if you just want to do integrity tests
+fh.integrity_tests(path/to/directoy)
+# log it at some point and have an additional csv
+fh.write_logs(path/where/to/log, to_csv=True)
+
+```
 
 
 ### updating signatures
@@ -287,22 +328,13 @@ kost: https://kost-ceco.ch/cms/de.html
 
 ### TODO
 
-**config/conceptual:**\
-decide on what file format to keep and to convert<br>
-office files such as doc, ppt, xls are converted with LibreOffice, this means it might affect layout 
+[ ] preserve some of the exiftags that are not technical during converting files<br>
+[ ] implement a (fast) way to test office documents on their integrity
 
-if you want to convert to pdf/A, you need libreOffice version 7.4+
+**NOTE**
+if you want to convert to pdf/A, you need libreOffice version 7.4+<br>
 it is implemented in wrappers.wrappers.Converter and conf.models.LibreOfficePdfSettings
-
-**NOTE** when you convert svg, you might run into errors as the default library of imagemagick is not that good. easiest workaround
+<br><br>
+when you convert svg, you might run into errors as the default library of imagemagick is not that good. easiest workaround
 is installing inkscape ( ```brew install --cask inkscape``` ), make sure that you reinstall imagemagick, so its uses inkscape
 as default for converting svg ( ```brew remove imagemagick``` , ```brew install imagemagick```)
-
-**coding:**\
-mostly marked in code. bigger issue are handling metadata such as exif etc. no preservation is currently implemented
-when files are converted, i.e. that information gets lost
-
-**outlook**
-maybe it would be nice to make a python django app out of this, use a database (less files get written and read),
-and refactor it so a taskmanager can send tasks to workers.
-and there would be also a simple GUI...

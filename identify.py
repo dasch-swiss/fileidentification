@@ -25,27 +25,27 @@ def main(
             help="test a puid from the policies with a respective sample of the directory")] = None,
         test_policies: Annotated[bool, typer.Option("--test", "-t",
             help="test all file conversions from the policies with a respective sample of the directory")] = False,
-        delete_original: Annotated[bool, typer.Option("--delete-original", "-d",
-            help="when generating policies: it sets the delete_original flag to false (default true)."
-                 "[with -r: the the delete_original flag in the policies is ignored and originals are deleted]")] = False,
+        remove_original: Annotated[bool, typer.Option("--remove-original", "-x",
+            help="when generating policies: it sets the remove_original flag to true (default false)."
+                 "[with -r: the the remove_original flag in the policies is ignored and originals are removed]")] = False,
         mode_strict: Annotated[bool, typer.Option("--strict", "-s",
             help="when generating policies: non default filetypes are not added as blank policies."
-                 "when applying policies: moves the files that are not listed in the policies to folder FAILED.")] = False,
+                 "when applying policies: moves the files that are not listed in the policies to folder _REMOVED.")] = False,
         mode_verbose: Annotated[bool, typer.Option("--verbose", "-v",
             help="catches more warnings on video and image files during the integrity tests")] = False,
         mode_quiet: Annotated[bool, typer.Option("--quiet", "-q",
             help="just print errors and warnings")] = False,
         save_policies: Annotated[bool, typer.Option("--save-policies", "-S",
             help="copy the local policies to conf/presets/")] = False,
-        csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False
+        to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False
     ):
 
     fh = FileHandler()
     fh.run(root_folder=root_folder, tmp_dir=tmp_dir,
            integrity_tests=integrity_tests, apply=apply, convert=convert, remove_tmp=remove_tmp,
            policies_path=policies_path, blank=blank, extend=extend, test_puid=test_puid, test_policies=test_policies,
-           delete_original=delete_original, mode_strict=mode_strict, mode_verbose=mode_verbose, mode_quiet=mode_quiet,
-           save_policies=save_policies, csv=csv)
+           remove_original=remove_original, mode_strict=mode_strict, mode_verbose=mode_verbose, mode_quiet=mode_quiet,
+           save_policies=save_policies, to_csv=to_csv)
 
 
 if __name__ == "__main__":

@@ -81,7 +81,8 @@ class SfInfo:
         self.wdir = wdir
         if initial:
             self.filename = self.filename.parent.relative_to(root_folder) / self.filename.name
-        self.path = self.root_folder / self.filename
+        if not self.dest:
+            self.path = self.root_folder / self.filename
 
 
 @dataclass
@@ -103,18 +104,6 @@ class Status:
     removed: bool = False
     pending: bool = False
     added: bool = False
-
-
-# @dataclass
-# class TmpFilePath:
-#     """
-#     table to store the paths
-#     """
-#     filename: Path = None
-#     dest: Path = None
-#
-#     def as_dict(self):
-#         return {"filename": f'{self.filename}', "dest": f'{self.dest}'}
 
 
 @dataclass

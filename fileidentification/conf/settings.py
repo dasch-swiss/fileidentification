@@ -30,7 +30,7 @@ class LibreOfficePdfSettings(StrEnum):
 # paths
 class PathsConfig(StrEnum):
     """default directory paths.
-    WDIR: the working directory. it adds the string to the root_folder -> path/to/folder/to/identify_WORKINGDIR
+    WDIR: the working directory. it adds the string to the root_folder -> path/to/folder_WORKINGDIR
     if the string contains a slash, it's treated as a path.
     REMOVED: folder name within WDIR to store the files that got removed from root_folder during processing.
     TEST: folder name within WDIR to store the outcome of testing policies
@@ -72,9 +72,8 @@ class FileProcessingMsg(StrEnum):
 
 
 class ChangeLogErr(StrEnum):
-    NOHASH = "hash not found, cannot verify the file"
-    MODIFIED = "changelog got modified"
-    NOFILE = "changelog not found"
+    NOHASH = "hash not found, cannot verify the the _log.json"
+    MODIFIED = "_log.json got modified"
 
 
 # file corrupt errors to parse from wrappers.wrappers.Ffmpeg when in verbose mode
