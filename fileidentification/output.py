@@ -1,7 +1,3 @@
-import sys
-import csv
-from pathlib import Path
-from datetime import datetime
 from typer import secho, colors
 from conf.settings import SiegfriedConf, FileDiagnosticsMsg
 from conf.models import LogMsg
@@ -82,19 +78,9 @@ class RenderTables:
             print(f'{l.timestamp}    {l.name}:    {l.msg.replace("\n", " ")}')
 
     @staticmethod
-    def print_processing_table(fh) -> None:
-        # TODO
-        pass
-
-    @staticmethod
-    def report2file(fh, path: Path) -> None:
-        default = sys.stdout
-        out_file = f'{path}_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
-        with open(out_file, 'a') as f:
-            sys.stdout = f
-            RenderTables.print_siegfried_errors(fh)
-            RenderTables.print_fileformats(fh, puids=[el for el in fh.ba.puid_unique])
-            RenderTables.print_diagnostic_table(fh)
-            sys.stdout = default
-
-        print(f'report written to {out_file}')
+    def print_processing_errors(fh) -> None:
+        if fh.log_tables.errors:
+            secho("\n----------- processing errors -----------", bold=True)
+            for err in fh.log_tables.errors:
+                print(f'\n{format_bite_size(err[1].filesize): >10}    {err[1].filename}')
+                RenderTables._print_logs(err[1].processing_logs)

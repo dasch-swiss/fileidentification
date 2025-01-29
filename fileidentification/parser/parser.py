@@ -1,7 +1,7 @@
 import re
 import json
 from pathlib import Path
-from conf.models import SFoutput, SfInfo, Match, SiegfriedConf, LogMsg, CleanUpTable
+from conf.models import SFoutput, SfInfo, Match, Status, SiegfriedConf, LogMsg
 from conf.settings import PolicyMsg
 
 
@@ -22,13 +22,13 @@ class SFParser:
             return sfout['matches'][0]['id'], None
 
     @staticmethod
-    def to_SfInfo(sfout: SFoutput, file=False) -> SfInfo:
+    def gen_sfinfo(sfout: SFoutput, initial=True) -> SfInfo:
         """turns a single output of siegfried into an SfInfo dataclass object. it can also be used to load
-        a protocol.json output for additional processing
+        a log.json output for additional processing
 
         :argument sfout a single output of siegfried (it is an element of sigfriedoutput[files], which is the output
         of wrappers.wrappers.sf_analyse)
-        :argument file if set to True, it indicated that the values a re parsed from a protocol and therefore fetch_puid
+        :argument initial if set to False, it indicated that the values a reparsed from a log and therefore fetch_puid
         does not need to be called again.
         """
         # mapp the siegfried output
@@ -54,32 +54,33 @@ class SFParser:
             sfinfo.matches.append(mat)
 
         # parse the processed_as
-        if not file:
+        if initial:
             sfinfo.processed_as, msg = SFParser.fetch_puid(sfout)
             sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=msg)) if msg else None
             return sfinfo
 
-        # parse the potential protocol.json values
+        # parse the potential log.json values
+
+        status = Status()
+        [setattr(status, k, v) for k, v in sfout['status'].items()]
+        sfinfo.status = status
+
         if 'processed_as' in sfout:
             sfinfo.processed_as = sfout['processed_as']
         if 'codec_info' in sfout:
-            [sfinfo.codec_info.append(LogMsg(name=el['name'],
-                                             msg=el['msg'],
-                                             timestamp=el['timestamp'])) for el in sfout['codec_info']]
+            [sfinfo.codec_info.append(LogMsg(name=el['name'], msg=el['msg'], timestamp=el['timestamp']))
+             for el in sfout['codec_info']]
         # set the list of possible logs
         if 'processing_logs' in sfout:
-            [sfinfo.processing_logs.append(LogMsg(name=el['name'],
-                                                  msg=el['msg'],
-                                                  timestamp=el['timestamp'])) for el in sfout['processing_logs']]
-        # set tmp values used for processing
-        if 'cu_table' in sfout:
-            cu_table = CleanUpTable()
-            [setattr(cu_table, k, Path(v)) for k, v in sfout['cu_table'].items()]
-            sfinfo.cu_table = cu_table
+            [sfinfo.processing_logs.append(LogMsg(name=el['name'], msg=el['msg'], timestamp=el['timestamp']))
+             for el in sfout['processing_logs']]
+        # if its a converted file, and not yet at its final destination
+        if 'dest' in sfout:
+            sfinfo.dest = Path(sfout['dest'])
 
         # do it recursive if there is a parent
         if 'derived_from' in sfout:
-            setattr(sfinfo, 'derived_from', SFParser.to_SfInfo(sfout['derived_from']))
+            setattr(sfinfo, 'derived_from', SFParser.gen_sfinfo(sfout['derived_from'], initial=False))
 
         return sfinfo
 
@@ -88,5 +89,5 @@ class SFParser:
         sfinfos: list[SfInfo] = []
         with open(path, 'r') as f:
             dump = json.load(f)
-            sfinfos.extend([(SFParser.to_SfInfo(el, file=True)) for _, el in dump.items()])
+            sfinfos.extend([(SFParser.gen_sfinfo(el, initial=False)) for _, el in dump.items()])
         return sfinfos

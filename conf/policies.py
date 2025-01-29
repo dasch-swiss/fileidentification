@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from conf.models import BasicAnalytics
-from conf.settings import Bin, FileOutput
+from conf.settings import Bin, JsonOutput
 
 ####
 # configuration template
@@ -174,7 +174,6 @@ class PolicyParams:
     target_container: str = field(default_factory=str)
     processing_args: str = field(default_factory=str)
     expected: list = field(default_factory=list)
-    force_log: bool = False
 
 
 @dataclass
@@ -186,7 +185,7 @@ class PoliciesGenerator:
                      blank: bool = False, extend: dict[str, PolicyParams] = None) -> tuple[dict, BasicAnalytics]:
 
         policies: dict = {}
-        jsonfile = f'{outpath}{FileOutput.POLICIES}'
+        jsonfile = f'{outpath}{JsonOutput.POLICIES}'
 
         # blank caveat
         if blank:
@@ -216,8 +215,7 @@ class PoliciesGenerator:
                 if default_values[puid][0]:
                     policy = {'format_name': self.fmt2ext[puid]['name'],
                               'bin': default_values[puid][1],
-                              'accepted': True,
-                              'force_log': False}
+                              'accepted': True}
                     # update policy if it's mp4 -> depends on streams if it's converted
                     if puid in ['fmt/199']:
                         policy.update({'delete_original': delete_original,

@@ -24,16 +24,16 @@ https://imagemagick.org/script/download.php#linux
 ```
 LibreOffice https://www.libreoffice.org/download/download-libreoffice/<br>
 
-it's a first version, not tested a lot and for sure needs some more debugging... also, it is not optimised on speed,
+it's not tested a lot and for sure needs some more debugging... also, it is not optimised on speed,
 especially when converting files. the idea was to write a script that has some default file conversion but is at the same
 time highly customisable.<br>
 <br>
 the script turns the output from siegfried into a SfInfo dataclass per file, looks up the policies defined in **conf/policies.py**
 and writes out a default **policies.json**. in a second iteration, it applies the policies 
-(probes the file - if it is corrupt - if file format is accepted or it need to be converted).
+probes the file - if it is corrupt - if file format is accepted or it need to be converted).
 then it converts the files flagged for conversion, verifies their output.
 
-it writes all relevant metadata to a changeLog.json containing a sequence of
+it writes all relevant metadata to a log.json containing a sequence of
 SfInfo objects that got enriched with the the file (conversion) processing logs 
 (so all file manipulation and format issues are logged).
 
@@ -71,7 +71,7 @@ uv run identify.py path/to/directory
 this does generate a default policies file according to the settings in conf/policies.py<br>
 you get:<br>
 **path/to/directory_policies.json**  -> the policies for that folder<br>
-**path/to/directory_report.txt** -> an overview about the filetypes, duplicates<br>
+**path/to/directory_log.json** -> the technical metadata of all the files in the folder<br>
 
 ### file integrity tests
 
@@ -79,7 +79,8 @@ you get:<br>
 uv run identify.py path/to/directory -i
 ```
 
-tests the files for their integrity and moves corrupted files to a folder path/to/directory_FAILED<br><br>
+tests the files for their integrity and moves corrupted files to a folder path/to/directory_REMOVED. the affected
+SfInfos in the log.json are flagged with removed<br><br>
 you can also add the flag -v (--verbose) for more detailed inspection. see **options** below
 
 ### applying the policies
@@ -90,27 +91,28 @@ if you're happy with the policies, you can apply them with<br>
 uv run identify.py path/to/directory -a
 ```
 
-you get the converted files in path/to/directory_WORKINGDIR<br>
+you get the converted files in path/to/directory_WORKINGDIR (default) with the log.txt next to it. <br><br>
+You can set the path of the workingdir either
+with the option -w path/to/workingdir (see **options** below) or change it permanent in **conf/settings.py**<br>
 
-### cleanup
+### remove temp
 
 if you're happy with the outcome you can run<br>
 
 ```
-uv run identify.py path/to/directory -c
+uv run identify.py path/to/directory -r
 ```
 
-this also deletes all temporary folders and moves the converted file next to their parents. you get a<br>
-**path/to/directory_changeLog.json** -> listing all file modification in the directory<br><br>
+this deletes all temporary folders and moves the converted file next to their parents. <br><br>
 if you don't want to keep the parents of the converted files, you can add the flag -d (--delete-original). 
 this replaces the parent files with the converted ones. see **options** below.<br><br>
 if you don't need these intermediate states, you can simply run
 
 ```
-uv run identify.py path/to/directory -iac
+uv run identify.py path/to/directory -iar
 ```
 
-which does all at once
+which does all at once.
 
 ### advanced usage
 
@@ -138,7 +140,7 @@ a policy for Audio/Video Interleaved Format thats need to be transcoded to MPEG-
 }
 ```
 
-a policy for Portable Network Graphics that is accepted as it is, but forced to be mentioned it in the changlog (by default only converted files are)
+a policy for Portable Network Graphics that is accepted as it is
 
 ```
 {
@@ -146,8 +148,7 @@ a policy for Portable Network Graphics that is accepted as it is, but forced to 
         "format_name": "Portable Network Graphics",
         "bin": "magick",
         "accepted": true
-        "force_log": true
-    },
+    }
 }
 ```
 
@@ -162,7 +163,6 @@ a policy for Portable Network Graphics that is accepted as it is, but forced to 
 | **target_container** (required if not accepted) | **str**: the container the file needs to be converted                                                                                         |
 | **processing_args** (required if not accepted)  | **str**: the arguments used with bin                                                                                                          |
 | **expected** (required if not accepted)         | **list**: the expected file format for the converted file                                                                                     |
-| **force_log** (optional)                        | **bool**: if the files of this format are forced to be mentioned in the changeLog even if the format is accepted.                             |
 
 <br><br>accepted values for **bin** are:<br>
 
@@ -177,7 +177,7 @@ a policy for Portable Network Graphics that is accepted as it is, but forced to 
 the path to the file with -p) with
 
 ```
-python3 identify.py path/to/directory -t
+uv run identify.py path/to/directory -t
 ```
 
 if you just want to test a specific policy, append f and the puid
@@ -186,7 +186,7 @@ if you just want to test a specific policy, append f and the puid
 uv run identify.py path/to/directory -tf fmt/XXX
 ```
 
-the testconversions are located in path/to/directory_WORKINGDIR/_TEST
+the test conversions are located in WORKINGDIR/_TEST
 
 ### presets
 
@@ -225,8 +225,8 @@ this can take a significantly longer based on what files you have. As an additio
 it handles some warnings as an error. e.g. it moves images that have an incomplete data stream into the _FAILED folder<br><br>
 **-a**<br>
 [--apply] applies the policies<br><br>
-**-c**<br>
-[--clean-up] removes all temporary items and adds the converted files next to their parents.<br><br>
+**-r**<br>
+[--remove-tmp] removes all temporary items and adds the converted files next to their parents.<br><br>
 **-p path/to/policies.json**<br>
 [--policies-path] load a custom policies json file<br><br>
 **-w path/to/workingdir**<br>
@@ -250,121 +250,13 @@ when used in generating policies, it sets delete_original in the policies to tru
 ### iterations
 
 as the SfInfo objects of converted files have an **derived_from** attribute that is again a SfInfo object of its parent, 
-and an existing changeLog is extended if a folder is run against a different policy, the changeLog keeps track of all
+and an existing log.json is extended if a folder is run against a different policy, the log.json keeps track of all
 iterations.<br>
-so iterations like A -> B, B -> C, ... is logged in one changeLog.<br>
+so iterations like A -> B, B -> C, ... is logged in one log.json.<br>
 <br>
 e.g. if you have different types of doc and docx files in a folder, you dont allow doc (delete them) 
-and you want a pdf as an addition to the docx files. here's an example of what the changeLog for one doc file would look like
+and you want a pdf as an addition to the docx files.
 
-```
-{
-    "test.pdf": {
-        "filename": "test.pdf",
-        "filesize": 331348,
-        "modified": "2025-01-14T12:04:43+01:00",
-        "errors": "",
-        "sha256": "0ae273edcb5b88ca231b310e3d2d574597a52044e6b2c84173a00b08c2f7ab40",
-        "matches": [
-            {
-                "ns": "pronom",
-                "id": "fmt/477",
-                "format": "Acrobat PDF/A - Portable Document Format",
-                "version": "2b",
-                "mime": "application/pdf",
-                "class": "Page Description",
-                "basis": "extension match pdf; byte match at [[0 8] [73932 44] [73984 73]] (signature 1/2)",
-                "warning": ""
-            }
-        ],
-        "processed_as": "fmt/477",
-        "processing_logs": [
-            {
-                "name": "soffice",
-                "msg": "convert test.docx as a Writer document -> test_cbbfb3/test.pdf using filter : writer_pdf_Export:{\"SelectPdfVersion\":{\"type\":\"long\",\"value\":\"2\"}}\n",
-                "timestamp": "2025-01-14 12:04:43.233084"
-            },
-            {
-                "name": "rsync",
-                "msg": "building file list ... done\ntest.pdf\n\nsent 331515 bytes  received 42 bytes  663114.00 bytes/sec\ntotal size is 331348  speedup is 1.00\n",
-                "timestamp": "2025-01-14 12:04:43.278817"
-            }
-        ],
-        "derived_from": {
-            "filename": "test.docx",
-            "filesize": 10744,
-            "modified": "2025-01-14T12:02:33+01:00",
-            "errors": "",
-            "sha256": "cbbfb392315fa4836e44ce42154e174400780cb9528b901a312f666b5ae8842f",
-            "matches": [
-                {
-                    "ns": "pronom",
-                    "id": "fmt/412",
-                    "format": "Microsoft Word for Windows",
-                    "version": "2007 onwards",
-                    "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    "class": "Word Processor",
-                    "basis": "extension match docx; container name [Content_Types].xml with byte match at 993, 94 (signature 1/3)",
-                    "warning": ""
-                }
-            ],
-            "processed_as": "fmt/412"
-        }
-    },
-    "test.docx": {
-        "filename": "test.docx",
-        "filesize": 10744,
-        "modified": "2025-01-14T12:02:33+01:00",
-        "errors": "",
-        "sha256": "cbbfb392315fa4836e44ce42154e174400780cb9528b901a312f666b5ae8842f",
-        "matches": [
-            {
-                "ns": "pronom",
-                "id": "fmt/412",
-                "format": "Microsoft Word for Windows",
-                "version": "2007 onwards",
-                "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "class": "Word Processor",
-                "basis": "extension match docx; container name [Content_Types].xml with byte match at 993, 94 (signature 1/3)",
-                "warning": ""
-            }
-        ],
-        "processed_as": "fmt/412",
-        "processing_logs": [
-            {
-                "name": "soffice",
-                "msg": "convert test.doc as a Writer document -> test_92dee5/test.docx using filter : Office Open XML Text\n",
-                "timestamp": "2025-01-14 12:04:43.265942"
-            },
-            {
-                "name": "rsync",
-                "msg": "building file list ... done\ntest.docx\n\nsent 10872 bytes  received 42 bytes  21828.00 bytes/sec\ntotal size is 10744  speedup is 0.98\n",
-                "timestamp": "2025-01-14 12:04:43.265960"
-            }
-        ],
-        "derived_from": {
-            "filename": "test.doc",
-            "filesize": 149504,
-            "modified": "2024-11-18T12:02:39+01:00",
-            "errors": "",
-            "sha256": "92dee513326d81121317cf8435b34c7d45e301bc9b07b2624fdedf98f9aa8347",
-            "matches": [
-                {
-                    "ns": "pronom",
-                    "id": "fmt/40",
-                    "format": "Microsoft Word Document",
-                    "version": "97-2003",
-                    "mime": "application/msword",
-                    "class": "Word Processor",
-                    "basis": "extension match doc; container name CompObj with byte match at 78, 20; name WordDocument with name only",
-                    "warning": ""
-                }
-            ],
-            "processed_as": "fmt/40"
-        }
-    }
-}
-```
 
 
 ### updating signatures
