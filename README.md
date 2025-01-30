@@ -71,9 +71,9 @@ this does generate a default policies file according to the settings in conf/pol
 you get:<br>
 **path/to/directory_policies.json**  -> the policies for that folder<br>
 **path/to/directory_log.json** -> the technical metadata of all the files in the folder<br><br>
-if you run it against a single file ( path/to/file.ext ) the json are located in the parent of that file:
-**path/to.file_policies.json**
-**path/to.file_log.json**
+if you run it against a single file ( path/to/file.ext ) the json are located in the parent of that file:<br>
+**path/to.file_policies.json**<br>
+**path/to.file_log.json**<br>
 
 ### file integrity tests
 
@@ -95,8 +95,10 @@ uv run identify.py path/to/directory -a
 ```
 
 you get the converted files in path/to/directory_WORKINGDIR (default) with the log.txt next to it. <br><br>
-You can set the path of the workingdir either
-with the option -w path/to/workingdir (see **options** below) or change it permanent in **conf/settings.py**<br>
+You can set the path of the workingdir either with the option -w path/to/workingdir (see **options** below) 
+or change it permanent in **conf/settings.py**<br>
+<br>
+this might be helpful if your files are on a external drive
 
 ### remove temp
 
@@ -123,9 +125,15 @@ which does all at once.
 the **path/to/directory_log.json** takes track of all modifications and appends logs of what changed in the folder. e.g. if a 
 file got removed from the folder, the respective json object of that file gets an entry **"status": {"removed": true}**,
 so it is documented what files got removed from the folder. its kind of a simple database.
-if you wish a simpler csv output, you can anytime you run the script add the flag **--csv**, which converts the log.json
+if you wish a simpler csv output, you can anytime add the flag **--csv** when you run the script, which converts the log.json
 of the actual status of the directory to a csv. as an addition, you get also a mapping file (if you need to replace the paths
-of converted files somewhere else)
+of converted files somewhere else)<br><br>
+**moving the directory**<br>
+as long as you keep the files **directory_log.json** and **directory_log.json.sha256** (needed to verify the log) on the same
+**path/to/** as the **directory**, you can move the directory anywhere between the steps.<br>
+(optional the **directory_policies.json** if its specific. otherwise a new one gets created)<br><br>
+you should not move the WORKINGDIR between applying the policies (-a) and removing tmp files (-r) though.
+
 
 ### advanced usage
 
@@ -172,7 +180,7 @@ a policy for Portable Network Graphics that is accepted as it is, but gets teste
 | **format_name** (optional)                      | **str**                                                                                                                                       |
 | **bin**                                         | **str**: program to convert the file or test the file (testing currently only is supported on image/audio/video, i.e. ffmpeg and imagemagick) |
 | **accepted**                                    | **bool**: false if the file needs to be converted                                                                                             |
-| **remove_original** (required if not accepted)  | **bool**: whether to keep the parent of the converted file in the directory, default is true                                                  |
+| **remove_original** (required if not accepted)  | **bool**: whether to keep the parent of the converted file in the directory, default is false                                                 |
 | **target_container** (required if not accepted) | **str**: the container the file needs to be converted to                                                                                      |
 | **processing_args** (required if not accepted)  | **str**: the arguments used with bin                                                                                                          |
 | **expected** (required if not accepted)         | **list**: the expected file format for the converted file                                                                                     |
