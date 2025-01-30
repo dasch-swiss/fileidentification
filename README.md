@@ -111,21 +111,22 @@ uv run identify.py path/to/directory -r
 this deletes all temporary folders and moves the converted file next to their parents. <br><br>
 if you don't want to keep the parents of the converted files, you can add the flag -x (--remove-original). 
 this replaces the parent files with the converted ones. see **options** below.<br><br>
-if you don't need these intermediate states, and e.g. want the script run in verbose mode, you can simply run a combination
-of those flags
+if you don't need these intermediate states and e.g. additionally want the script run in verbose mode and temporarily
+set a custom working directory, you can simply run a combination of those flags
 
 ```
-uv run identify.py path/to/directory -ariv
+uv run identify.py path/to/directory -ariv -w path/to/workingdirectory
 ```
 
 which does all at once.
 
 ### log, status and output
 
-the **path/to/directory_log.json** takes track of all modifications and appends logs of what changed in the folder. e.g. if a 
-file got removed from the folder, the respective json object of that file gets an entry **"status": {"removed": true}**,
-so it is documented what files got removed from the folder. its kind of a simple database.
-if you wish a simpler csv output, you can anytime add the flag **--csv** when you run the script, which converts the log.json
+the **path/to/directory_log.json** takes track of all modifications and appends logs of what changed in the folder.
+<br>e.g.: if a file got removed from the folder, in the log.json of that folder the respective SfInfo object of that file gets an 
+entry **"status": {"removed": true}**, so it documented that this file was once in the folder, but not anymore. 
+its kind of a simple database.<br><br>
+if you wish a simpler csv output, you can add the flag **--csv** anytime when you run the script, which converts the log.json
 of the actual status of the directory to a csv. as an addition, you get also a mapping file (if you need to replace the paths
 of converted files somewhere else)<br><br>
 **moving the directory**<br>
@@ -243,7 +244,7 @@ settings such as default path values or hash algorithm are in **conf/settings.py
 **-v**<br>
 [--verbose] catches more warnings on video and image files during the integrity tests.
 this can take a significantly longer based on what files you have. As an addition,
-it handles some warnings as an error. e.g. it moves images that have an incomplete data stream into the _FAILED folder<br><br>
+it handles some warnings as an error. e.g. it moves images that have an incomplete data stream into the _REMOVED folder<br><br>
 **-a**<br>
 [--apply] applies the policies<br><br>
 **-r**<br>
@@ -258,15 +259,14 @@ when used in generating policies, it sets remove_original in the policies to tru
 [--working-dir] set a custom working directory. default is path/to/directory_WORKINGDIR<br><br>
 **-s**<br>
 [--strict] 
-when run in strict mode, it moves the files that are not listed in policies.json to a folder named _FAILED located
-at the directory root of the files to analyse (instead of throwing a warning)<br>
+when run in strict mode, it moves the files that are not listed in policies.json to the folder _REMOVED (instead of throwing a warning)<br>
 when used in generating policies, it does not add blank ones for formats that are not mentioned in conf/policies.py<br><br>
 **-b**<br>
 [--blank] creates a blank policies based on the files encountered in the given directory<br><br>
 **-e**<br>
 [--extend-policies] append filetypes found in the directory to the given policies if they are missing in it.<br><br>
 **-S**<br>
-[--save-policies] save the policies in presets
+[--save-policies] save the policies in presets<br>
 **-q**<br>
 [--quiet] just print errors and warnings<br><br>
 **--csv**<br>
@@ -285,10 +285,11 @@ e.g. if you have different types of doc and docx files in a folder, you dont all
 and you want a pdf as an addition to the docx files.
 
 
-### implementing it in your code
+### using it in your code
 
 as long as you have all the dependencies installed and run python **version >=3.12**, have **typer >=0.10.0**,
-**lxml>=5.1.0** and **requests>=2.31.0** installed in your project, you can copy the fileidentification folder in your project and import it to your code
+**lxml>=5.1.0** and **requests>=2.31.0** installed in your project, you can copy the fileidentification folder into 
+your project folder and import the FileHandler to your code
 
 
 ```
@@ -301,8 +302,11 @@ fh.run(path/to/directory)
 
 
 # or if you just want to do integrity tests
+
 fh.integrity_tests(path/to/directoy)
+
 # log it at some point and have an additional csv
+
 fh.write_logs(path/where/to/log, to_csv=True)
 
 ```
