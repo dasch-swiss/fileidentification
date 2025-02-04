@@ -31,6 +31,10 @@ class Siegfried:
         res = json.loads(res.stdout)
         return res['files']
 
+    @staticmethod
+    def update() -> None:
+        subprocess.run(["sf", "-update"])
+
 
 class Ffmpeg(Analytics):
 

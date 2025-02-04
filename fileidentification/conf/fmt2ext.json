@@ -2181,7 +2181,9 @@
     "x-fmt/347": {
         "name": "MultiMate Text File",
         "file_extensions": [
-            "dox"
+            "dox",
+            "fnx",
+            "pat"
         ]
     },
     "x-fmt/348": {
@@ -5015,6 +5017,7 @@
             "jpgw",
             "pgw",
             "rasterw",
+            "sdw",
             "tfw",
             "tifw"
         ]
@@ -5181,7 +5184,7 @@
         ]
     },
     "fmt/394": {
-        "name": "DS_store file (MAC)",
+        "name": "DS_Store File (MAC)",
         "file_extensions": [
             "ds_store"
         ]
@@ -15000,6 +15003,415 @@
         "name": "Common Loudspeaker Format (CLF)",
         "file_extensions": [
             "cf2"
+        ]
+    },
+    "fmt/1946": {
+        "name": "Draw.io Diagram (XML) File",
+        "file_extensions": [
+            "drawio",
+            "xml"
+        ]
+    },
+    "fmt/1947": {
+        "name": "OpenWayback CDXJ File Format",
+        "file_extensions": [
+            "cdx",
+            "cdxj"
+        ]
+    },
+    "fmt/1948": {
+        "name": "Common Data Format dotCDF",
+        "file_extensions": [
+            "cdf"
+        ]
+    },
+    "fmt/1949": {
+        "name": "Common Data Format dotCDF",
+        "file_extensions": [
+            "cdf"
+        ]
+    },
+    "fmt/1950": {
+        "name": "Common Data Format dotCDF",
+        "file_extensions": [
+            "cdf"
+        ]
+    },
+    "fmt/1951": {
+        "name": "Pro Tools Session File",
+        "file_extensions": [
+            "ptf",
+            "pts"
+        ]
+    },
+    "fmt/1952": {
+        "name": "PechaMaker Format",
+        "file_extensions": [
+            "pxp"
+        ]
+    },
+    "fmt/1953": {
+        "name": "Zoom Project Settings",
+        "file_extensions": [
+            "hprj"
+        ]
+    },
+    "fmt/1954": {
+        "name": "Zoom Project Settings",
+        "file_extensions": [
+            "hprj"
+        ]
+    },
+    "fmt/1955": {
+        "name": "Graphisoft Archicad Project",
+        "file_extensions": [
+            "pla",
+            "pln"
+        ]
+    },
+    "fmt/1956": {
+        "name": "Sandboxels Save File",
+        "file_extensions": [
+            "sbxls"
+        ]
+    },
+    "fmt/1957": {
+        "name": "Program Embroidery Stitch (PES) File",
+        "file_extensions": [
+            "pes"
+        ]
+    },
+    "fmt/1958": {
+        "name": "Melco OFM Project",
+        "file_extensions": [
+            "ofm"
+        ]
+    },
+    "fmt/1959": {
+        "name": "Melco OFM Project",
+        "file_extensions": [
+            "ofm"
+        ]
+    },
+    "fmt/1960": {
+        "name": "Disklavier E-Seq Music",
+        "file_extensions": [
+            "esq",
+            "fil"
+        ]
+    },
+    "fmt/1961": {
+        "name": "Shorten (codec)",
+        "file_extensions": [
+            "shn"
+        ]
+    },
+    "fmt/1962": {
+        "name": "SolidWorks Material Database File",
+        "file_extensions": [
+            "sldmat"
+        ]
+    },
+    "fmt/1963": {
+        "name": "NEC Thermo Tracer Image File",
+        "file_extensions": [
+            "tmp"
+        ]
+    },
+    "fmt/1964": {
+        "name": "JPH (JPEG 2000 part 15)",
+        "file_extensions": [
+            "jph"
+        ]
+    },
+    "fmt/1965": {
+        "name": "Papyrus Document",
+        "file_extensions": [
+            "pap",
+            "pav",
+            "pbf"
+        ]
+    },
+    "fmt/1966": {
+        "name": "Final Writer Document",
+        "file_extensions": [
+            "fw"
+        ]
+    },
+    "fmt/1967": {
+        "name": "Solidworks Design Document Files",
+        "file_extensions": [
+            "sld",
+            "sldasm",
+            "slddrt",
+            "slddrw",
+            "sldlfp",
+            "sldprt"
+        ]
+    },
+    "fmt/1968": {
+        "name": "Atrac Codec File",
+        "file_extensions": [
+            "aea"
+        ]
+    },
+    "fmt/1969": {
+        "name": "ETC Express/Expression Show File",
+        "file_extensions": [
+            "shw"
+        ]
+    },
+    "fmt/1970": {
+        "name": "MOXCEL",
+        "file_extensions": [
+            "mxl"
+        ]
+    },
+    "fmt/1971": {
+        "name": "Enigma Binary File (Finale)",
+        "file_extensions": [
+            "mus"
+        ]
+    },
+    "fmt/1972": {
+        "name": "Enigma Binary File (Finale)",
+        "file_extensions": [
+            "mus"
+        ]
+    },
+    "fmt/1973": {
+        "name": "Finale Performance Assessment",
+        "file_extensions": [
+            "fpa"
+        ]
+    },
+    "fmt/1974": {
+        "name": "Finale Notation File",
+        "file_extensions": [
+            "musx"
+        ]
+    },
+    "fmt/1975": {
+        "name": "ICC Profile",
+        "file_extensions": [
+            "icc",
+            "icm"
+        ]
+    },
+    "fmt/1976": {
+        "name": "ICC Profile",
+        "file_extensions": [
+            "icc",
+            "icm"
+        ]
+    },
+    "fmt/1977": {
+        "name": "ICC Profile",
+        "file_extensions": [
+            "icc",
+            "icm"
+        ]
+    },
+    "fmt/1978": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1979": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1980": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1981": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1982": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1983": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1984": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1985": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1986": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1987": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1988": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1989": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1990": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1991": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1992": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1993": {
+        "name": "Sibelius Score",
+        "file_extensions": [
+            "sib"
+        ]
+    },
+    "fmt/1994": {
+        "name": "Sibelius Scorch",
+        "file_extensions": [
+            "sco"
+        ]
+    },
+    "fmt/1995": {
+        "name": "WinFax Fax Image",
+        "file_extensions": [
+            "fxm",
+            "fxr",
+            "fxs"
+        ]
+    },
+    "fmt/1996": {
+        "name": "SPIR-V",
+        "file_extensions": [
+            "spirv"
+        ]
+    },
+    "fmt/1997": {
+        "name": "IMF Package Asset Map",
+        "file_extensions": [
+            "xml"
+        ]
+    },
+    "fmt/1998": {
+        "name": "IMF Package Packing List",
+        "file_extensions": [
+            "xml"
+        ]
+    },
+    "fmt/1999": {
+        "name": "IMF Package Composition Playlist",
+        "file_extensions": [
+            "xml"
+        ]
+    },
+    "fmt/2000": {
+        "name": "Husqvarna Embroidery Stitch File",
+        "file_extensions": [
+            "hus"
+        ]
+    },
+    "fmt/2001": {
+        "name": "Husqvarna / Pfaff Embroidery Stitch File",
+        "file_extensions": [
+            "vip"
+        ]
+    },
+    "fmt/2002": {
+        "name": "Husqvarna / TruE Embroidery Stitch File",
+        "file_extensions": [
+            "vp3"
+        ]
+    },
+    "fmt/2003": {
+        "name": "Husqvarna / Premier+ Embroidery Stitch File",
+        "file_extensions": [
+            "vp4"
+        ]
+    },
+    "fmt/2004": {
+        "name": "Husqvarna-Viking Designer 1 Stitch File",
+        "file_extensions": [
+            "mhv",
+            "phv",
+            "shv"
+        ]
+    },
+    "fmt/2005": {
+        "name": "Compressed MusicXML",
+        "file_extensions": [
+            "mxl"
+        ]
+    },
+    "fmt/2006": {
+        "name": "QuarkXPress Project",
+        "file_extensions": [
+            "qpt",
+            "qwd",
+            "qxp"
+        ]
+    },
+    "fmt/2007": {
+        "name": "QuarkXPress Project",
+        "file_extensions": [
+            "qpt",
+            "qwd",
+            "qxp"
+        ]
+    },
+    "fmt/2008": {
+        "name": "QuarkXPress Project",
+        "file_extensions": [
+            "qpt",
+            "qwd",
+            "qxp"
+        ]
+    },
+    "fmt/2009": {
+        "name": "Protein Data Bank File",
+        "file_extensions": [
+            "pdb"
         ]
     }
 }

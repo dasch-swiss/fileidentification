@@ -59,7 +59,14 @@ but this is not necessary when using `uv run`.)
 ## Usage
 
 in your terminal, switch to the root directory of fileidentification and run the script with  
-`uv run identify.py` or activate the virtual environment and run `python3 identify.py`<br>
+`uv run identify.py path/to/folder or file` or activate the virtual environment and run 
+`python3 identify.py path/to/folder or file`<br>
+
+to get an overview of the options<br>
+
+```bash
+uv run identify.py --help
+```
 
 ### generating policies
 
@@ -152,7 +159,7 @@ a policy for Audio/Video Interleaved Format thats need to be transcoded to MPEG-
             "format_name": "Audio/Video Interleaved Format",  # optional
             "bin": "ffmpeg",
             "accepted": false,
-            "delete_original": true,
+            "remove_original": false,
             "target_container": "mp4",
             "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac"
             "expected": [
@@ -167,7 +174,7 @@ a policy for Portable Network Graphics that is accepted as it is, but gets teste
 ```
 {
     "fmt/13": {
-        "format_name": "Portable Network Graphics",
+        "format_name": "Portable Network Graphics",  # optional
         "bin": "magick",
         "accepted": true
     }
@@ -266,7 +273,7 @@ when used in generating policies, it does not add blank ones for formats that ar
 **-e**<br>
 [--extend-policies] append filetypes found in the directory to the given policies if they are missing in it.<br><br>
 **-S**<br>
-[--save-policies] save the policies in presets<br>
+[--save-policies] save the policies in presets<br><br>
 **-q**<br>
 [--quiet] just print errors and warnings<br><br>
 **--csv**<br>
@@ -287,8 +294,8 @@ and you want a pdf as an addition to the docx files.
 
 ### using it in your code
 
-as long as you have all the dependencies installed and run python **version >=3.12**, have **typer >=0.10.0**,
-**lxml>=5.1.0** and **requests>=2.31.0** installed in your project, you can copy the fileidentification folder into 
+as long as you have all the dependencies installed and run python **version >=3.7**, have **typer**,
+**lxml** and **requests** installed in your project, you can copy the fileidentification folder into 
 your project folder and import the FileHandler to your code
 
 
@@ -314,13 +321,11 @@ fh.write_logs(path/where/to/log, to_csv=True)
 
 ### updating signatures
 
-siegfried<br>
 
-```sf -update```
+```bash
+uv run update.py
+```
 
-check https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm
-and adapt version in ```conf/droidsig2json.py``` and run it. you should get an updated **fmt2ext.json** (its not
-automated because the site is painful to parse)
 
 ### useful links
 

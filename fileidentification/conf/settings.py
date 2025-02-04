@@ -8,6 +8,12 @@ class SiegfriedConf(StrEnum):
     MULTI = "256"
 
 
+class DroidSigURL(StrEnum):
+    """urls to fetch droid signature xml"""
+    NALIST = "https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm"
+    cdnNA = "https://cdn.nationalarchives.gov.uk/documents/DROID_SignatureFile_"
+
+
 class Bin(StrEnum):
     MAGICK = "magick"
     FFMPEG = "ffmpeg"
@@ -73,7 +79,7 @@ class FileProcessingMsg(StrEnum):
 
 class ChangeLogErr(StrEnum):
     NOHASH = "hash not found, cannot verify the the _log.json"
-    MODIFIED = "_log.json got modified"
+    MODIFIED = "log.json got modified"
 
 
 # file corrupt errors to parse from wrappers.wrappers.Ffmpeg when in verbose mode

@@ -95,8 +95,8 @@ class FileHandler:
             else:
                 msg = f'expecting one of the following ext: {[el for el in self.fmt2ext[puid]['file_extensions']]}'
                 sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=msg))
-                self.log_tables.diagnostics_add(sfinfo, FileDiagnosticsMsg.EXTMISMATCH)
                 secho(f'WARNING: you should manually rename {sfinfo.filename}\n{sfinfo.processing_logs}', fg=colors.YELLOW)
+            self.log_tables.diagnostics_add(sfinfo, FileDiagnosticsMsg.EXTMISMATCH)
 
     def _apply_policy(self, sfinfo: SfInfo) -> None:
 
@@ -144,11 +144,10 @@ class FileHandler:
         # if a file with same name and extension already there, append file hash to name
         if sfinfo.path.with_suffix(ext).is_file():
             dest = sfinfo.path.parent / f'{sfinfo.path.stem}_{sfinfo.filehash[:6]}{ext}'
-        msg = f'expecting {ext} : did rename {sfinfo.path.name} -> {dest.name}'
         os.rename(sfinfo.path, dest)
+        msg = f'did rename {sfinfo.path.name} -> {dest.name}'
         sfinfo.path, sfinfo.filename = dest, dest.relative_to(sfinfo.root_folder)
         sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=msg))
-        self.log_tables.diagnostics_add(sfinfo, FileDiagnosticsMsg.EXTMISMATCH)
 
     def _is_file_corrupt(self, sfinfo: SfInfo) -> bool:
         """
@@ -252,12 +251,9 @@ class FileHandler:
                 print(f'there are some non default policies: {[el for el in self.ba.blank]}\n',
                       f'-> you may adjust them (they are set as accepted now)')
 
-    def _test_policies(self, wdir: Path, puid: str = None) -> None:
+    def _test_policies(self, puid: str = None) -> None:
         """test a policies.json with the smallest files of the directory. if puid is passed, it only tests the puid
         of the policies."""
-
-        if wdir.joinpath(PathsConfig.TEST).is_dir():
-            shutil.rmtree(wdir.joinpath(PathsConfig.TEST))
 
         if puid:
             puids = [puid]
@@ -276,12 +272,12 @@ class FileHandler:
                 # we want the smallest file first for running the test in FileHandler.test_conversion()
                 self.ba.puid_unique[puid] = self.ba.sort_by_filesize(self.ba.puid_unique[puid])
                 sample = self.ba.puid_unique[puid][0]
-
+                secho(f'\n{puid}', fg=colors.YELLOW)
                 test, duration, cmd = test_conv.run_test(sample)
-                print(f'\ntested with {cmd}')
-                if test.dest:
+                if test:
                     est_time = self.ba.total_size[puid] / test.derived_from.filesize * duration
-                    print(f'\napplying the policies for this filetype would appoximatly take '
+                    secho(f'{cmd}', fg=colors.GREEN, bold=True)
+                    secho(f'\napplying the policies for this filetype would approximately take '
                           f'{int(est_time) / 60: .2f} min. You find the file with the log in {test.filename.parent}')
 
     def _load_sfinfos(self, root_folder: Path, wdir: Path):
@@ -306,7 +302,7 @@ class FileHandler:
 
         # run basic analytics
         self.ba = BasicAnalytics(fmt2ext=self.fmt2ext)
-        [self.ba.append(sfinfo) for sfinfo in self.stack if not sfinfo.status.removed]
+        [self.ba.append(sfinfo) for sfinfo in self.stack if not (sfinfo.status.removed or sfinfo.dest)]
         if self.mode.VERBOSE:
             RenderTables.print_siegfried_errors(self)
 
@@ -370,7 +366,7 @@ class FileHandler:
             for sfinfo in pending:
                 conv_sfinfo, _ = fc.convert(sfinfo)
                 if conv_sfinfo:
-                    msg = f'converted to {conv_sfinfo.filename.name}'
+                    msg = f'converted -> {conv_sfinfo.filename.parent.stem}/{conv_sfinfo.filename.name}'
                     sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msg))
                     conv_sfinfo.root_folder = sfinfo.root_folder
                     self.stack.append(conv_sfinfo)
@@ -455,12 +451,8 @@ class FileHandler:
             remove_tmp: bool = True, convert: bool = False, policies_path: Path = None, blank: bool = False, extend: bool = False,
             test_puid: str = None, test_policies: bool = False, remove_original: bool = False, mode_strict: bool = False,
             mode_verbose: bool = True, mode_quiet: bool = True, save_policies: bool = False, to_csv: bool = False):
-
         # check path
         root_folder = Path(root_folder)
-        if not root_folder.exists():
-            print(f'{root_folder} not found. exiting...')
-            exit(1)
         # configure working dir
         wdir = self._set_working_dir(root_folder, tmp_dir)
         # set the mode
@@ -475,20 +467,20 @@ class FileHandler:
         root_folder = f'{root_folder.parent}.{root_folder.stem}' if root_folder.is_file() else root_folder
         # generate policies
         self._manage_policies(root_folder, policies_path, blank, extend)
-        # remove tmp caveat
-        if remove_tmp:
-            self.remove_tmp(root_folder, wdir, to_csv)
         # convert caveat
         if convert:
             self.convert()
+        # remove tmp caveat
+        if remove_tmp:
+            self.remove_tmp(root_folder, wdir, to_csv)
         # file integrity tests
         if integrity_tests:
             self.integrity_tests()
         # policies testing
         if test_puid:
-            self._test_policies(wdir, puid=test_puid)
+            self._test_policies(puid=test_puid)
         if test_policies:
-            self._test_policies(wdir)
+            self._test_policies()
         # apply policies
         if apply:
             self.apply_policies()
@@ -641,9 +633,13 @@ class Postprocessor:
         if isinstance(log_path, Path):
             stack.extend(SFParser.read_changelog(log_path))
         else:
-            secho(f'ERROR: {log_path} when trying to read {root_folder}{JsonOutput.LOG}', fg=colors.RED, bold=True)
-            os.rename(f'{log_path}{JsonOutput.LOG}',
-                      f'{log_path}_{datetime.now().strftime("%Y%m%d_%H%M%S")}{JsonOutput.LOG}')
+            secho(f'ERROR: {log_path}', fg=colors.RED, bold=True)
+            bkp = f'{root_folder}_{datetime.now().strftime("%Y%m%d_%H%M%S")}{JsonOutput.LOG}'
+            shutil.copy(f'{root_folder}{JsonOutput.LOG}', bkp)
+            secho(f'did backup the file as {bkp}')
+            rescan = typer.confirm("Do you want to rescan the directory?")
+            if not rescan:
+                raise typer.Exit()
         return stack
 
     @staticmethod
