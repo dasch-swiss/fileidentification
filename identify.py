@@ -9,12 +9,12 @@ def main(
         tmp_dir: Annotated[Path, typer.Option("--working-dir", "-w",
             help="path to working dir where the processed files are stored")] = None,
         integrity_tests: Annotated[bool, typer.Option("--integrity-tests", "-i",
-            help="apply the [pinned] conversions")] = False,
+            help="do file integrity tests on the selected root_folder")] = False,
         apply: Annotated[bool, typer.Option("--apply", "-a", help="apply the policies and convert the pending files")] = False,
         convert: Annotated[bool, typer.Option("--convert", help="re-convert failed pending files")] = False,
         remove_tmp: Annotated[bool, typer.Option("--remove-tmp", "-r",
-            help="removes all temporary items and moves the converted files to the folder of its original file"
-                 "[with -d: it replaces the original files with the converted one]")] = False,
+            help="""removes all temporary items and moves the converted files next to their parents.
+                 [with -x: it replaces the original files with the converted one]""")] = False,
         policies_path: Annotated[Path, typer.Option("--policies-path", "-p",
             help="path to the json file with the policies")] = None,
         blank: Annotated[bool, typer.Option("--blank", "-b",
@@ -26,18 +26,18 @@ def main(
         test_policies: Annotated[bool, typer.Option("--test", "-t",
             help="test all file conversions from the policies with a respective sample of the directory")] = False,
         remove_original: Annotated[bool, typer.Option("--remove-original", "-x",
-            help="when generating policies: it sets the remove_original flag to true (default false)."
-                 "[with -r: the the remove_original flag in the policies is ignored and originals are removed]")] = False,
+            help="""when generating policies: it sets the remove_original flag to true (default false).
+                 [with -r: the the remove_original flag in the policies is ignored and originals are removed]""")] = False,
         mode_strict: Annotated[bool, typer.Option("--strict", "-s",
-            help="when generating policies: non default filetypes are not added as blank policies."
-                 "when applying policies: moves the files that are not listed in the policies to folder _REMOVED.")] = False,
+            help="""when generating policies: non default filetypes are not added as blank policies.
+                 when applying policies: moves the files that are not listed in the policies to folder _REMOVED.""")] = False,
         mode_verbose: Annotated[bool, typer.Option("--verbose", "-v",
             help="catches more warnings on video and image files during the integrity tests")] = False,
         mode_quiet: Annotated[bool, typer.Option("--quiet", "-q",
             help="just print errors and warnings")] = False,
         save_policies: Annotated[bool, typer.Option("--save-policies", "-S",
             help="copy the local policies to conf/presets/")] = False,
-        to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False
+        to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False,
     ):
 
     fh = FileHandler()
