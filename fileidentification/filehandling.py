@@ -19,7 +19,7 @@ from fileidentification.parser.parser import SFParser
 from fileidentification.output import RenderTables
 from fileidentification.helpers import get_hash
 from fileidentification.conf.settings import (PathsConfig, LibreOfficePath, FileDiagnosticsMsg, PolicyMsg, FileProcessingMsg,
-                                              JsonOutput, Bin, ChangeLogErr)
+                                              JsonOutput, Bin, ChangeLogErr, ErrMsgReencode)
 from fileidentification.conf.models import SfInfo, BasicAnalytics, LogTables, LogMsg
 from fileidentification.conf.policies import PoliciesGenerator
 from fileidentification.conf.policies import systemfiles
@@ -64,9 +64,10 @@ class FileHandler:
 
         puid = sfinfo.processed_as
         if not puid:
-            sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=f'{FileProcessingMsg.PUIDFAIL} for {sfinfo.filename}'))
-            self.log_tables.errors.append((sfinfo.processing_logs[-1], sfinfo))
             self._remove(sfinfo)
+            sfinfo.processing_logs.append(LogMsg(name="filehandler", msg="file removed"))
+            msg = LogMsg(name='filehandler', msg=f'{FileProcessingMsg.PUIDFAIL} for {sfinfo.filename}')
+            self.log_tables.errors.append((msg, sfinfo))
             return
 
         if sfinfo.errors == FileDiagnosticsMsg.EMPTYSOURCE:
@@ -93,7 +94,7 @@ class FileHandler:
                 ext = "." + self.fmt2ext[puid]['file_extensions'][-1]
                 self._rename(sfinfo, ext)
             else:
-                msg = f'expecting one of the following ext: {[el for el in self.fmt2ext[puid]['file_extensions']]}'
+                msg = f'expecting one of the following ext: {[el for el in self.fmt2ext[puid]["file_extensions"]]}'
                 sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=msg))
                 secho(f'WARNING: you should manually rename {sfinfo.filename}\n{sfinfo.processing_logs}', fg=colors.YELLOW)
             self.log_tables.diagnostics_add(sfinfo, FileDiagnosticsMsg.EXTMISMATCH)
@@ -137,7 +138,8 @@ class FileHandler:
         else:
             os.remove(sfinfo.path)
         sfinfo.status.removed = True
-        self.ba.puid_unique[sfinfo.processed_as].remove(sfinfo)
+        if sfinfo.processed_as:
+            self.ba.puid_unique[sfinfo.processed_as].remove(sfinfo)
 
     def _rename(self, sfinfo: SfInfo, ext: str):
         dest = sfinfo.path.with_suffix(ext)
@@ -172,6 +174,10 @@ class FileHandler:
                     sfinfo.codec_info.append(LogMsg(name=Bin.FFMPEG, msg=json.dumps(specs)))
                 if warning:
                     sfinfo.processing_logs.append(LogMsg(name=Bin.FFMPEG, msg=warning))
+                    # see if warning needs file to be re-encoded
+                    if any([msg in warning for msg in ErrMsgReencode]):
+                        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg="re-encoding the file"))
+                        sfinfo.status.pending = True
             case Bin.MAGICK | Bin.INCSCAPE:
                 error, warning, specs = ImageMagick.is_corrupt(sfinfo, verbose=self.mode.VERBOSE)
                 if specs and not sfinfo.codec_info:
@@ -364,14 +370,16 @@ class FileHandler:
         with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True) as prog:
             prog.add_task(description="converting ...", total=None)
             for sfinfo in pending:
-                conv_sfinfo, _ = fc.convert(sfinfo)
+                conv_sfinfo, cmd = fc.convert(sfinfo)
                 if conv_sfinfo:
-                    msg = f'converted -> {conv_sfinfo.filename.parent.stem}/{conv_sfinfo.filename.name}'
+                    msg = f'converted -> {sfinfo.wdir.stem}/{conv_sfinfo.filename.parent.name}/{conv_sfinfo.filename.name}'
                     sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msg))
                     conv_sfinfo.root_folder = sfinfo.root_folder
                     self.stack.append(conv_sfinfo)
                 else:
-                    self.log_tables.errors.append((sfinfo.processing_logs.pop(), sfinfo))
+                    lmsg = sfinfo.processing_logs.pop()
+                    lmsg.msg += f'. cmd={cmd} '
+                    self.log_tables.errors.append((lmsg, sfinfo))
 
     def remove_tmp(self, root_folder: Path, wdir: Path, to_csv=False):
 
@@ -412,7 +420,6 @@ class FileHandler:
                     if sfinfo.filename.parent.is_dir():
                         shutil.rmtree(sfinfo.filename.parent)
                     # set relative path in sfinfo.filename, set flags
-                    sfinfo.processing_logs.append(LogMsg(name='rsync', msg=msg))
                     sfinfo.filename = sfinfo.dest / dest_abs.name
                     sfinfo.status.added = True
                     sfinfo.dest = None
@@ -607,9 +614,9 @@ class Postprocessor:
 
         if not listitems:
             return
-        jsonout: dict = {}
+        jsonout: list = []
         outfile = f'{path}{filename}'
-        [jsonout.update({f'{el.filename}': el.as_dict()}) for el in listitems]
+        [jsonout.append(el.as_dict()) for el in listitems]
         with open(outfile, 'w') as f:
             json.dump(jsonout, f, indent=4, ensure_ascii=False)
         if sha256:
@@ -677,4 +684,6 @@ class Postprocessor:
             res['processing_logs'] = " ; ".join([el.msg for el in sfinfo.processing_logs if el.name == "filehandler"])
         if sfinfo.derived_from:
             res['derived_from'] = sfinfo.derived_from.filename
+        if sfinfo.dest:
+            res['dest'] = f'{sfinfo.dest}'
         return res
