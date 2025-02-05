@@ -89,5 +89,5 @@ class SFParser:
         sfinfos: list[SfInfo] = []
         with open(path, 'r') as f:
             dump = json.load(f)
-            sfinfos.extend([(SFParser.gen_sfinfo(el, initial=False)) for _, el in dump.items()])
+            sfinfos.extend([(SFParser.gen_sfinfo(el, initial=False)) for el in dump])
         return sfinfos

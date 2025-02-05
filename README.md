@@ -294,9 +294,9 @@ and you want a pdf as an addition to the docx files.
 
 ### using it in your code
 
-as long as you have all the dependencies installed and run python **version >=3.7**, have **typer**,
-**lxml** and **requests** installed in your project, you can copy the fileidentification folder into 
-your project folder and import the FileHandler to your code
+as long as you have all the dependencies installed and run python **version >=3.8**, have **typer** 
+installed in your project, you can copy the fileidentification folder into your project folder 
+and import the FileHandler to your code
 
 
 ```

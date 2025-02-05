@@ -6,7 +6,7 @@ from abc import ABC
 from pathlib import Path
 from typing import Union, Any
 from fileidentification.conf.models import SFoutput, SfInfo
-from fileidentification.conf.settings import SiegfriedConf, LibreOfficePath, ErrorMsgFF, ErrorMsgIM, LibreOfficePdfSettings, Bin
+from fileidentification.conf.settings import SiegfriedConf, LibreOfficePath, ErrMsgFF, ErrMsgIM, LibreOfficePdfSettings, Bin
 
 
 class Analytics(ABC):
@@ -61,11 +61,11 @@ class Ffmpeg(Analytics):
     @staticmethod
     def parse_output(sfinfo: SfInfo, std_out, _, verbose: bool = False) -> tuple[bool, str, dict[str, Any] | None]:
 
-        std_out = std_out.replace(f'{sfinfo.path}/', "")
+        std_out = std_out.replace(f'{sfinfo.path.parent}', "")
         streams = Ffmpeg.codec_info(sfinfo.path)
         if verbose:
             if std_out:
-                if any([msg in std_out for msg in ErrorMsgFF]):
+                if any([msg in std_out for msg in ErrMsgFF]):
                     return True, std_out, streams
                 return False, std_out, streams
             return False, std_out, streams
@@ -105,13 +105,17 @@ class ImageMagick(Analytics):
     @staticmethod
     def parse_output(sfinfo: SfInfo, std_out, std_err, verbose: bool = False) -> tuple[bool, str, str]:
 
-        std_out = std_out.replace(f'{sfinfo.path}/', "")
-        std_err = std_err.replace(f'{sfinfo.path}/', "")
+        std_out = std_out.replace(f'{sfinfo.path.parent}', "")
+        std_err = std_err.replace(f'{sfinfo.path.parent}', "")
+
+        if verbose:
+            if std_err:
+                if any([msg in std_err for msg in ErrMsgIM]):
+                    return True, std_err, std_out
+            return False, std_err, std_out
 
         if std_err:
-            if any([msg in std_err for msg in ErrorMsgIM]):
-                return True, std_err, std_out
-            return False, std_err, std_out
+            return True, std_err, std_out
         return False, std_err, std_out
 
     @staticmethod
@@ -134,7 +138,7 @@ class Converter:
         :returns the constructed target path, the cmd run and the log path
         """
 
-        wdir = Path(sfinfo.wdir / f'{sfinfo.filename.stem}_{sfinfo.filehash[:6]}')
+        wdir = Path(sfinfo.wdir / f'{sfinfo.filename.name}_{sfinfo.filehash[:6]}')
         if not wdir.exists():
             os.makedirs(wdir)
 

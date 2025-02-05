@@ -83,14 +83,19 @@ class ChangeLogErr(StrEnum):
 
 
 # file corrupt errors to parse from wrappers.wrappers.Ffmpeg when in verbose mode
-class ErrorMsgFF(StrEnum):
+class ErrMsgFF(StrEnum):
     ffmpeg1 = "Error opening input files"
-    ffmpeg2 = "A non-intra slice in an IDR NAL unit"
+    # ffmpeg2 = "A non-intra slice in an IDR NAL unit"
+
+
+# re-encode with ffmpeg as it can handle that error
+class ErrMsgReencode(StrEnum):
+    ffmpeg1 = "A non-intra slice in an IDR NAL unit"
 
 
 # file corrupt errors to parse form wrappers.wrappers.ImageMagick
 # there must be more... add them when encountered
-class ErrorMsgIM(StrEnum):
+class ErrMsgIM(StrEnum):
     magic1 = "identify: Cannot read"
     magic2 = "identify: Sanity check on directory count failed"
     magic3 = "identify: Failed to read directory"
