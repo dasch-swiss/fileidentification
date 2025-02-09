@@ -664,6 +664,13 @@ class Postprocessor:
             w = csv.DictWriter(f, flds)
             w.writeheader()
             w.writerows([Postprocessor.to_csv(sfi) for sfi in items])
+            
+        # mapping
+        jsonout: dict = {}
+        [jsonout.update({f'{sfi.derived_from.filename}': f'{sfi.filename}'}) for sfi in items if sfi.derived_from]
+        if jsonout:
+            with open(f'{root_folder}.mapping.json', 'w') as f:
+                json.dump(jsonout, f, indent=4, ensure_ascii=False)
 
     @staticmethod
     def to_csv(sfinfo: SfInfo) -> dict:
