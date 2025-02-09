@@ -6,7 +6,7 @@ from fileidentification.conf.settings import Bin, JsonOutput
 
 ####
 # configuration template
-# default: a dict of puid of files, first value of list determine wheter the format is accepted or not
+# default: a dict of puid of files, first value of list determine whether the format is accepted or not
 ####
 
 #
@@ -176,13 +176,12 @@ class PolicyParams:
     expected: list = field(default_factory=list)
 
 
-@dataclass
-class PoliciesGenerator:
 
-    fmt2ext: dict = field(default_factory=dict)
+class Policies:
 
-    def gen_policies(self, outpath: Path, ba: BasicAnalytics, strict: bool = False, remove_original: bool = False,
-                     blank: bool = False, extend: dict[str, PolicyParams] = None) -> tuple[dict, BasicAnalytics]:
+    @staticmethod
+    def generate(outpath: Path, ba: BasicAnalytics, fmt2ext: dict, strict: bool = False, remove_original: bool = False,
+                 blank: bool = False, extend: dict[str, PolicyParams] = None) -> tuple[dict, BasicAnalytics]:
 
         policies: dict = {}
         jsonfile = f'{outpath}{JsonOutput.POLICIES}'
@@ -190,7 +189,7 @@ class PoliciesGenerator:
         # blank caveat
         if blank:
             for puid in ba.puid_unique:
-                policies[puid] = asdict(PolicyParams(format_name=self.fmt2ext[puid]['name']))
+                policies[puid] = asdict(PolicyParams(format_name=fmt2ext[puid]['name']))
             # write out policies with name of the folder, return policies and BasicAnalytics
             with open(jsonfile, 'w') as f:
                 json.dump(policies, f, indent=4, ensure_ascii=False)
@@ -208,12 +207,12 @@ class PoliciesGenerator:
                 if strict:
                     pass  # don't create a blank policies -> files of this type are moved to FAILED
                 else:
-                    policies[puid] = asdict(PolicyParams(format_name=self.fmt2ext[puid]['name']))
+                    policies[puid] = asdict(PolicyParams(format_name=fmt2ext[puid]['name']))
                     ba.blank.append(puid)
             else:
                 # if the filetype is accepted:
                 if default_values[puid][0]:
-                    policy = {'format_name': self.fmt2ext[puid]['name'],
+                    policy = {'format_name': fmt2ext[puid]['name'],
                               'bin': default_values[puid][1],
                               'accepted': True}
                     # update policy if it's mp4 -> depends on streams if it's converted
@@ -224,7 +223,7 @@ class PoliciesGenerator:
                               'expected': default_values[puid][4]})
                 # if the filety is not accepted
                 else:
-                    policy = {'format_name': self.fmt2ext[puid]['name'],
+                    policy = {'format_name': fmt2ext[puid]['name'],
                               'bin': default_values[puid][1],
                               'accepted': False,
                               'remove_original': remove_original,

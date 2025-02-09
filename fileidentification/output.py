@@ -4,14 +4,14 @@ from fileidentification.conf.models import LogMsg
 from fileidentification.helpers import format_bite_size
 
 
-class RenderTables:
+class Output:
 
     @staticmethod
     def print_siegfried_errors(fh):
         if fh.ba.siegfried_errors:
             print('got the following errors from siegfried')
             for sfinfo in fh.ba.siegfried_errors:
-                print(f'{sfinfo.filename} \n{sfinfo.errors} {RenderTables._print_logs(sfinfo.processing_logs)}')
+                print(f'{sfinfo.filename} \n{sfinfo.errors} {Output._print_logs(sfinfo.processing_logs)}')
 
 
     @staticmethod
@@ -43,7 +43,30 @@ class RenderTables:
                 print(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {"": <25} | {fmtname}')
 
     @staticmethod
-    def print_diagnostic_table(fh) -> None:
+    def print_diagnostic(fh) -> None:
+
+        # lists all corrupt files with the respective errors thrown
+        if fh.log_tables.diagnostics:
+            if FileDiagnosticsMsg.ERROR.name in fh.log_tables.diagnostics.keys():
+                secho("\n----------- errors -----------", bold=True)
+                for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.ERROR.name]:
+                    print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
+                    Output._print_logs(sfinfo.processing_logs)
+            if fh.mode.VERBOSE:
+                if FileDiagnosticsMsg.WARNING.name in fh.log_tables.diagnostics.keys():
+                    secho("\n----------- warnings -----------", bold=True)
+                    for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.WARNING.name]:
+                        print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
+                        Output._print_logs(sfinfo.processing_logs)
+                if FileDiagnosticsMsg.EXTMISMATCH.name in fh.log_tables.diagnostics.keys():
+                    secho("\n----------- extension missmatch -----------", bold=True)
+                    for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.EXTMISMATCH.name]:
+                        print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
+                        Output._print_logs(sfinfo.processing_logs)
+                print("\n")
+
+    @staticmethod
+    def print_duplicates(fh) -> None:
         # pop uniques files
         [fh.ba.filehashes.pop(k) for k in fh.ba.filehashes.copy() if len(fh.ba.filehashes[k]) == 1]
         if fh.ba.filehashes:
@@ -52,25 +75,6 @@ class RenderTables:
                 print(f'\n{SiegfriedConf.ALG}: {k} - files: ')
                 [print(f'{path}') for path in fh.ba.filehashes[k]]
 
-        # lists all corrupt files with the respective errors thrown
-        if fh.log_tables.diagnostics:
-            if FileDiagnosticsMsg.ERROR.name in fh.log_tables.diagnostics.keys():
-                secho("\n----------- errors -----------", bold=True)
-                for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.ERROR.name]:
-                    print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
-                    RenderTables._print_logs(sfinfo.processing_logs)
-            if fh.mode.VERBOSE:
-                if FileDiagnosticsMsg.WARNING.name in fh.log_tables.diagnostics.keys():
-                    secho("\n----------- warnings -----------", bold=True)
-                    for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.WARNING.name]:
-                        print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
-                        RenderTables._print_logs(sfinfo.processing_logs)
-                if FileDiagnosticsMsg.EXTMISMATCH.name in fh.log_tables.diagnostics.keys():
-                    secho("\n----------- extension missmatch -----------", bold=True)
-                    for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.EXTMISMATCH.name]:
-                        print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
-                        RenderTables._print_logs(sfinfo.processing_logs)
-                print("\n")
 
     @staticmethod
     def _print_logs(logs: list[LogMsg]):
@@ -83,4 +87,4 @@ class RenderTables:
             secho("\n----------- processing errors -----------", bold=True)
             for err in fh.log_tables.errors:
                 print(f'\n{format_bite_size(err[1].filesize): >10}    {err[1].filename}')
-                RenderTables._print_logs(err[1].processing_logs)
+                Output._print_logs([err[0]])

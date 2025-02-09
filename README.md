@@ -24,10 +24,9 @@ https://imagemagick.org/script/download.php#linux
 ```
 LibreOffice https://www.libreoffice.org/download/download-libreoffice/<br>
 
-it is not optimised on speed, especially when converting files. the idea was to write a script that has some 
-default file conversion but is at the same time highly customisable.<br>
+it is not optimised on speed, especially when converting files. the idea was to write a script that has some default file conversion but is at the same time highly customisable.<br>
 <br>
-the script turns the output from siegfried into a SfInfo dataclass per file, looks up the policies defined in **conf/policies.py**
+the script turns the output from siegfried into a SfInfo dataclass instance per file, looks up the policies defined in **conf/policies.py**
 and writes out a default **policies.json**. in a second iteration, it applies the policies 
 probes the file - if it is corrupt - if file format is accepted or it need to be converted).
 then it converts the files flagged for conversion, verifies their output.
@@ -48,7 +47,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 Then, you can use `uv run` to run the fileidentification script:
 
 ```bash
-uv run identify.py testdata   
+uv run identify.py testdata
 ```
 
 By prepending `uv run` before `identify.py`,
@@ -134,8 +133,7 @@ the **path/to/directory_log.json** takes track of all modifications and appends 
 entry **"status": {"removed": true}**, so it documented that this file was once in the folder, but not anymore. 
 its kind of a simple database.<br><br>
 if you wish a simpler csv output, you can add the flag **--csv** anytime when you run the script, which converts the log.json
-of the actual status of the directory to a csv. as an addition, you get also a mapping file (if you need to replace the paths
-of converted files somewhere else)<br><br>
+of the actual status of the directory to a csv.<br><br>
 **moving the directory**<br>
 as long as you keep the files **directory_log.json** and **directory_log.json.sha256** (needed to verify the log) on the same
 **path/to/** as the **directory**, you can move the directory anywhere between the steps.<br>
@@ -148,7 +146,7 @@ you should not move the WORKINGDIR between applying the policies (-a) and removi
 you can also create your own policies file, and with that, customise the file conversion output 
 (and executionsteps of the script.) simply edit the default file path/to/directory_policies.json before applying.<br>
 if you want to start from scratch, you can create a blank template with all the file formats encountered
-in the folder with ```python3 indentify.py path/to/folder -b```<br>
+in the folder with ```uv run indentify.py path/to/folder -b```<br>
 
 **policy examples:**<br>
 a policy for Audio/Video Interleaved Format thats need to be transcoded to MPEG-4 Media File (Codec: AVC/H.264, Audio: AAC) looks like this
@@ -303,17 +301,16 @@ and import the FileHandler to your code
 from fileidentification.filehandling import FileHandler
 
 
+# this runs it with default parameters (flags -ivarq), but change the parameters to your needs
 fh = FileHandler()
 fh.run(path/to/directory)
-# this runs it with default parameters (flags -ivarq), but change the parameters to your needs
 
 
 # or if you just want to do integrity tests
-
+fh = FileHandler()
 fh.integrity_tests(path/to/directoy)
 
 # log it at some point and have an additional csv
-
 fh.write_logs(path/where/to/log, to_csv=True)
 
 ```
@@ -342,11 +339,6 @@ recommendations on what file format to archive data<br>
 kost: https://kost-ceco.ch/cms/de.html
 <br>bundesarchiv:  https://www.bar.admin.ch/dam/bar/de/dokumente/konzepte_und_weisungen/archivtaugliche_dateiformate.1.pdf.download.pdf/archivtaugliche_dateiformate.pdf
 
-
-### TODO
-
-[ ] preserve some of the exiftags that are not technical during converting files<br>
-[ ] implement a (fast) way to test office documents on their integrity
 
 **NOTE**
 if you want to convert to pdf/A, you need libreOffice version 7.4+<br>

@@ -16,22 +16,22 @@ from typing import Union
 from fileidentification.wrappers.wrappers import Siegfried as Sf, Ffmpeg, Converter as Con, ImageMagick, Rsync
 from fileidentification.wrappers import homebrew_packeges
 from fileidentification.parser.parser import SFParser
-from fileidentification.output import RenderTables
+from fileidentification.output import Output
 from fileidentification.helpers import get_hash
 from fileidentification.conf.settings import (PathsConfig, LibreOfficePath, FileDiagnosticsMsg, PolicyMsg, FileProcessingMsg,
                                               JsonOutput, Bin, ChangeLogErr, ErrMsgReencode)
 from fileidentification.conf.models import SfInfo, BasicAnalytics, LogTables, LogMsg
-from fileidentification.conf.policies import PoliciesGenerator
+from fileidentification.conf.policies import Policies
 from fileidentification.conf.policies import systemfiles
 
 
 @dataclass
 class Mode:
-    """the different modes for the filehandling class.
-    REMOVEORIGINAL: do not remove the original files of the files that got converted
-    VERBOSE: do verbose analysis of video and image files
-    STRICT: move files that are not listed in policies to FAILED istead of skipping them
-    QUIET: just print warnings and errors"""
+    """the different modes for the FileHanlder.
+    REMOVEORIGINAL: bool, whether to remove the original files of the files that got converted
+    VERBOSE: bool, do verbose analysis of video and image files
+    STRICT: bool, move files that are not listed in policies to FAILED instead of skipping them
+    QUIET: bool, just print warnings and errors"""
     REMOVEORIGINAL: bool = False
     VERBOSE: bool = False
     STRICT: bool = False
@@ -45,12 +45,14 @@ class FileHandler:
     move and remove tmp files.
     """
 
-    fmt2ext: dict = field(default_factory=dict)
-    policies: dict = field(default_factory=dict)
+    mode: Mode = None
+    fmt2ext: dict = None
+    policies: dict = None
     log_tables: LogTables = field(default_factory=LogTables)
     ba: BasicAnalytics = None
-    stack: list[SfInfo] = field(default_factory=list)
-    mode: Mode = field(default_factory=Mode)
+    stack: list[SfInfo] = field(default_factory=list[SfInfo])
+    wdir: Path = None
+
 
     def __post_init__(self):
         with open(PathsConfig.FMT2EXT, 'r') as f:
@@ -103,6 +105,8 @@ class FileHandler:
 
         puid = sfinfo.processed_as
         if not puid:
+            return
+        if sfinfo.status.pending:
             return
 
         if puid not in self.policies:
@@ -195,7 +199,7 @@ class FileHandler:
             return False
         return False
 
-    def _has_valid_streams(self, sfinfo: SfInfo) -> bool:
+    def _has_valid_streams(self, sfinfo: SfInfo) -> bool | None:
         streams = Ffmpeg.codec_info(sfinfo.path)
         if not streams:
             secho(f'\t{sfinfo.filename} throwing errors. consider to run script with flag -i [--integrity-tests]',
@@ -230,11 +234,9 @@ class FileHandler:
                     print(f'; not allowed in processing_args. found in policy {el} ... exit')
                     raise typer.Exit(1)
 
-    def _gen_policies(self, root_folder: Path, blank: bool = False, extend: str = None) -> None:
+    def _gen_policies(self, outpath: Path, blank: bool = False, extend: str = None) -> None:
         """
-        generates a policies.json with the default values stored in conf.policies.py with the encountered fileformats (they
-        are passed with a list of SfInfos. this is done by loading the sfinfo values into an BasicAnalytics table.
-        returns the path of the policies.json
+        generates a policies.json with the default values stored in conf.policies.py with the encountered fileformats
         :param root_folder the directory with the files to generate a default policies file
         :param blank if set to True, it generates a blank policies.json
         :param extend if true, it expands the loaded policies with filetypes found in root_folder that are not in the
@@ -247,12 +249,11 @@ class FileHandler:
             extend = self.policies
             [self.ba.presets.update({k: name}) for k in self.policies]
 
-        pol_gen = PoliciesGenerator(fmt2ext=self.fmt2ext)
-        self.policies, self.ba = pol_gen.gen_policies(root_folder, ba=self.ba, strict=self.mode.STRICT,
-                                                      remove_original=self.mode.REMOVEORIGINAL, blank=blank, extend=extend)
+        self.policies, self.ba = Policies.generate(outpath=outpath, ba=self.ba, fmt2ext=self.fmt2ext, strict=self.mode.STRICT,
+                                                   remove_original=self.mode.REMOVEORIGINAL, blank=blank, extend=extend)
         if not self.mode.QUIET:
-            RenderTables.print_fileformats(fh=self, puids=[el for el in self.ba.puid_unique])
-            print(f'\nyou find the policies in {root_folder}_policies.json, if you want to modify them')
+            Output.print_fileformats(fh=self, puids=[el for el in self.ba.puid_unique])
+            print(f'\nyou find the policies in {outpath}{JsonOutput.POLICIES}, if you want to modify them')
             if self.ba.blank:
                 print(f'there are some non default policies: {[el for el in self.ba.blank]}\n',
                       f'-> you may adjust them (they are set as accepted now)')
@@ -269,14 +270,14 @@ class FileHandler:
         if not puids:
             print(f'no files found that should be converted with given policies')
         else:
-            RenderTables.print_fileformats(fh=self, puids=puids)
+            Output.print_fileformats(fh=self, puids=puids)
             print("\n --- testing policies with a sample from the directory ---")
 
             test_conv = FileConverter(policies=self.policies)
 
             for puid in puids:
                 # we want the smallest file first for running the test in FileHandler.test_conversion()
-                self.ba.puid_unique[puid] = self.ba.sort_by_filesize(self.ba.puid_unique[puid])
+                self.ba.sort_puid_unique_by_size(puid)
                 sample = self.ba.puid_unique[puid][0]
                 secho(f'\n{puid}', fg=colors.YELLOW)
                 test, duration, cmd = test_conv.run_test(sample)
@@ -286,15 +287,15 @@ class FileHandler:
                     secho(f'\napplying the policies for this filetype would approximately take '
                           f'{int(est_time) / 60: .2f} min. You find the file with the log in {test.filename.parent}')
 
-    def _load_sfinfos(self, root_folder: Path, wdir: Path):
+    def _load_sfinfos(self, root_folder: Path):
 
         # set path to log.json, use parent.stem of root_folder if it is a file
         logpath_root = f'{root_folder.parent}.{root_folder.stem}' if root_folder.is_file() else root_folder
         # if there is a log, try to read from there
         if Path(f'{logpath_root}{JsonOutput.LOG}').is_file():
             self.stack = Postprocessor.parse_log(logpath_root)
-            # append the directories values
-            [sfinfo.set_processing_paths(root_folder, wdir) for sfinfo in self.stack if not sfinfo.status.removed]
+            # append the root path values
+            [sfinfo.set_processing_paths(root_folder, self.wdir) for sfinfo in self.stack if not sfinfo.status.removed]
 
         # else scan the root_folder with siegfried
         if not self.stack:
@@ -303,14 +304,15 @@ class FileHandler:
                 sfoutput = Sf.analyse(root_folder)
             # get the json output from siegfried and parse it to SfInfo
             [self.stack.append(SFParser.gen_sfinfo(metadata)) for metadata in sfoutput]
-            # append the directories values, set sfinfo.filename relative to root_folder
-            [sfinfo.set_processing_paths(root_folder, wdir, initial=True) for sfinfo in self.stack]
+            # append the path values, set sfinfo.filename relative to root_folder
+            [sfinfo.set_processing_paths(root_folder, self.wdir, initial=True) for sfinfo in self.stack]
 
         # run basic analytics
-        self.ba = BasicAnalytics(fmt2ext=self.fmt2ext)
+        self.ba = BasicAnalytics()
         [self.ba.append(sfinfo) for sfinfo in self.stack if not (sfinfo.status.removed or sfinfo.dest)]
-        if self.mode.VERBOSE:
-            RenderTables.print_siegfried_errors(self)
+        Output.print_siegfried_errors(fh=self)
+        if not self.mode.QUIET:
+            Output.print_duplicates(fh=self)
 
     def _manage_policies(self, root_folder: Path, policies_path: Path = None, blank=False, extend=False):
 
@@ -338,8 +340,8 @@ class FileHandler:
 
         if not self.stack and root_folder:
             root_folder = Path(root_folder)
-            wdir = self._set_working_dir(root_folder)
-            self._load_sfinfos(root_folder, wdir)
+            self._set_working_dir(root_folder)
+            self._load_sfinfos(root_folder)
             self._manage_policies(root_folder)
 
         with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True) as prog:
@@ -347,7 +349,7 @@ class FileHandler:
             [self._integrity_test(sfinfo) for sfinfo in self.stack if not (sfinfo.status.removed or sfinfo.dest)]
 
         if not self.mode.QUIET:
-            RenderTables.print_diagnostic_table(self)
+            Output.print_diagnostic(fh=self)
 
     def apply_policies(self):
 
@@ -381,16 +383,18 @@ class FileHandler:
                     lmsg.msg += f'. cmd={cmd} '
                     self.log_tables.errors.append((lmsg, sfinfo))
 
-    def remove_tmp(self, root_folder: Path, wdir: Path, to_csv=False):
+    def remove_tmp(self, root_folder: Path, to_csv=False):
 
+        # move converted files from the working dir to its destination
         with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True) as prog:
-            prog.add_task(description=f'moving files from {wdir.stem} to {root_folder.stem}...', total=None)
+            prog.add_task(description=f'moving files from {self.wdir.stem} to {root_folder.stem}...', total=None)
             write_logs = self._move_tmp()
 
-        # remove empty folders in wdir
-        for path, _, _ in os.walk(wdir, topdown=False):
-            if len(os.listdir(path)) == 0:
-                os.rmdir(path)
+        # remove empty folders in working dir
+        if self.wdir.is_dir():
+            for path, _, _ in os.walk(self.wdir, topdown=False):
+                if len(os.listdir(path)) == 0:
+                    os.rmdir(path)
         if write_logs:
             self.write_logs(root_folder, to_csv)
 
@@ -408,19 +412,19 @@ class FileHandler:
                     if derived_from.path.is_file():
                         self._remove(derived_from)
                 # create absolute filepath
-                dest_abs = sfinfo.root_folder / sfinfo.dest / sfinfo.filename.name
+                abs_dest = sfinfo.root_folder / sfinfo.dest / sfinfo.filename.name
                 # append hash to filename if the path already exists
-                if dest_abs.is_file():
-                    dest_abs = Path(dest_abs.parent, f'{sfinfo.filename.stem}_{sfinfo.filehash[:6]}{sfinfo.filename.suffix}')
+                if abs_dest.is_file():
+                    abs_dest = Path(abs_dest.parent, f'{sfinfo.filename.stem}_{sfinfo.filehash[:6]}{sfinfo.filename.suffix}')
                 # move the file
-                err, msg, cmd = Rsync.copy(sfinfo.filename, dest_abs)
+                err, msg, cmd = Rsync.copy(sfinfo.filename, abs_dest)
                 # check if the return status is true
                 if not err:
                     # remove working dir
                     if sfinfo.filename.parent.is_dir():
                         shutil.rmtree(sfinfo.filename.parent)
                     # set relative path in sfinfo.filename, set flags
-                    sfinfo.filename = sfinfo.dest / dest_abs.name
+                    sfinfo.filename = sfinfo.dest / abs_dest.name
                     sfinfo.status.added = True
                     sfinfo.dest = None
                 else:  # rsync failed
@@ -434,7 +438,7 @@ class FileHandler:
         Postprocessor.dump_json(self.stack, root_folder, JsonOutput.LOG, sha256=True)
         Postprocessor.dump_json(self.log_tables.dump_errors(), root_folder, JsonOutput.FAILED)
         if self.mode.VERBOSE:
-            RenderTables.print_processing_errors(fh=self)
+            Output.print_processing_errors(fh=self)
         if to_csv:
             Postprocessor.write_csv(self.stack, root_folder)
         # exit
@@ -458,20 +462,20 @@ class FileHandler:
             remove_tmp: bool = True, convert: bool = False, policies_path: Path = None, blank: bool = False, extend: bool = False,
             test_puid: str = None, test_policies: bool = False, remove_original: bool = False, mode_strict: bool = False,
             mode_verbose: bool = True, mode_quiet: bool = True, save_policies: bool = False, to_csv: bool = False):
-        # check path
+
         root_folder = Path(root_folder)
         # configure working dir
-        wdir = self._set_working_dir(root_folder, tmp_dir)
+        self._set_working_dir(root_folder, tmp_dir)
         # set the mode
         mode = Mode(REMOVEORIGINAL=remove_original, STRICT=mode_strict, VERBOSE=mode_verbose, QUIET=mode_quiet)
         self.mode = mode
+        # generate a list of SfInfo objects out of the target folder
+        self._load_sfinfos(root_folder)
+        # set root_folder if it is a file
+        root_folder = f'{root_folder.parent}.{root_folder.stem}' if root_folder.is_file() else root_folder
         # save policies caveat
         if save_policies:
             self._save_policies_from(root_folder)
-        # generate a list of SfInfo objects out of the target folder generate policies
-        self._load_sfinfos(root_folder, wdir)
-        # set root_folder if it is a file
-        root_folder = f'{root_folder.parent}.{root_folder.stem}' if root_folder.is_file() else root_folder
         # generate policies
         self._manage_policies(root_folder, policies_path, blank, extend)
         # convert caveat
@@ -479,7 +483,7 @@ class FileHandler:
             self.convert()
         # remove tmp caveat
         if remove_tmp:
-            self.remove_tmp(root_folder, wdir, to_csv)
+            self.remove_tmp(root_folder, to_csv)
         # file integrity tests
         if integrity_tests:
             self.integrity_tests()
@@ -494,7 +498,7 @@ class FileHandler:
             self.convert()
         # remove tmp files
         if remove_tmp:
-            self.remove_tmp(root_folder, wdir, to_csv)
+            self.remove_tmp(root_folder, to_csv)
         # write logs (if not called within remove_tmp)
         self.write_logs(root_folder, to_csv)
 
@@ -502,7 +506,8 @@ class FileHandler:
         if root_folder.is_file():
             root_folder = root_folder.parent
         if not tmp_dir and not PathsConfig.WDIR.__contains__("/"):
-            return Path(f'{root_folder}_{PathsConfig.WDIR}')
+            self.wdir = Path(f'{root_folder}_{PathsConfig.WDIR}')
+            return self.wdir
         wdir = Path(PathsConfig.WDIR)
         if tmp_dir:
             wdir = tmp_dir
@@ -512,7 +517,8 @@ class FileHandler:
         if str(wdir) == str(Path.home()):
             wdir = Path(wdir / f'fileidentification{datetime.now().strftime("%Y%m%d")}')
             print(f'working dir set to {wdir} - not using home')
-        return wdir
+        self.wdir = wdir
+        return self.wdir
 
 
 class FileConverter:
@@ -570,7 +576,7 @@ class FileConverter:
     def convert(self, sfinfo: SfInfo) -> tuple[SfInfo, list]:
         """
         convert a file, returns the metadata of the converted file as SfInfo
-        :param sfinfo the metadata of the file to convert, updated if successfully converted
+        :param sfinfo the metadata of the file to convert
         """
 
         args = self.policies[sfinfo.processed_as]
@@ -638,7 +644,7 @@ class Postprocessor:
         log_path = Postprocessor._verify_file(Path(f'{root_folder}{JsonOutput.LOG}'))
         stack: list[SfInfo] = []
         if isinstance(log_path, Path):
-            stack.extend(SFParser.read_changelog(log_path))
+            stack.extend(SFParser.read_log(log_path))
         else:
             secho(f'ERROR: {log_path}', fg=colors.RED, bold=True)
             bkp = f'{root_folder}_{datetime.now().strftime("%Y%m%d_%H%M%S")}{JsonOutput.LOG}'
@@ -658,12 +664,6 @@ class Postprocessor:
             w = csv.DictWriter(f, flds)
             w.writeheader()
             w.writerows([Postprocessor.to_csv(sfi) for sfi in items])
-        # mapping
-        jsonout: dict = {}
-        [jsonout.update({f'{sfi.derived_from.filename}': f'{sfi.filename}'}) for sfi in items if sfi.derived_from]
-        if jsonout:
-            with open(f'{root_folder}.mapping.json', 'w') as f:
-                json.dump(jsonout, f, indent=4, ensure_ascii=False)
 
     @staticmethod
     def to_csv(sfinfo: SfInfo) -> dict:
