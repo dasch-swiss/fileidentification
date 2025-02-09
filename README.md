@@ -133,7 +133,7 @@ the **path/to/directory_log.json** takes track of all modifications and appends 
 entry **"status": {"removed": true}**, so it documented that this file was once in the folder, but not anymore. 
 its kind of a simple database.<br><br>
 if you wish a simpler csv output, you can add the flag **--csv** anytime when you run the script, which converts the log.json
-of the actual status of the directory to a csv.<br><br>
+of the actual status of the directory to a csv. as an addition, you get also a mapping file (if you need to replace the paths of converted files somewhere else)<br><br>
 **moving the directory**<br>
 as long as you keep the files **directory_log.json** and **directory_log.json.sha256** (needed to verify the log) on the same
 **path/to/** as the **directory**, you can move the directory anywhere between the steps.<br>
