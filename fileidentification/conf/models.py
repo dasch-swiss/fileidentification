@@ -44,7 +44,7 @@ class SfInfo:
         self.status = Status()
 
     def as_dict(self):
-        """return the class as dict, with Path as string, None values skipped, recursiv for derived_from"""
+        """return the class as dict, with Path as string, None values skipped, recursive for derived_from"""
         # the output from siegfried
         res = {"filename": f'{self.filename}',
                "filesize": self.filesize,
@@ -67,14 +67,15 @@ class SfInfo:
             res['codec_info'] = [{k: v for k, v in asdict(el).items()} for el in self.codec_info]
         if self.processing_logs:
             res['processing_logs'] = [{k: v for k, v in asdict(el).items()} for el in self.processing_logs]
-        if self.derived_from:
-            res['derived_from'] = self.derived_from.as_dict()
         if self.dest:
             res['dest'] = f'{self.dest}'
+        if self.derived_from:
+            res['derived_from'] = self.derived_from.as_dict()
 
         return res
 
     def set_processing_paths(self, root_folder: Path, wdir: Path, initial=False):
+
         if root_folder.is_file():
             root_folder = root_folder.parent
         self.root_folder = root_folder
@@ -118,7 +119,7 @@ class LogTables:
             self.diagnostics[reason.name] = []
         self.diagnostics[reason.name].append(sfinfo)
 
-    def dump_errors(self):
+    def dump_errors(self) -> list[SfInfo]:
         [el[1].processing_logs.append(el[0]) for el in self.errors]
         return [el[1] for el in self.errors]
 
@@ -129,7 +130,6 @@ class BasicAnalytics:
     filehashes: dict[str, list[Path]] = field(default_factory=dict)
     puid_unique: dict[str, list[SfInfo]] = field(default_factory=dict)
     siegfried_errors: list[SfInfo] = field(default_factory=list)
-    fmt2ext: dict = field(default_factory=dict)
     total_size: dict[str, int] = field(default_factory=dict)
     presets: dict[str, str] = None
     blank: list = None
@@ -147,9 +147,8 @@ class BasicAnalytics:
         if sfinfo.errors:
             self.siegfried_errors.append(sfinfo)
 
-    @staticmethod
-    def sort_by_filesize(sfinfos: list[SfInfo]) -> list[SfInfo]:
-            return sorted(sfinfos, key=lambda x: x.filesize, reverse=False)
+    def sort_puid_unique_by_size(self, puid: str) -> None:
+            self.puid_unique[puid] = sorted(self.puid_unique[puid], key=lambda x: x.filesize, reverse=False)
 
 
 

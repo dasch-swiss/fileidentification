@@ -9,7 +9,7 @@ class SiegfriedConf(StrEnum):
 
 
 class DroidSigURL(StrEnum):
-    """urls to fetch droid signature xml"""
+    """urls to fetch droid signature xml from national archives"""
     NALIST = "https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm"
     cdnNA = "https://cdn.nationalarchives.gov.uk/documents/DROID_SignatureFile_"
 
@@ -78,7 +78,7 @@ class FileProcessingMsg(StrEnum):
 
 
 class ChangeLogErr(StrEnum):
-    NOHASH = "hash not found, cannot verify the the _log.json"
+    NOHASH = "hash not found, cannot verify the the log.json"
     MODIFIED = "log.json got modified"
 
 
@@ -88,7 +88,7 @@ class ErrMsgFF(StrEnum):
     # ffmpeg2 = "A non-intra slice in an IDR NAL unit"
 
 
-# re-encode with ffmpeg as it can handle that error
+# reencode with ffmpeg as it can handle that error
 class ErrMsgReencode(StrEnum):
     ffmpeg1 = "A non-intra slice in an IDR NAL unit"
 

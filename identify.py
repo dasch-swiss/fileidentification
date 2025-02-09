@@ -9,7 +9,7 @@ def main(
         tmp_dir: Annotated[Path, typer.Option("--working-dir", "-w",
             help="path to working dir where the processed files are stored")] = None,
         integrity_tests: Annotated[bool, typer.Option("--integrity-tests", "-i",
-            help="apply the [pinned] conversions")] = False,
+            help="do integrity tests on the files in the selected folder")] = False,
         apply: Annotated[bool, typer.Option("--apply", "-a", help="apply the policies and convert the pending files")] = False,
         convert: Annotated[bool, typer.Option("--convert", help="re-convert failed pending files")] = False,
         remove_tmp: Annotated[bool, typer.Option("--remove-tmp", "-r",

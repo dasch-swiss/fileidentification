@@ -85,7 +85,7 @@ class SFParser:
         return sfinfo
 
     @staticmethod
-    def read_changelog(path: Path) -> list[SfInfo]:
+    def read_log(path: Path) -> list[SfInfo]:
         sfinfos: list[SfInfo] = []
         with open(path, 'r') as f:
             dump = json.load(f)
