@@ -193,12 +193,12 @@ a policy for Portable Network Graphics that is accepted as it is, but gets teste
 
 <br><br>accepted values for **bin** are:<br>
 
-|**""** | no program used, the file are also not tested for their integrity |
-| - | - |
-|**magick** | use imagemagick |
-|**ffmpeg** | use ffmpeg |
-|**soffice** | use libre office |
-|**inkscape** | use inkscape |
+| **""**       | no program used  |
+|--------------|------------------|
+| **magick**   | use imagemagick  |
+| **ffmpeg**   | use ffmpeg       |
+| **soffice**  | use libre office |
+| **inkscape** | use inkscape     |
 
 <br><br>you can test an entire policies file (given that the path is path/to/directory_policies.json, otherwise pass 
 the path to the file with -p) with

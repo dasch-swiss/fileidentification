@@ -84,12 +84,6 @@ class FileHandler:
             # os.remove(sfinfo.path)
             return
 
-        # check if the file throws any errors while open/processing it with the respective bin
-        if self._is_file_corrupt(sfinfo):
-            sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=f'{FileDiagnosticsMsg.ERROR}'))
-            self._remove(sfinfo)
-            return
-
         # case where there is an extension missmatch, rename the file if there is a unique ext
         if sfinfo.matches[0].warning == FileDiagnosticsMsg.EXTMISMATCH:
             if len(self.fmt2ext[puid]['file_extensions']) == 1:
@@ -100,6 +94,12 @@ class FileHandler:
                 sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=msg))
                 secho(f'WARNING: you should manually rename {sfinfo.filename}\n{sfinfo.processing_logs}', fg=colors.YELLOW)
             self.log_tables.diagnostics_add(sfinfo, FileDiagnosticsMsg.EXTMISMATCH)
+
+        # check if the file throws any errors while open/processing it with the respective bin
+        if self._is_file_corrupt(sfinfo):
+            sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=f'{FileDiagnosticsMsg.ERROR}'))
+            self._remove(sfinfo)
+            return
 
     def _apply_policy(self, sfinfo: SfInfo) -> None:
 
@@ -170,8 +170,16 @@ class FileHandler:
             if sfinfo.processed_as not in self.policies.keys():
                 return False
 
+        pbin = self.policies[sfinfo.processed_as]["bin"]
+        # select bin out of mimetype if not specified in policies
+        if pbin == "" and sfinfo.matches[0].mime.split("/")[0] in ["image", "audio", "video"]:
+            mime = sfinfo.matches[0].mime.split("/")[0]
+            pbin = Bin.MAGICK if mime == "image" else Bin.FFMPEG
+            msg = f'bin not specified in policies, using {pbin} according to the file mimetype for integrity tests'
+            sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msg))
+
         # get the specs and errors
-        match self.policies[sfinfo.processed_as]["bin"]:
+        match pbin:
             case Bin.FFMPEG:
                 error, warning, specs = Ffmpeg.is_corrupt(sfinfo, verbose=self.mode.VERBOSE)
                 if specs and not sfinfo.codec_info:
@@ -237,7 +245,6 @@ class FileHandler:
     def _gen_policies(self, outpath: Path, blank: bool = False, extend: str = None) -> None:
         """
         generates a policies.json with the default values stored in conf.policies.py with the encountered fileformats
-        :param root_folder the directory with the files to generate a default policies file
         :param blank if set to True, it generates a blank policies.json
         :param extend if true, it expands the loaded policies with filetypes found in root_folder that are not in the
         loaded policies and writes out an updated policies.json
