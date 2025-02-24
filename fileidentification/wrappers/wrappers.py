@@ -62,7 +62,7 @@ class Ffmpeg(Analytics):
     def parse_output(sfinfo: SfInfo, std_out, _, verbose: bool = False) -> tuple[bool, str, dict[str, Any] | None]:
 
         std_out = std_out.replace(f'{sfinfo.path.parent}', "")
-        streams = Ffmpeg.codec_info(sfinfo.path)
+        streams = Ffmpeg.media_info(sfinfo.path)
         if verbose:
             if std_out:
                 if any([msg in std_out for msg in ErrMsgFF]):
@@ -75,7 +75,7 @@ class Ffmpeg(Analytics):
         return False, std_out, streams
 
     @staticmethod
-    def codec_info(file: Path) -> dict[str, Any] | None:
+    def media_info(file: Path) -> dict[str, Any] | None:
         cmd = ["ffprobe", file, "-hide_banner", "-show_entries", "stream=index,codec_name,codec_long_name,profile,"
                "codec_tag,pix_fmt,color_space,coded_width,coded_height,r_frame_rate,bit_rate,channels,channel_layout,"
                "sample_aspect_ratio,display_aspect_ratio", "-output_format", "json"]
@@ -119,7 +119,7 @@ class ImageMagick(Analytics):
         return False, std_err, std_out
 
     @staticmethod
-    def codec_info(file: Path) -> Union[str | None]:
+    def media_info(file: Path) -> Union[str | None]:
 
         cmd = f'magick identify -format "%m %wx%h %g %z-bit %[channels]" {shlex.quote(str(file))}'
         res = subprocess.run(cmd, shell=True, capture_output=True, text=True)

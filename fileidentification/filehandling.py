@@ -182,8 +182,8 @@ class FileHandler:
         match pbin:
             case Bin.FFMPEG:
                 error, warning, specs = Ffmpeg.is_corrupt(sfinfo, verbose=self.mode.VERBOSE)
-                if specs and not sfinfo.codec_info:
-                    sfinfo.codec_info.append(LogMsg(name=Bin.FFMPEG, msg=json.dumps(specs)))
+                if specs and not sfinfo.media_info:
+                    sfinfo.media_info.append(LogMsg(name=Bin.FFMPEG, msg=json.dumps(specs)))
                 if warning:
                     sfinfo.processing_logs.append(LogMsg(name=Bin.FFMPEG, msg=warning))
                     # see if warning needs file to be re-encoded
@@ -192,8 +192,8 @@ class FileHandler:
                         sfinfo.status.pending = True
             case Bin.MAGICK | Bin.INCSCAPE:
                 error, warning, specs = ImageMagick.is_corrupt(sfinfo, verbose=self.mode.VERBOSE)
-                if specs and not sfinfo.codec_info:
-                    sfinfo.codec_info.append(LogMsg(name=Bin.MAGICK, msg=specs))
+                if specs and not sfinfo.media_info:
+                    sfinfo.media_info.append(LogMsg(name=Bin.MAGICK, msg=specs))
                 if warning:
                     sfinfo.processing_logs.append(LogMsg(name=Bin.MAGICK, msg=warning))
             case _:
@@ -208,7 +208,7 @@ class FileHandler:
         return False
 
     def _has_valid_streams(self, sfinfo: SfInfo) -> bool | None:
-        streams = Ffmpeg.codec_info(sfinfo.path)
+        streams = Ffmpeg.media_info(sfinfo.path)
         if not streams:
             secho(f'\t{sfinfo.filename} throwing errors. consider to run script with flag -i [--integrity-tests]',
                   fg=colors.RED, bold=True)
@@ -538,13 +538,13 @@ class FileConverter:
             self.soffice = Path(LibreOfficePath.Darwin)
 
     @staticmethod
-    def _add_codec_info(sfinfo: SfInfo, _bin: str):
+    def _add_media_info(sfinfo: SfInfo, _bin: str):
         match _bin:
             case Bin.FFMPEG:
-                streams = Ffmpeg.codec_info(sfinfo.filename)
-                sfinfo.codec_info.append(LogMsg(name="ffmpeg", msg=json.dumps(streams)))
+                streams = Ffmpeg.media_info(sfinfo.filename)
+                sfinfo.media_info.append(LogMsg(name="ffmpeg", msg=json.dumps(streams)))
             case Bin.MAGICK | Bin.INCSCAPE:
-                sfinfo.codec_info.append(LogMsg(name="imagemagick", msg=ImageMagick.codec_info(sfinfo.filename)))
+                sfinfo.media_info.append(LogMsg(name="imagemagick", msg=ImageMagick.media_info(sfinfo.filename)))
             case _:
                 pass
 
@@ -599,7 +599,7 @@ class FileConverter:
         # create an SfInfo for target and verify output, add codec and processing logs
         target_sfinfo = self.verify(target_path, sfinfo, args['expected'])
         if target_sfinfo:
-            self._add_codec_info(target_sfinfo, args['bin'])
+            self._add_media_info(target_sfinfo, args['bin'])
             if processing_log:
                 target_sfinfo.processing_logs.append(processing_log)
 
@@ -667,7 +667,7 @@ class Postprocessor:
         outfile = f'{root_folder}.csv'
         with open(outfile, 'w') as f:
             flds = [fld.name for fld in fields(SfInfo) if fld.name not in ['matches', 'tmp_file', 'path', 'root_folder',
-                                                                           'wdir', 'codec_info']]
+                                                                           'wdir', 'media_info']]
             w = csv.DictWriter(f, flds)
             w.writeheader()
             w.writerows([Postprocessor.to_csv(sfi) for sfi in items])

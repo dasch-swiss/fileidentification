@@ -67,9 +67,9 @@ class SFParser:
 
         if 'processed_as' in sfout:
             sfinfo.processed_as = sfout['processed_as']
-        if 'codec_info' in sfout:
-            [sfinfo.codec_info.append(LogMsg(name=el['name'], msg=el['msg'], timestamp=el['timestamp']))
-             for el in sfout['codec_info']]
+        if 'media_info' in sfout:
+            [sfinfo.media_info.append(LogMsg(name=el['name'], msg=el['msg'], timestamp=el['timestamp']))
+             for el in sfout['media_info']]
         # set the list of possible logs
         if 'processing_logs' in sfout:
             [sfinfo.processing_logs.append(LogMsg(name=el['name'], msg=el['msg'], timestamp=el['timestamp']))

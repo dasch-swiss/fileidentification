@@ -30,7 +30,7 @@ class SfInfo:
     # added during processing
     status: Status = None
     processed_as: Optional[str] = None
-    codec_info: Optional[list[LogMsg]] = field(default_factory=list)
+    media_info: Optional[list[LogMsg]] = field(default_factory=list)
     processing_logs: Optional[list[LogMsg]] = field(default_factory=list)
     # if converted
     derived_from: Optional[SfInfo] = None
@@ -63,8 +63,8 @@ class SfInfo:
 
         if self.processed_as:
             res['processed_as'] = self.processed_as
-        if self.codec_info:
-            res['codec_info'] = [{k: v for k, v in asdict(el).items()} for el in self.codec_info]
+        if self.media_info:
+            res['media_info'] = [{k: v for k, v in asdict(el).items()} for el in self.media_info]
         if self.processing_logs:
             res['processing_logs'] = [{k: v for k, v in asdict(el).items()} for el in self.processing_logs]
         if self.dest:
