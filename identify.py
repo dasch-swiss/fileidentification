@@ -14,7 +14,7 @@ def main(
         convert: Annotated[bool, typer.Option("--convert", help="re-convert failed pending files")] = False,
         remove_tmp: Annotated[bool, typer.Option("--remove-tmp", "-r",
             help="removes all temporary items and moves the converted files to the folder of its original file"
-                 "[with -d: it replaces the original files with the converted one]")] = False,
+                 "[with -x: it replaces the original files with the converted one]")] = False,
         policies_path: Annotated[Path, typer.Option("--policies-path", "-p",
             help="path to the json file with the policies")] = None,
         blank: Annotated[bool, typer.Option("--blank", "-b",
@@ -36,7 +36,7 @@ def main(
         mode_quiet: Annotated[bool, typer.Option("--quiet", "-q",
             help="just print errors and warnings")] = False,
         save_policies: Annotated[bool, typer.Option("--save-policies", "-S",
-            help="copy the local policies to conf/presets/")] = False,
+            help="copy the local policies to presets/")] = False,
         to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False
     ):
 

@@ -172,11 +172,12 @@ class FileHandler:
 
         pbin = self.policies[sfinfo.processed_as]["bin"]
         # select bin out of mimetype if not specified in policies
-        if pbin == "" and sfinfo.matches[0].mime.split("/")[0] in ["image", "audio", "video"]:
-            mime = sfinfo.matches[0].mime.split("/")[0]
-            pbin = Bin.MAGICK if mime == "image" else Bin.FFMPEG
-            msg = f'bin not specified in policies, using {pbin} according to the file mimetype for integrity tests'
-            sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msg))
+        if pbin == "" and sfinfo.matches[0].mime != "":
+            if sfinfo.matches[0].mime.split("/")[0] in ["image", "audio", "video"]:
+                mime = sfinfo.matches[0].mime.split("/")[0]
+                pbin = Bin.MAGICK if mime == "image" else Bin.FFMPEG
+                msg = f'bin not specified in policies, using {pbin} according to the file mimetype for integrity tests'
+                sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msg))
 
         # get the specs and errors
         match pbin:
@@ -522,7 +523,7 @@ class FileHandler:
             wdir = Path.home() / wdir
         # avoid the home directory
         if str(wdir) == str(Path.home()):
-            wdir = Path(wdir / f'fileidentification{datetime.now().strftime("%Y%m%d")}')
+            wdir = Path(wdir / f'fileidentification_{datetime.now().strftime("%Y%m%d")}')
             print(f'working dir set to {wdir} - not using home')
         self.wdir = wdir
         return self.wdir

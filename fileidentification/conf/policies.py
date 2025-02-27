@@ -24,19 +24,22 @@ default_values: dict = {
     "fmt/12": [True, Bin.MAGICK],     # PNG 1.1 / Portable Network Graphics
     "fmt/13": [True, Bin.MAGICK],     # PNG 1.2 / Portable Network Graphics
     "fmt/353": [True, Bin.MAGICK],    # TIFF - Tagged Image File Format
+    # sipi converts jpg to jp2 / tif, leave them
     "fmt/42": [True, Bin.MAGICK],     # JPEG File Interchange Format - 1.0
     "fmt/43": [True, Bin.MAGICK],     # JPEG File Interchange Format - 1.01
     "fmt/44": [True, Bin.MAGICK],     # JPEG File Interchange Format - 1.02
     "fmt/1507": [True, Bin.MAGICK],   # Exchangeable Image File Format (Compressed) 2.3.x
     # canon raw
     "fmt/592": [False, Bin.MAGICK, "tif", "", ["fmt/353"]],  # do we reduce the quality on raw files?
-    # ... TODO there's a lot more, keep_original them step by step
-    # svg to jp2000
+    "fmt/593": [False, Bin.MAGICK, "tif", "", ["fmt/353"]],
+    # ... TODO there's a lot more, add them step by step
+    # svg to tif
     "fmt/91": [False, Bin.MAGICK, "tif", "-density 300", ["fmt/353"]],
     "fmt/92": [False, Bin.MAGICK, "tif", "-density 300", ["fmt/353"]],
     "fmt/413": [False, Bin.MAGICK, "tif", "-density 300", ["fmt/353"]],
 
     # Audio
+    # we currently accept mp3, should we convert them to wav? or m4a (codec aac)
     "fmt/134": [True, Bin.FFMPEG],    # MPEG 1/2 Audio Layer 3 (MP3)
     "fmt/6": [True, Bin.FFMPEG],      # Waveform Audio File Format (WAVE)
     "fmt/141": [True, Bin.FFMPEG],
@@ -45,19 +48,19 @@ default_values: dict = {
     # aif
     "fmt/414": [False, Bin.FFMPEG, "wav", "-codec copy", ["fmt/141", "fmt/142", "fmt/143"]],
     # alac
-    "fmt/596": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141"]],
+    "fmt/596": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141", "fmt/142", "fmt/143"]],
     # aifc
-    "x-fmt/136": [False, Bin.FFMPEG, "mp3", "-c:a libmp3lame", ["fmt/134"]],
-    # what about flac etc?
+    "x-fmt/136": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141", "fmt/142", "fmt/143"]],
+    # what about flac etc? it's lossless, should we support it or convert to wav?
     # flac
-    "fmt/279": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141"]],
-    "fmt/947": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141"]],
+    "fmt/279": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141", "fmt/142", "fmt/143"]],
+    "fmt/947": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141", "fmt/142", "fmt/143"]],
     # vorbis
-    "fmt/203": [False, Bin.FFMPEG, "mp3", "-c:a libmp3lame", ["fmt/134"]],
+    "fmt/203": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141", "fmt/142", "fmt/143"]],
     # opus
-    "fmt/946": [False, Bin.FFMPEG, "mp3", "-c:a libmp3lame", ["fmt/134"]],
+    "fmt/946": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141", "fmt/142", "fmt/143"]],
     # speex
-    "fmt/948": [False, Bin.FFMPEG, "mp3", "-c:a libmp3lame", ["fmt/134"]],
+    "fmt/948": [False, Bin.FFMPEG, "wav", "-c:a pcm_s16le", ["fmt/141", "fmt/142", "fmt/143"]],
 
     # Video
     # MPEG-4 Media File (Codec: AVC/H.264, Audio: AAC)
@@ -156,6 +159,7 @@ default_values: dict = {
     "x-fmt/18": [True, ''],   # CSV - Comma Separated Values (UTF-8, UTF-16, ISO 8859-1, ISO 8859-15, ASCII)
 
     # Archive
+    # we do archive them as they are. should we implement scanning the archives as well and convert files inside?
     "x-fmt/263": [True, ''],   # ZIP Format
     "x-fmt/265": [True, ''],   # Tape Archive Format
     "x-fmt/266": [True, ''],   # GZIP Format

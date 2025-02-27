@@ -74,6 +74,7 @@ class Output:
             for k in fh.ba.filehashes:
                 print(f'\n{SiegfriedConf.ALG}: {k} - files: ')
                 [print(f'{path}') for path in fh.ba.filehashes[k]]
+            print("\n")
 
 
     @staticmethod
