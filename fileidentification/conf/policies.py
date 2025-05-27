@@ -79,13 +79,13 @@ default_values: dict = {
     # ogg
     "fmt/945": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # ffv1
-    # TODO do we archive ffv1 in Matroska Container? or Matroska Container in general? it can contain a lot of codecs
+    # TODO do we archive ffv1 in Matroska Container? use wrappers.Ffmpeg.media_info to determine streams?
     "fmt/569": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # dv
     "x-fmt/152": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
     # wmv
     "fmt/133": [False, Bin.FFMPEG, "mp4", "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac", ["fmt/199"]],
-    # ... TODO there's a lot more, keep_original them step by step
+    # ... TODO there's a lot more, add them step by step
 
     # PDF/A recommended as archival format
     "fmt/95": [True, ''],     # Acrobat PDF/A 1a
@@ -157,6 +157,7 @@ default_values: dict = {
     "fmt/1476": [True, ''],
     "fmt/1477": [True, ''],
     "x-fmt/18": [True, ''],   # CSV - Comma Separated Values (UTF-8, UTF-16, ISO 8859-1, ISO 8859-15, ASCII)
+    "fmt/817": [True, ''],    # JSON Data Interchange Format
 
     # Archive
     # we do archive them as they are. should we implement scanning the archives as well and convert files inside?
