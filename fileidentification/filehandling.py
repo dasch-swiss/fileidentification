@@ -42,13 +42,13 @@ class FileHandler:
 
     def __init__(self):
 
-        self.mode = None
-        self.fmt2ext = json.loads(Path(PathsConfig.FMT2EXT).read_text())
-        self.policies = None
+        self.mode: Mode = Mode()
+        self.fmt2ext: dict = json.loads(Path(PathsConfig.FMT2EXT).read_text())
+        self.policies: dict = {}
         self.log_tables = LogTables()
         self.ba = BasicAnalytics()
         self.stack: list[SfInfo] = []
-        self.wdir = None
+        self.wdir: Path = Path(PathsConfig.WDIR)
         self.converter = FileConverter()
 
     def _integrity_test(self, sfinfo: SfInfo):
@@ -498,16 +498,14 @@ class FileHandler:
         if not tmp_dir and not PathsConfig.WDIR.__contains__("/"):
             self.wdir = Path(f'{root_folder}_{PathsConfig.WDIR}')
             return self.wdir
-        wdir = Path(PathsConfig.WDIR)
         if tmp_dir:
-            wdir = tmp_dir
-        if not wdir.is_absolute():
-            wdir = Path.home() / wdir
+            self.wdir = Path(tmp_dir)
+        if not self.wdir.is_absolute():
+            self.wdir = Path.home() / self.wdir
         # avoid the home directory
-        if str(wdir) == str(Path.home()):
-            wdir = Path(wdir / f'fileidentification_{datetime.now().strftime("%Y%m%d")}')
-            print(f'working dir set to {wdir} - not using home')
-        self.wdir = wdir
+        if str(self.wdir) == str(Path.home()):
+            self.wdir = Path(self.wdir / f'fileidentification_{datetime.now().strftime("%Y%m%d")}')
+            print(f'working dir set to {self.wdir} - not using home')
         return self.wdir
 
 
