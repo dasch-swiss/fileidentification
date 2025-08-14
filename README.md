@@ -215,29 +215,6 @@ uv run identify.py path/to/directory -tf fmt/XXX
 
 the test conversions are located in _WORKINGDIR/_TEST
 
-### presets
-
-once you've done your work on a customised polices, you might want to save it as a preset 
-(given the path of the policies is path/to/directory_policies.json )
-
-```
-uv run identify.py path/to/directory -S
-```
-
-you can reuse it on another folder with the flag -p:
-
-```
-uv run identify.py path/to/directory -p presets/yourSavedPoliciesName
-```
-
-if you're not sure what files to expect in that folder and you mind skipping them during processing, 
-you can add the flag -e which expands the policies with blank ones that are not yet in the policies and writes a 
-new file path/to/directory_policies.json which you can adjust before applying them.
-
-```
-uv run identify.py path/to/directory -ep presets/yourSavedPoliciesName
-```
-
 ### default settings
 
 the default setting for file conversion are in **conf/policies.py**, you can add or modify the entries there. all other
@@ -270,8 +247,6 @@ when used in generating policies, it does not add blank ones for formats that ar
 [--blank] creates a blank policies based on the files encountered in the given directory<br><br>
 **-e**<br>
 [--extend-policies] append filetypes found in the directory to the given policies if they are missing in it.<br><br>
-**-S**<br>
-[--save-policies] save the policies in presets<br><br>
 **-q**<br>
 [--quiet] just print errors and warnings<br><br>
 **--csv**<br>

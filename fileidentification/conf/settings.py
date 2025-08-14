@@ -45,7 +45,6 @@ class PathsConfig(StrEnum):
     WDIR = "WORKINGDIR"
     REMOVED = "_REMOVED"
     TEST = "_TEST"
-    PRESETS = "presets"
     # do not change this
     FMT2EXT = "fileidentification/conf/fmt2ext.json"
 
@@ -53,7 +52,10 @@ class PathsConfig(StrEnum):
 class JsonOutput(StrEnum):
     POLICIES = "_policies.json"
     LOG = "_log.json"
-    FAILED = "_failed.json"
+
+
+CSVFIELDS = ["filename", "filesize", SiegfriedConf.ALG, "modified", "errors", "processed_as", "media_info",
+             "processing_logs", "status", "derived_from"]
 
 
 # msg
@@ -75,11 +77,6 @@ class FileProcessingMsg(StrEnum):
     CONVFAILED = "conversion failed"
     NOTEXPECTEDFMT = "converted file does not match the expected fmt."
     FAILEDMOVE = "failed to rsyc the file"
-
-
-class ChangeLogErr(StrEnum):
-    NOHASH = "hash not found, cannot verify the the log.json"
-    MODIFIED = "log.json got modified"
 
 
 # file corrupt errors to parse from wrappers.wrappers.Ffmpeg when in verbose mode

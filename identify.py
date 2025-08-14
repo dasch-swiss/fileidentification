@@ -35,8 +35,6 @@ def main(
             help="catches more warnings on video and image files during the integrity tests")] = False,
         mode_quiet: Annotated[bool, typer.Option("--quiet", "-q",
             help="just print errors and warnings")] = False,
-        save_policies: Annotated[bool, typer.Option("--save-policies", "-S",
-            help="copy the local policies to presets/")] = False,
         to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False
     ):
 
@@ -45,7 +43,7 @@ def main(
            integrity_tests=integrity_tests, apply=apply, convert=convert, remove_tmp=remove_tmp,
            policies_path=policies_path, blank=blank, extend=extend, test_puid=test_puid, test_policies=test_policies,
            remove_original=remove_original, mode_strict=mode_strict, mode_verbose=mode_verbose, mode_quiet=mode_quiet,
-           save_policies=save_policies, to_csv=to_csv)
+           to_csv=to_csv)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ import os
 from abc import ABC
 from pathlib import Path
 from typing import Union, Any
-from fileidentification.conf.models import SFoutput, SfInfo
+from fileidentification.models import SFoutput, SfInfo
 from fileidentification.conf.settings import SiegfriedConf, LibreOfficePath, ErrMsgFF, ErrMsgIM, LibreOfficePdfSettings, Bin
 
 
@@ -47,11 +47,11 @@ class Ffmpeg(Analytics):
         When the file can't be opened by ffmpeg at all, it returns [True, "stderr"]. for minor errors [False, "stderr"].
         if everithing ok [False, ""]"""
 
-        cmd = f'ffprobe -hide_banner -show_error {shlex.quote(str(sfinfo.path))}'
+        cmd = f'ffprobe -hide_banner -show_error {shlex.quote(str(sfinfo._path))}'
 
         res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         if verbose:
-            cmd_v = f'ffmpeg -v error -i {shlex.quote(str(sfinfo.path))} -f null -'
+            cmd_v = f'ffmpeg -v error -i {shlex.quote(str(sfinfo._path))} -f null -'
             res_v = subprocess.run(cmd_v, shell=True, capture_output=True, text=True)
             # replace the stdout of errors with the verbose one
             res.stdout = res_v.stderr
@@ -61,8 +61,8 @@ class Ffmpeg(Analytics):
     @staticmethod
     def parse_output(sfinfo: SfInfo, std_out, _, verbose: bool = False) -> tuple[bool, str, dict[str, Any] | None]:
 
-        std_out = std_out.replace(f'{sfinfo.path.parent}', "")
-        streams = Ffmpeg.media_info(sfinfo.path)
+        std_out = std_out.replace(f'{sfinfo._path.parent}', "")
+        streams = Ffmpeg.media_info(sfinfo._path)
         if verbose:
             if std_out:
                 if any([msg in std_out for msg in ErrMsgFF]):
@@ -94,19 +94,19 @@ class ImageMagick(Analytics):
         whether it can be open at all. it returns [True, "stderr"]. for minor errors [False, "stderr"].
         if everithing ok [False, ""]"""
 
-        cmd = f'magick identify -format "%m %wx%h %g %z-bit %[channels]" {shlex.quote(str(sfinfo.path))}'
+        cmd = f'magick identify -format "%m %wx%h %g %z-bit %[channels]" {shlex.quote(str(sfinfo._path))}'
 
         if verbose:
             cmd = (f'magick identify -verbose -regard-warnings -format "%m %wx%h %g %z-bit %[channels]" '
-                   f'{shlex.quote(str(sfinfo.path))}')
+                   f'{shlex.quote(str(sfinfo._path))}')
         res = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         return ImageMagick.parse_output(sfinfo, res.stdout, res.stderr)
 
     @staticmethod
     def parse_output(sfinfo: SfInfo, std_out, std_err, verbose: bool = False) -> tuple[bool, str, str]:
 
-        std_out = std_out.replace(f'{sfinfo.path.parent}', "")
-        std_err = std_err.replace(f'{sfinfo.path.parent}', "")
+        std_out = std_out.replace(f'{sfinfo._path.parent}', "")
+        std_err = std_err.replace(f'{sfinfo._path.parent}', "")
 
         if verbose:
             if std_err:
@@ -138,7 +138,7 @@ class Converter:
         :returns the constructed target path, the cmd run and the log path
         """
 
-        wdir = Path(sfinfo.wdir / f'{sfinfo.filename.name}_{sfinfo.filehash[:6]}')
+        wdir = Path(sfinfo._wdir / f'{sfinfo.filename.name}_{sfinfo.filehash[:6]}')
         if not wdir.exists():
             os.makedirs(wdir)
 
@@ -149,7 +149,7 @@ class Converter:
         logfile_path = Path(wdir / f'{sfinfo.filename.stem}.log')
 
         # set input, outputfile and log for shell
-        inputfile = shlex.quote(str(sfinfo.path))
+        inputfile = shlex.quote(str(sfinfo._path))
         outfile = shlex.quote(str(target))
         logfile = shlex.quote(str(logfile_path))
 

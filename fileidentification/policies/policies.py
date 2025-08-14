@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from fileidentification.conf.models import BasicAnalytics
+from fileidentification.models import BasicAnalytics
 from fileidentification.conf.settings import Bin, JsonOutput
 
 ####
@@ -181,64 +181,60 @@ class PolicyParams:
     expected: list = field(default_factory=list)
 
 
+def generate_policies(outpath: Path, ba: BasicAnalytics, fmt2ext: dict, strict: bool = False, remove_original: bool = False,
+             blank: bool = False, extend: dict[str, PolicyParams] = None) -> tuple[dict, BasicAnalytics]:
 
-class Policies:
+    policies: dict = {}
+    jsonfile = f'{outpath}{JsonOutput.POLICIES}'
 
-    @staticmethod
-    def generate(outpath: Path, ba: BasicAnalytics, fmt2ext: dict, strict: bool = False, remove_original: bool = False,
-                 blank: bool = False, extend: dict[str, PolicyParams] = None) -> tuple[dict, BasicAnalytics]:
-
-        policies: dict = {}
-        jsonfile = f'{outpath}{JsonOutput.POLICIES}'
-
-        # blank caveat
-        if blank:
-            for puid in ba.puid_unique:
-                policies[puid] = asdict(PolicyParams(format_name=fmt2ext[puid]['name']))
-            # write out policies with name of the folder, return policies and BasicAnalytics
-            with open(jsonfile, 'w') as f:
-                json.dump(policies, f, indent=4, ensure_ascii=False)
-            return policies, ba
-
-        # default values
-        ba.blank = []
+    # blank caveat
+    if blank:
         for puid in ba.puid_unique:
-            # if it is run in extend mode, add the existing policy if there is any
-            if extend and puid in extend:
-                policy = extend[puid]
-                policies[puid] = policy
-            # if there are no default values of this filetype
-            elif puid not in default_values:
-                if strict:
-                    pass  # don't create a blank policies -> files of this type are moved to FAILED
-                else:
-                    policies[puid] = asdict(PolicyParams(format_name=fmt2ext[puid]['name']))
-                    ba.blank.append(puid)
-            else:
-                # if the filetype is accepted:
-                if default_values[puid][0]:
-                    policy = {'format_name': fmt2ext[puid]['name'],
-                              'bin': default_values[puid][1],
-                              'accepted': True}
-                    # update policy if it's mp4 -> depends on streams if it's converted
-                    if puid in ['fmt/199']:
-                        policy.update({'remove_original': remove_original,
-                              'target_container': default_values[puid][2],
-                              'processing_args': default_values[puid][3],
-                              'expected': default_values[puid][4]})
-                # if the filety is not accepted
-                else:
-                    policy = {'format_name': fmt2ext[puid]['name'],
-                              'bin': default_values[puid][1],
-                              'accepted': False,
-                              'remove_original': remove_original,
-                              'target_container': default_values[puid][2],
-                              'processing_args': default_values[puid][3],
-                              'expected': default_values[puid][4]}
-
-                policies[puid] = policy
-
-        # write out the policies with name of the folder, return policies and updated BasicAnalytics
+            policies[puid] = asdict(PolicyParams(format_name=fmt2ext[puid]['name']))
+        # write out policies with name of the folder, return policies and BasicAnalytics
         with open(jsonfile, 'w') as f:
             json.dump(policies, f, indent=4, ensure_ascii=False)
         return policies, ba
+
+    # default values
+    ba.blank = []
+    for puid in ba.puid_unique:
+        # if it is run in extend mode, add the existing policy if there is any
+        if extend and puid in extend:
+            policy = extend[puid]
+            policies[puid] = policy
+        # if there are no default values of this filetype
+        elif puid not in default_values:
+            if strict:
+                pass  # don't create a blank policies -> files of this type are moved to FAILED
+            else:
+                policies[puid] = asdict(PolicyParams(format_name=fmt2ext[puid]['name']))
+                ba.blank.append(puid)
+        else:
+            # if the filetype is accepted:
+            if default_values[puid][0]:
+                policy = {'format_name': fmt2ext[puid]['name'],
+                          'bin': default_values[puid][1],
+                          'accepted': True}
+                # update policy if it's mp4 -> depends on streams if it's converted
+                if puid in ['fmt/199']:
+                    policy.update({'remove_original': remove_original,
+                          'target_container': default_values[puid][2],
+                          'processing_args': default_values[puid][3],
+                          'expected': default_values[puid][4]})
+            # if the filety is not accepted
+            else:
+                policy = {'format_name': fmt2ext[puid]['name'],
+                          'bin': default_values[puid][1],
+                          'accepted': False,
+                          'remove_original': remove_original,
+                          'target_container': default_values[puid][2],
+                          'processing_args': default_values[puid][3],
+                          'expected': default_values[puid][4]}
+
+            policies[puid] = policy
+
+    # write out the policies with name of the folder, return policies and updated BasicAnalytics
+    with open(jsonfile, 'w') as f:
+        json.dump(policies, f, indent=4, ensure_ascii=False)
+    return policies, ba
