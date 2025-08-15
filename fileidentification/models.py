@@ -35,7 +35,7 @@ class SfInfo(BaseModel):
     filehash: str = Field(alias=SiegfriedConf.ALG)
     matches: list | None = None
     # added during processing
-    status: Status = None
+    status: Status | None = None
     processed_as: str | None = None
     media_info: list[LogMsg] = Field(default_factory=list[LogMsg])
     processing_logs: list[LogMsg] = Field(default_factory=list[LogMsg])
@@ -48,7 +48,8 @@ class SfInfo(BaseModel):
     _wdir: Path | None = None
 
     def model_post_init(self, __context):
-        self.status = Status()
+        if not self.status:
+            self.status = Status()
         if not self.processed_as:
             self.processed_as = self._fetch_puid()
 
