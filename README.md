@@ -319,3 +319,14 @@ it is implemented in wrappers.wrappers.Converter and conf.models.LibreOfficePdfS
 when you convert svg, you might run into errors as the default library of imagemagick is not that good. easiest workaround
 is installing inkscape ( ```brew install --cask inkscape``` ), make sure that you reinstall imagemagick, so its uses inkscape
 as default for converting svg ( ```brew remove imagemagick``` , ```brew install imagemagick```)
+
+## Docker container
+
+```bash
+docker build -t fileidentification .
+```
+
+```bash
+data=path/to/data
+docker run -v "${data}:/data" fileidentification uv run identify.py /data
+```
