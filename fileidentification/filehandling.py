@@ -18,7 +18,7 @@ from fileidentification.conf.settings import (PathsConfig, LibreOfficePath, File
                                               JsonOutput, Bin, ErrMsgReencode, CSVFIELDS)
 from fileidentification.models import SfInfo, BasicAnalytics, LogTables, LogMsg, LogOutput
 from fileidentification.policies.policies import generate_policies
-from fileidentification.policies.policies import systemfiles
+from fileidentification.policies.default import systemfiles
 from fileidentification.helpers import sfinfo2csv
 
 @dataclass

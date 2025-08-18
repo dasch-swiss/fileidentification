@@ -12,10 +12,11 @@ from fileidentification.conf.settings import SiegfriedConf, PolicyMsg
 class LogMsg(BaseModel):
     name: str
     msg: str
-    timestamp: datetime | None = None
+    timestamp: datetime = None
 
     def model_post_init(self, __context):
-        self.timestamp = datetime.now(UTC)
+        if not self.timestamp:
+            self.timestamp = datetime.now(UTC)
 
 
 class Status(BaseModel):
