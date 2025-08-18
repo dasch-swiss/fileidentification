@@ -48,7 +48,7 @@ def generate_policies(outpath: Path, ba: BasicAnalytics, fmt2ext: dict, strict: 
                 ba.blank.append(puid)
         else:
             policies[puid] = default_policies[puid]
-            if not policies[puid]["accepted"]:
+            if not policies[puid]["accepted"] or puid in ['fmt/199']:
                 policies[puid].update({"remove_original": remove_original})
 
     # write out the policies with name of the folder, return policies and updated BasicAnalytics
