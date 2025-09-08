@@ -1,4 +1,4 @@
-# fileidentification
+# Fileidentification
 
 A python CLI to identify file formats and bulk convert files. It is designed for digital preservation workflows and is basically a python wrapper arround several programs. It uses siegfried, ffmpeg, imagemagick (inkscape) and LibreOffice, so you need to have those installed for this to work. It features:
 
