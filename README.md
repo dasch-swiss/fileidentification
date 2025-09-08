@@ -2,7 +2,7 @@
 
 A python CLI to identify file formats and bulk convert files. It is designed for digital preservation workflows and is basically a python wrapper arround several programs. It uses siegfried, ffmpeg, imagemagick (inkscape) and LibreOffice, so you need to have those installed for this to work. It features:
 
-- file format idenficiation and technical metadata with Sigfried
+- file format identification and technical metadata with Sigfried
 - file integrity testing with ffmpeg and imagemagick
 - file conversion with ffmpeg, imagemagick and libreoffice using a json file as a protocol
 - detailed logging
