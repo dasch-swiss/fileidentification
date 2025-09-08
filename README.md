@@ -187,7 +187,7 @@ if you just want to test a specific policy, append f and the puid
 
 the test conversions are located in _WORKINGDIR/_TEST
 
-## Modifiying Default Settings
+## Modifying Default Settings
 
 The default setting for file conversion are in **fileindentification/policies/default.py**, you can add or modify the entries there. all other
 settings such as default path values or hash algorithm are in **fileidentification/conf/settings.py**
