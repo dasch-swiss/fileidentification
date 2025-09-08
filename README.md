@@ -26,7 +26,7 @@ brew install --cask libreoffice
 
 Depending on your distribution: [siegfried](https://github.com/richardlehane/siegfried/wiki/Getting-started), [ffmpeg](https://ffmpeg.org/download.html#build-linux), [inkscape](https://wiki.inkscape.org/wiki/Installing_Inkscape#Linux), [imagemagick](https://imagemagick.org/script/download.php#linux), [LibreOffice](https://www.libreoffice.org/download/download-libreoffice)
 
-siegfried
+Siegfried:
 
 ```bash
 curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x20F802FE798E6857" | gpg --dearmor | sudo tee /usr/share/keyrings/siegfried-archive-keyring.gpg
