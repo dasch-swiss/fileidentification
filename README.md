@@ -7,7 +7,7 @@ A python CLI to identify file formats and bulk convert files. It is designed for
 - file conversion with ffmpeg, imagemagick and LibreOffice using a json file as a protocol
 - detailed logging
 
-## Requiered Programs
+## Required Programs
 
 Install siegfried, ffmpeg, imagemagick (inkscape) and LibreOffice if not already installed.
 
