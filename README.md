@@ -152,7 +152,13 @@ a policy for Portable Network Graphics that is accepted as it is, but gets teste
 }
 ```
 
-| key                                             | is the puid (fmt/XXX)                                                                                                                         |
+
+### Specification of the JSON format
+
+The topmost key is the pronom UID in the format `fmt/XXX`.
+The nested keys have the following meaning:
+
+| Key                                             |  Meaning                                                                                                                        |
 |-------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 | **format_name** (optional)                      | **str**                                                                                                                                       |
 | **bin**                                         | **str**: program to convert the file or test the file (testing currently only is supported on image/audio/video, i.e. ffmpeg and imagemagick) |
