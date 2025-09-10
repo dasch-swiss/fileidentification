@@ -1,8 +1,12 @@
 # Fileidentification
 
-A python CLI to identify file formats and bulk convert files. It is designed for digital preservation workflows and is basically a python wrapper arround several programs. It uses siegfried, ffmpeg, imagemagick (inkscape) and LibreOffice, so you need to have those installed for this to work. It features:
+A python CLI to identify file formats and bulk convert files. It is designed for digital preservation workflows
+and is basically a python wrapper around several programs. It uses siegfried, ffmpeg, imagemagick (inkscape)
+and LibreOffice, so you need to have those installed for this to work. Most probable use case might be
+when you need to test and possibly convert a huge amount of files and you don't know in advance
+what file types you are dealing with. It features:
 
-- file format identification and extraction of technical metadata of the files with Sigfried, ffprobe and imagemagick
+- file format identification and extraction of technical metadata with siegfried, ffprobe and imagemagick
 - file integrity testing with ffmpeg and imagemagick
 - file conversion with ffmpeg, imagemagick and LibreOffice using a json file as a protocol
 - detailed logging
@@ -24,9 +28,15 @@ brew install --cask libreoffice
 
 ### Linux
 
-Depending on your distribution: [siegfried](https://github.com/richardlehane/siegfried/wiki/Getting-started), [ffmpeg](https://ffmpeg.org/download.html#build-linux), [inkscape](https://wiki.inkscape.org/wiki/Installing_Inkscape#Linux), [imagemagick](https://imagemagick.org/script/download.php#linux), [LibreOffice](https://www.libreoffice.org/download/download-libreoffice)
+Depending on your distribution:
 
-Siegfried:
+- [siegfried](https://github.com/richardlehane/siegfried/wiki/Getting-started)
+- [ffmpeg](https://ffmpeg.org/download.html#build-linux)
+- [imagemagick](https://imagemagick.org/script/download.php#linux)
+- [inkscape](https://wiki.inkscape.org/wiki/Installing_Inkscape#Linux)
+- [LibreOffice](https://www.libreoffice.org/download/download-libreoffice)
+
+On Debian/Ubuntu, add siegfried to the apt sources:
 
 ```bash
 curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x20F802FE798E6857" | gpg --dearmor | sudo tee /usr/share/keyrings/siegfried-archive-keyring.gpg
@@ -34,7 +44,7 @@ echo "deb [signed-by=/usr/share/keyrings/siegfried-archive-keyring.gpg] https://
 sudo apt-get update && sudo apt-get install siegfried
 ```
 
-ffmpeg, inkscape imagemagick and LibreOffice
+ffmpeg, inkscape imagemagick and LibreOffice:
 
 ```bash
 sudo apt-get update
@@ -49,7 +59,8 @@ If you don't have [uv](https://docs.astral.sh/uv/) installed, install it with
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Then, you can use `uv run` to run the fileidentification script. This creates a venv and installs all necessary python dependencies:
+Then, you can use `uv run` to run the fileidentification script.
+This creates a venv and installs all necessary python dependencies:
 
 ```bash
 uv run identify.py --help
@@ -58,12 +69,12 @@ uv run identify.py --help
 ## Quick Start
 
 1. **Generate policies for your files:**
-`uv run identify.py /path/to/files`
+`uv run identify.py path/to/directory`
 
-2. **Review generated policies:** Edit `files_policies.json` to customize conversion rules
+2. **Review generated policies:** Edit `path/to/directory_policies.json` to customize conversion rules
 
 3. **Test files and apply the policies:**
-`uv run indentify.py /path/to/files -iar`
+`uv run indentify.py path/to/directory -iar`
 
 ## Single Execution Steps
 
@@ -75,7 +86,9 @@ Generate two json files:
 
 **path/to/directory_log.json** : The technical metadata of all the files in the folder
 
-**path/to/directory_policies.json** : A file conversion protocol for each file format that was encountered in the folder according to the default policies located in `fileidentification/policies/default.py`. Edit it to customize conversion rules.
+**path/to/directory_policies.json** : A file conversion protocol for each file format
+that was encountered in the folder according to the default policies located in
+`fileidentification/policies/default.py`. Edit it to customize conversion rules.
 
 ### File Integrity Tests
 
@@ -91,7 +104,9 @@ NOTE: Currently only audio/video and image files are tested.
 
 `uv run identify.py path/to/directory -a`
 
-Apply the policies defined in `path/to/directory_policies.json` and convert files into their target file format. The converted files are temporary stored in `path/to/directory_WORKINGDIR` (default) with the log output of the program used as log.txt next to it.
+Apply the policies defined in `path/to/directory_policies.json` and convert files into their target file format.
+The converted files are temporary stored in `path/to/directory_WORKINGDIR` (default) with the log output
+of the program used as log.txt next to it.
 
 ### Clean Up Temporary Files
 
@@ -99,43 +114,69 @@ Apply the policies defined in `path/to/directory_policies.json` and convert file
 
 Delete all temporary files and folders and move the converted files next to their parents.
 
-### Combining Steps - Custom Policies and Workingdir
+### Combining Steps - Custom Policies and Working Directory
 
-If you don't need these intermediary steps, you can combine the flags, which does all at once. Here is an example how to load a custom policy and set the location to the working directory other than default (see **option** below for more information about the flags):
+If you don't need these intermediary steps, you can run the desired steps at once by combining their flags.
+Here is an example how to do verboose testing, applying a custom policy and set the location to the working
+directory other than default (see **option** below for more information about the flags):
 
 `uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json -w path/to/workingdir`
 
 ### Log
 
-The **path/to/directory_log.json** takes track of all modifications and of the changes in the target folder.  
+The **path/to/directory_log.json** takes track of all modifications in the target folder.  
 Since with each execution of the script it checks whether such a log exists and read/appends to that file.  
 Iterations of file conversions such as A -> B, B -> C, ... are logged in the same file.
 
-If you wish a simpler csv output, you can add the flag `--csv` anytime when you run the script, which converts the `log.json`
-of the actual status of the directory to a csv.
+If you wish a simpler csv output, you can add the flag `--csv` anytime when you run the script,
+which converts the `log.json` of the actual status of the directory to a csv.
 
 ## Advanced Usage
 
-You can also create your own policies file, and with that, customise the file conversion output. simply edit the generated default file `path/to/directory_policies.json` before applying.
-If you want to start from scratch, run `uv run indentify.py path/to/folder -b` to create a blank template with all the file formats encountered
-in the folder.
+You can also create your own policies file, and with that, customise the file conversion output.
+Simply edit the generated default file `path/to/directory_policies.json` before applying.
+If you want to start from scratch, run `uv run indentify.py path/to/directory -b` to create a
+blank policies template with all the file formats encountered in the folder.
 
-**Policy Examples:**
+### Policy Specification
 
-A policy for Audio/Video Interleaved Format (avi) thats need to be transcoded to MPEG-4 Media File (Codec: AVC/H.264, Audio: AAC) looks like this
+A policy for a file type consists of the following fields and uses its PRONOM Unique Identifier (PUID) as a key
+
+| Field                | Type           |                                     |
+|----------------------|----------------|-------------------------------------|
+| **format_name**      | **str**        | optional                            |
+| **bin**              | **str**        | required                            |
+| **accepted**         | **bool**       | required                            |
+| **target_container** | **str**        | required if field accepted is false |
+| **processing_args**  | **str**        | required if field accepted is false |
+| **expected**         | **list[str]**  | required if field accepted is false |
+| **remove_original**  | **bool**       | required if field accepted is false |
+
+- `format_name`: The name of the file format.
+- `bin`: Program to convert or test the file. Literal[`""`, `"magick"`, `"ffmpeg"`, `"soffice"`, `"inkscape"`].
+(Testing currently only is supported on image/audio/video, i.e. ffmpeg and magick.)
+- `accepted`: `false` if the file needs to be converted, `true` if it doesn't.
+- `processing_args`: The arguments used with bin. Can also be an empty string if there is no need for such arguments.
+- `expected`: the expected file format for the converted file as PUID
+- `remove_original`: whether to keep the parent of the converted file in the directory, default is `false`
+
+### Policy Examples
+
+A policy for Audio/Video Interleaved Format (avi) that need to be transcoded to MPEG-4 Media File
+(Codec: AVC/H.264, Audio: AAC) looks like this
 
 ```json
 {
     "fmt/5": {
-            "format_name": "Audio/Video Interleaved Format",
-            "bin": "ffmpeg",
-            "accepted": false,
-            "remove_original": false,
-            "target_container": "mp4",
-            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
-            "expected": [
-                "fmt/199"
-            ]
+        "format_name": "Audio/Video Interleaved Format",
+        "bin": "ffmpeg",
+        "accepted": false,
+        "target_container": "mp4",
+        "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
+        "expected": [
+            "fmt/199"
+        ],
+        "remove_original": false
     }
 }
 ```
@@ -152,95 +193,79 @@ A policy for Portable Network Graphics that is accepted as it is, but gets teste
 }
 ```
 
-### Specification of the JSON format
+**Policy Testing:**
 
-The topmost key is the pronom UID in the format `fmt/XXX`.
-The nested keys have the following meaning:
-
-| Key                                             |  Meaning                                                                                                                        |
-|-------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| **format_name** (optional)                      | **str**                                                                                                                                       |
-| **bin**                                         | **str**: program to convert the file or test the file (testing currently only is supported on image/audio/video, i.e. ffmpeg and imagemagick) |
-| **accepted**                                    | **bool**: false if the file needs to be converted                                                                                             |
-| **remove_original** (required if not accepted)  | **bool**: whether to keep the parent of the converted file in the directory, default is false                                                 |
-| **target_container** (required if not accepted) | **str**: the container the file needs to be converted to                                                                                      |
-| **processing_args** (required if not accepted)  | **str**: the arguments used with bin                                                                                                          |
-| **expected** (required if not accepted)         | **list**: the expected file format for the converted file                                                                                     |
-
-accepted values for **bin** are:
-
-| **""**       | no program used  |
-|--------------|------------------|
-| **magick**   | use imagemagick  |
-| **ffmpeg**   | use ffmpeg       |
-| **soffice**  | use libre office |
-| **inkscape** | use inkscape     |
-
-you can test the outcome of the conversion policies (given that the path is path/to/directory_policies.json, otherwise pass the path to the file with -p) with
+You can test the outcome of the conversion policies (given that the path is path/to/directory_policies.json,
+otherwise pass the path to the file with -p) with
 
 `uv run identify.py path/to/directory -t`
 
-The script takes the smallest file for each conversion policy and converts it. The converted files are located in _WORKINGDIR/_TEST.
+The script takes the smallest file for each conversion policy and converts it.
+The converted files are located in _WORKINGDIR/_TEST.
 
 If you just want to test a specific policy, append f and the puid
 
 `uv run identify.py path/to/directory -tf fmt/XXX`
 
-
 ## Modifying Default Settings
 
-The default setting for file conversion are in **fileindentification/policies/default.py**, you can add or modify the entries there. all other
-settings such as default path values or hash algorithm are in **fileidentification/conf/settings.py**
+The default setting for file conversion are in **fileidentification/policies/default.py**, you can add or modify the
+entries there. All other settings such as default path values or hash algorithm are in
+**fileidentification/conf/settings.py**
 
 ## Options
 
-**-i**
-[--integrity-tests] tests the files for their integrity
+`-i`
+[`--integrity-tests`] tests the files for their integrity
 
-**-v**
-[--verbose] catches more warnings on video and image files during the integrity tests.
+`-v`
+[`--verbose`] catches more warnings on video and image files during the integrity tests.
 this can take a significantly longer based on what files you have. As an addition,
 it handles some warnings as an error.
 
-**-a**
-[--apply] applies the policies
+`-a`
+[`--apply`] applies the policies
 
-**-r**
-[--remove-tmp] removes all temporary items and adds the converted files next to their parents.
+`-r`
+[`--remove-tmp`] removes all temporary items and adds the converted files next to their parents.
 
-**-x**
-[--remove-original] this overwrites the remove_original value in the policies and sets it to true when removing the tmp
-files. the original files are moved to the WORKINGDIR/_REMOVED folder.
-when used in generating policies, it sets remove_original in the policies to true (default false)
+`-x`
+[`--remove-original`] this overwrites the remove_original value in the policies and sets it to true when removing
+the tmp files. the original files are moved to the WORKINGDIR/_REMOVED folder.
+When used in generating policies, it sets remove_original in the policies to true (default false).
 
-**-p path/to/policies.json**
-[--policies-path] load a custom policies json file
+`-p`
+[`--policies-path`] load a custom policies json file
 
-**-w path/to/workingdir**
-[--working-dir] set a custom working directory. default is path/to/directory_WORKINGDIR
+`-w`
+[`--working-dir`] set a custom working directory. default is path/to/directory_WORKINGDIR
 
-**-s**
-[--strict] when run in strict mode, it moves the files that are not listed in policies.json to the folder _REMOVED (instead of throwing a warning).
-When used in generating policies, it does not add blank policies for formats that are not mentioned in fileidentification/policies/default.py
+`-s`
+[`--strict`] when run in strict mode, it moves the files that are not listed in policies.json to the folder _REMOVED
+(instead of throwing a warning).
+When used in generating policies, it does not add blank policies for formats that are not mentioned in
+fileidentification/policies/default.py
 
-**-b**
-[--blank] creates a blank policies based on the files encountered in the given directory
+`-b`
+[`--blank`] creates a blank policies based on the files encountered in the given directory.
 
-**-e**
-[--extend-policies] append filetypes found in the directory to the given policies if they are missing in it.
+`-e`
+[`--extend-policies`] append filetypes found in the directory to the given policies if they are missing in it.
 
-**-q**
-[--quiet] just print errors and warnings
+`-q`
+[`--quiet`] just print errors and warnings
 
-**--csv**
+`--csv`
 get an additional output as csv aside from the log.json
 
-**--convert**
+`--convert`
 re-convert the files that failed during file conversion
 
 ## using it in your code
 
-as long as you have all the dependencies installed and run python **version >=3.8**, have **typer** installed in your project, you can copy the fileidentification folder into your project folder and import the FileHandler to your code
+as long as you have all the dependencies installed and run python **version >=3.8**, have **typer** and **pydanic**
+installed in your project, you can copy the fileidentification folder into your project folder and import the
+FileHandler to your code
 
 ```python
 from fileidentification.filehandling import FileHandler
@@ -253,7 +278,7 @@ fh.run("path/to/directory")
 
 # or if you just want to do integrity tests
 fh = FileHandler()
-fh.integrity_tests("path/to/directoy")
+fh.integrity_tests("path/to/directory")
 
 # log it at some point and have an additional csv
 fh.write_logs("path/where/to/log", to_csv=True)
@@ -268,21 +293,22 @@ uv run update.py
 
 ## Useful Links
 
-You'll find a good resource to query for fileformats on [nationalarchives.gov.uk](https://www.nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new)
+You'll find a good resource to query for fileformats on
+[nationalarchives.gov.uk](https://www.nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new)
 
-The Homepage of Siegfried
+The Homepage of siegfried
 [https://www.itforarchivists.com/siegfried/]([https://www.itforarchivists.com/siegfried/)
 
 Signatures
 [https://en.wikipedia.org/wiki/List_of_file_signatures]([https://en.wikipedia.org/wiki/List_of_file_signatures)
 
-Preservation recommondations
+Preservation recommendations
 [kost](https://kost-ceco.ch/cms/de.html)
 [bundesarchiv](https://www.bar.admin.ch/dam/bar/de/dokumente/konzepte_und_weisungen/archivtaugliche_dateiformate.1.pdf.download.pdf/archivtaugliche_dateiformate.pdf)
 
 **NOTE**
 if you want to convert to pdf/A, you need LibreOffice version 7.4+
 
-when you convert svg, you might run into errors as the default library of imagemagick is not that good. easiest workaround
-is installing inkscape ( `brew install --cask inkscape` ), make sure that you reinstall imagemagick, so its uses inkscape
-as default for converting svg ( `brew remove imagemagick` , `brew install imagemagick`)
+when you convert svg, you might run into errors as the default library of imagemagick is not that good.
+easiest workaround is installing inkscape ( `brew install --cask inkscape` ), make sure that you reinstall imagemagick,
+so its uses inkscape as default for converting svg ( `brew remove imagemagick` , `brew install imagemagick`)
