@@ -297,10 +297,10 @@ You'll find a good resource to query for fileformats on
 [nationalarchives.gov.uk](https://www.nationalarchives.gov.uk/PRONOM/Format/proFormatSearch.aspx?status=new)
 
 The Homepage of siegfried
-[itforarchivists.com/siegfried/]([https://www.itforarchivists.com/siegfried/)
+[itforarchivists.com/siegfried/](https://www.itforarchivists.com/siegfried/)
 
 List of File Signatures on
-[wikipedia]([https://en.wikipedia.org/wiki/List_of_file_signatures)
+[wikipedia](https://en.wikipedia.org/wiki/List_of_file_signatures)
 
 Preservation recommendations
 [kost](https://kost-ceco.ch/cms/de.html)
