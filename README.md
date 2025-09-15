@@ -1,24 +1,24 @@
 # Fileidentification
 
 A python CLI to identify file formats and bulk convert files. It is designed for digital preservation workflows
-and is basically a python wrapper around several programs. It uses siegfried, ffmpeg, imagemagick (inkscape)
-and LibreOffice, so you need to have those installed for this to work. Most probable use case might be
-when you need to test and possibly convert a huge amount of files and you don't know in advance
+and is basically a python wrapper around several programs. It uses [pygfried](https://pypi.org/project/pygfried/)
+(a CPython extension for [siegfried](https://www.itforarchivists.com/siegfried)), ffmpeg, imagemagick (inkscape) and
+LibreOffice, so you need to have those installed for this to work.
+Most probable use case might be when you need to test and possibly convert a huge amount of files and you don't know in advance
 what file types you are dealing with. It features:
 
-- file format identification and extraction of technical metadata with siegfried, ffprobe and imagemagick
+- file format identification and extraction of technical metadata with pygfried, ffprobe and imagemagick
 - file integrity testing with ffmpeg and imagemagick
 - file conversion with ffmpeg, imagemagick and LibreOffice using a json file as a protocol
 - detailed logging
 
 ## Required Programs
 
-Install siegfried, ffmpeg, imagemagick (inkscape) and LibreOffice if not already installed.
+Install ffmpeg, imagemagick (inkscape) and LibreOffice if not already installed.
 
 ### MacOS (using homebrew)
 
 ```bash
-brew install richardlehane/digipres/siegfried
 brew install ffmpeg
 brew install --cask inkscape
 brew install imagemagick
@@ -30,21 +30,12 @@ brew install --cask libreoffice
 
 Depending on your distribution:
 
-- [siegfried](https://github.com/richardlehane/siegfried/wiki/Getting-started)
 - [ffmpeg](https://ffmpeg.org/download.html#build-linux)
 - [imagemagick](https://imagemagick.org/script/download.php#linux)
 - [inkscape](https://wiki.inkscape.org/wiki/Installing_Inkscape#Linux)
 - [LibreOffice](https://www.libreoffice.org/download/download-libreoffice)
 
-On Debian/Ubuntu, add siegfried to the apt sources:
-
-```bash
-curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x20F802FE798E6857" | gpg --dearmor | sudo tee /usr/share/keyrings/siegfried-archive-keyring.gpg
-echo "deb [signed-by=/usr/share/keyrings/siegfried-archive-keyring.gpg] https://www.itforarchivists.com/ buster main" | sudo tee -a /etc/apt/sources.list.d/siegfried.list
-sudo apt-get update && sudo apt-get install siegfried
-```
-
-ffmpeg, inkscape imagemagick and LibreOffice:
+On Debian/Ubuntu
 
 ```bash
 sudo apt-get update
@@ -288,7 +279,7 @@ fh.write_logs("path/where/to/log", to_csv=True)
 ## Updating Signatures
 
 ```bash
-uv run update.py
+uv run update.py && uv lock --upgrade
 ```
 
 ## Useful Links

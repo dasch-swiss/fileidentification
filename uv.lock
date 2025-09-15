@@ -96,6 +96,7 @@ dependencies = [
     { name = "beautifulsoup4" },
     { name = "lxml" },
     { name = "pydantic" },
+    { name = "pygfried" },
     { name = "requests" },
     { name = "rich" },
     { name = "typer" },
@@ -106,6 +107,7 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.13.1" },
     { name = "lxml", specifier = ">=5.1.0" },
     { name = "pydantic", specifier = ">=2.11.7" },
+    { name = "pygfried", specifier = ">=0.12.0" },
     { name = "requests", specifier = ">=2.31.0" },
     { name = "rich", specifier = ">=13.7.1" },
     { name = "typer", specifier = ">=0.10.0" },
@@ -238,6 +240,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/a4/7d/e09391c2eebeab681df2b74bfe6c43422fffede8dc74187b2b0bf6fd7571/pydantic_core-2.33.2-cp313-cp313t-macosx_11_0_arm64.whl", hash = "sha256:61c18fba8e5e9db3ab908620af374db0ac1baa69f0f32df4f61ae23f15e586ac", size = 1806162 },
     { url = "https://files.pythonhosted.org/packages/f1/3d/847b6b1fed9f8ed3bb95a9ad04fbd0b212e832d4f0f50ff4d9ee5a9f15cf/pydantic_core-2.33.2-cp313-cp313t-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:95237e53bb015f67b63c91af7518a62a8660376a6a0db19b89acc77a4d6199f5", size = 1981560 },
     { url = "https://files.pythonhosted.org/packages/6f/9a/e73262f6c6656262b5fdd723ad90f518f579b7bc8622e43a942eec53c938/pydantic_core-2.33.2-cp313-cp313t-win_amd64.whl", hash = "sha256:c2fc0a768ef76c15ab9238afa6da7f69895bb5d1ee83aeea2e3509af4472d0b9", size = 1935777 },
+]
+
+[[package]]
+name = "pygfried"
+version = "0.12.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/32/8d/9262e3a2c41892627a9a1803af8c992767d32b7d6df54f04de150471c925/pygfried-0.12.0.tar.gz", hash = "sha256:0e7e23a11c0348dab857a9a5cd0ef25b6d36cd3f157fe9f1da3b62e2319602c2", size = 219403 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fc/80/34cef93f7a2ff5510c22a5e889af3ec308105b9ce956c55c4069790fd9ae/pygfried-0.12.0-cp312-cp312-win_amd64.whl", hash = "sha256:e9d3503d1cf6cfe287ef09dad685397feb0184f220a9ee5f851ca878d2000d71", size = 2112246 },
+    { url = "https://files.pythonhosted.org/packages/d1/89/9070e39ad05523d5ef761a0b9db601b3b63a2c3150850837d97ea91f4bd1/pygfried-0.12.0-cp313-cp313-win_amd64.whl", hash = "sha256:b1fdcecf143543c4625e9ee47e5a4cb9107de48c190f531706cc4dd34029a1be", size = 2112215 },
+    { url = "https://files.pythonhosted.org/packages/f3/e2/d927e95411f5f32fb5d8fa1b0b4a40ee2f45566abdce28a417263e628cf7/pygfried-0.12.0-cp39-abi3-macosx_14_0_universal2.whl", hash = "sha256:bc8c80494f74efd6c241522b7d3c42832f008e3dd4b7c0687fed2c21f0d7c21b", size = 1957676 },
+    { url = "https://files.pythonhosted.org/packages/c3/93/d15a2e4a21ac04562b96c36ce9d4f24857aa86cf5a8efffca7c2689752bb/pygfried-0.12.0-cp39-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:6531a848043051cc1d852ddabf938b6494f7c65403b659bfb21d7fbcd320fdeb", size = 2140277 },
 ]
 
 [[package]]

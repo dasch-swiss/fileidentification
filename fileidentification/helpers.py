@@ -1,8 +1,5 @@
 import math
-import hashlib
-from pathlib import Path
 from fileidentification.models import SfInfo
-from fileidentification.conf.settings import SiegfriedConf
 
 
 def format_bite_size(bytes_size: int) -> str:
@@ -17,20 +14,12 @@ def format_bite_size(bytes_size: int) -> str:
     return f'{round(tmp, 3)} MB'
 
 
-def get_hash(path: str | Path) -> hashlib.sha256:
-    sha256 = hashlib.sha256()
-    with open(path, "rb") as s:
-        for chunk in iter(lambda: s.read(4096), b""):
-            sha256.update(chunk)
-    return sha256.hexdigest()
-
-
 def sfinfo2csv(sfinfo: SfInfo) -> dict:
     res = {"filename": f'{sfinfo.filename}',
            "filesize": sfinfo.filesize,
            "modified": sfinfo.modified,
            "errors": sfinfo.errors,
-           SiegfriedConf.ALG: sfinfo.filehash}
+           "md5": sfinfo.md5}
     if sfinfo.status.pending:
         res.update({"status": "pending"})
     if sfinfo.status.added:

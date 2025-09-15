@@ -5,14 +5,14 @@ import shutil
 import json
 import csv
 import typer
+import pygfried
 from time import time
 from datetime import datetime
 from typer import secho, colors
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from pathlib import Path
 from dataclasses import dataclass
-from fileidentification.wrappers.wrappers import Siegfried as Sf, Ffmpeg, Converter as Con, ImageMagick, Rsync
-from fileidentification.wrappers import homebrew_packeges
+from fileidentification.wrappers.wrappers import Ffmpeg, Converter as Con, ImageMagick, Rsync
 from fileidentification.output import Output
 from fileidentification.conf.settings import (PathsConfig, LibreOfficePath, FileDiagnosticsMsg, PolicyMsg, FileProcessingMsg,
                                               JsonOutput, Bin, ErrMsgReencode, CSVFIELDS)
@@ -138,7 +138,7 @@ class FileHandler:
         dest = sfinfo._path.with_suffix(ext)
         # if a file with same name and extension already there, append file hash to name
         if sfinfo._path.with_suffix(ext).is_file():
-            dest = sfinfo._path.parent / f'{sfinfo._path.stem}_{sfinfo.filehash[:6]}{ext}'
+            dest = sfinfo._path.parent / f'{sfinfo._path.stem}_{sfinfo.md5[:6]}{ext}'
         os.rename(sfinfo._path, dest)
         msg = f'did rename {sfinfo._path.name} -> {dest.name}'
         sfinfo._path, sfinfo.filename = dest, dest.relative_to(sfinfo._root_folder)
@@ -293,13 +293,12 @@ class FileHandler:
             # append the root path values
             [sfinfo.set_processing_paths(root_folder, self.wdir) for sfinfo in self.stack if not sfinfo.status.removed]
 
-        # else scan the root_folder with siegfried
+        # else scan the root_folder with pygfried
         if not self.stack:
             with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True,) as prog:
                 prog.add_task(description="analysing files with siegfried...", total=None)
-                sfoutput = Sf.analyse(root_folder)
-            # get the json output from siegfried and parse it to SfInfo
-            [self.stack.append(SfInfo(**metadata)) for metadata in sfoutput]
+                [self.stack.append(SfInfo(**pygfried.identify(f'{f}', detailed=True)["files"][0]))
+                 for f in Path("testdata").rglob("*") if f.is_file()]
             # append the path values, set sfinfo.filename relative to root_folder
             [sfinfo.set_processing_paths(root_folder, self.wdir, initial=True) for sfinfo in self.stack]
 
@@ -413,7 +412,7 @@ class FileHandler:
                 abs_dest = sfinfo._root_folder / sfinfo.dest / sfinfo.filename.name
                 # append hash to filename if the path already exists
                 if abs_dest.is_file():
-                    abs_dest = Path(abs_dest.parent, f'{sfinfo.filename.stem}_{sfinfo.filehash[:6]}{sfinfo.filename.suffix}')
+                    abs_dest = Path(abs_dest.parent, f'{sfinfo.filename.stem}_{sfinfo.md5[:6]}{sfinfo.filename.suffix}')
                 # move the file
                 err, msg, cmd = Rsync.copy(sfinfo.filename, abs_dest)
                 # check if the return status is true
@@ -539,7 +538,7 @@ class FileConverter:
         target_sfinfo = None
         if target.is_file():
             # generate a SfInfo of the converted file
-            target_sfinfo = SfInfo(**Sf.analyse(target)[0])
+            target_sfinfo = SfInfo(**pygfried.identify(f'{target}', detailed=True)["files"][0])
             # only add postprocessing information if conversion was successful
             if target_sfinfo.processed_as in expected:
                 target_sfinfo.dest = sfinfo.filename.parent
