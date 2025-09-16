@@ -74,7 +74,7 @@ class SfInfo(BaseModel):
         self._root_folder = root_folder
         self._wdir = wdir
         if initial:
-            self.filename = self.filename.parent.relative_to(root_folder.name) / self.filename.name
+            self.filename = self.filename.parent.relative_to(root_folder) / self.filename.name
         if not self.dest:
             self._path = self._root_folder / self.filename
 

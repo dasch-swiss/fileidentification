@@ -298,7 +298,9 @@ class FileHandler:
             with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True,) as prog:
                 prog.add_task(description="analysing files with siegfried...", total=None)
                 [self.stack.append(SfInfo(**pygfried.identify(f'{f}', detailed=True)["files"][0]))
-                 for f in Path("testdata").rglob("*") if f.is_file()]
+                 for f in root_folder.rglob("*") if f.is_file()]
+                if root_folder.is_file():
+                    self.stack.append(SfInfo(**pygfried.identify(f'{root_folder}', detailed=True)["files"][0]))
             # append the path values, set sfinfo.filename relative to root_folder
             [sfinfo.set_processing_paths(root_folder, self.wdir, initial=True) for sfinfo in self.stack]
 
