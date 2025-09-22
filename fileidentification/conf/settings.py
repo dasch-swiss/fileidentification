@@ -12,7 +12,7 @@ class Bin(StrEnum):
     MAGICK = "magick"
     FFMPEG = "ffmpeg"
     SOFFICE = "soffice"
-    INCSCAPE = "inkscape"
+    # INCSCAPE = "inkscape"
     EMPTY = ""
 
 

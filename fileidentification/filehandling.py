@@ -81,7 +81,7 @@ class FileHandler:
             else:
                 msg = f'expecting one of the following ext: {[el for el in self.fmt2ext[puid]["file_extensions"]]}'
                 sfinfo.processing_logs.append(LogMsg(name='filehandler', msg=msg))
-                secho(f'WARNING: you should manually rename {sfinfo.filename}\n{sfinfo.processing_logs}', fg=colors.YELLOW)
+                secho(f'\nWARNING: you should manually rename {sfinfo.filename}\n{msg}', fg=colors.YELLOW)
             self.log_tables.diagnostics_add(sfinfo, FileDiagnosticsMsg.EXTMISMATCH)
 
         # check if the file throws any errors while open/processing it with the respective bin
@@ -159,7 +159,9 @@ class FileHandler:
             if sfinfo.processed_as not in self.policies.keys():
                 return False
 
-        pbin = self.policies[sfinfo.processed_as]["bin"]
+        pbin = ""
+        if sfinfo.processed_as in self.policies:
+            pbin = self.policies[sfinfo.processed_as]["bin"]
         # select bin out of mimetype if not specified in policies
         if pbin == "" and sfinfo.matches[0]["mime"] != "":
             if sfinfo.matches[0]["mime"].split("/")[0] in ["image", "audio", "video"]:
@@ -180,7 +182,7 @@ class FileHandler:
                     if any([msg in warning for msg in ErrMsgReencode]):
                         sfinfo.processing_logs.append(LogMsg(name="filehandler", msg="re-encoding the file"))
                         sfinfo.status.pending = True
-            case Bin.MAGICK | Bin.INCSCAPE:
+            case Bin.MAGICK:
                 error, warning, specs = ImageMagick.is_corrupt(sfinfo, verbose=self.mode.VERBOSE)
                 if specs and not sfinfo.media_info:
                     sfinfo.media_info.append(LogMsg(name=Bin.MAGICK, msg=specs))
@@ -415,6 +417,9 @@ class FileHandler:
                 # append hash to filename if the path already exists
                 if abs_dest.is_file():
                     abs_dest = Path(abs_dest.parent, f'{sfinfo.filename.stem}_{sfinfo.md5[:6]}{sfinfo.filename.suffix}')
+                # if its converted with docker container but -r flag is executed outside of docker, change the path
+                if not sfinfo.filename.is_file():
+                    sfinfo.filename = sfinfo._root_folder.parent / sfinfo.filename.relative_to("/data")
                 # move the file
                 err, msg, cmd = Rsync.copy(sfinfo.filename, abs_dest)
                 # check if the return status is true
@@ -525,7 +530,7 @@ class FileConverter:
             case Bin.FFMPEG:
                 streams = Ffmpeg.media_info(sfinfo.filename)
                 sfinfo.media_info.append(LogMsg(name="ffmpeg", msg=json.dumps(streams)))
-            case Bin.MAGICK | Bin.INCSCAPE:
+            case Bin.MAGICK:
                 sfinfo.media_info.append(LogMsg(name="imagemagick", msg=ImageMagick.media_info(sfinfo.filename)))
             case _:
                 pass

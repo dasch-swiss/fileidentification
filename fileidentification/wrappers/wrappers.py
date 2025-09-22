@@ -146,8 +146,8 @@ class Converter:
             case Bin.MAGICK:
                 cmd = f'magick {args["processing_args"]} {inputfile} {outfile} 2> {logfile}'
             # construct command if its inkscape
-            case Bin.INCSCAPE:
-                cmd = f'inkscape --export-filename={outfile} {args["processing_args"]} {inputfile} 2> {logfile}'
+            # case Bin.INCSCAPE:
+                # cmd = f'inkscape --export-filename={outfile} {args["processing_args"]} {inputfile} 2> {logfile}'
             # construct command if its LibreOffice
             case Bin.SOFFICE:
                 cmd = f'{soffice} {args["processing_args"]} {args["target_container"]} {inputfile} '

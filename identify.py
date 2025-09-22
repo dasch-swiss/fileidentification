@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 import typer
 from typing_extensions import Annotated
 from fileidentification.filehandling import FileHandler
@@ -35,15 +36,46 @@ def main(
             help="catches more warnings on video and image files during the integrity tests")] = False,
         mode_quiet: Annotated[bool, typer.Option("--quiet", "-q",
             help="just print errors and warnings")] = False,
-        to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False
+        to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False,
+        use_docker: Annotated[bool, typer.Option("--docker", help="run the script in a docker container")] = False
     ):
 
-    fh = FileHandler()
-    fh.run(root_folder=root_folder, tmp_dir=tmp_dir,
-           integrity_tests=integrity_tests, apply=apply, convert=convert, remove_tmp=remove_tmp,
-           policies_path=policies_path, blank=blank, extend=extend, test_puid=test_puid, test_policies=test_policies,
-           remove_original=remove_original, mode_strict=mode_strict, mode_verbose=mode_verbose, mode_quiet=mode_quiet,
-           to_csv=to_csv)
+    if use_docker:
+        print("... creating docker image. this may take a while ... \n")
+        subprocess.run(["docker", "build", "-t", "fileconverter", "."])
+        cmd = ["docker", "run", "--rm", "-v", f'{root_folder.parent}:/data', "fileconverter:latest",
+               ".venv/bin/python3", "identify.py", f'/data/{root_folder.name}']
+        if integrity_tests:
+            cmd.append("-i")
+        if mode_verbose:
+            cmd.append("-v")
+        if apply:
+            cmd.append("-a")
+        if remove_tmp:
+            cmd.append("-r")
+        if remove_original:
+            cmd.append("-x")
+        if test_policies:
+            cmd.append("-t")
+        if test_puid:
+            cmd.extend(["-tf", test_puid])
+        if mode_quiet:
+            cmd.append("-q")
+        if mode_strict:
+            cmd.append("-s")
+        if convert:
+            cmd.append("--convert")
+        if to_csv:
+            cmd.append("--csv")
+        subprocess.run(cmd)
+
+    else:
+        fh = FileHandler()
+        fh.run(root_folder=root_folder, tmp_dir=tmp_dir,
+               integrity_tests=integrity_tests, apply=apply, convert=convert, remove_tmp=remove_tmp,
+               policies_path=policies_path, blank=blank, extend=extend, test_puid=test_puid, test_policies=test_policies,
+               remove_original=remove_original, mode_strict=mode_strict, mode_verbose=mode_verbose, mode_quiet=mode_quiet,
+               to_csv=to_csv)
 
 
 if __name__ == "__main__":
