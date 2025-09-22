@@ -2,12 +2,6 @@ from enum import StrEnum
 
 
 # application settings
-class SiegfriedConf(StrEnum):
-    """siegfried parameters"""
-    ALG = "sha256"
-    MULTI = "256"
-
-
 class DroidSigURL(StrEnum):
     """urls to fetch droid signature xml from national archives"""
     NALIST = "https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm"
@@ -18,7 +12,7 @@ class Bin(StrEnum):
     MAGICK = "magick"
     FFMPEG = "ffmpeg"
     SOFFICE = "soffice"
-    INCSCAPE = "inkscape"
+    # INCSCAPE = "inkscape"
     EMPTY = ""
 
 
@@ -54,7 +48,7 @@ class JsonOutput(StrEnum):
     LOG = "_log.json"
 
 
-CSVFIELDS = ["filename", "filesize", SiegfriedConf.ALG, "modified", "errors", "processed_as", "media_info",
+CSVFIELDS = ["filename", "filesize", "md5", "modified", "errors", "processed_as", "media_info",
              "processing_logs", "status", "derived_from"]
 
 

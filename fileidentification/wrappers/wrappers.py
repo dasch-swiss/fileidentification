@@ -5,8 +5,8 @@ import os
 from abc import ABC
 from pathlib import Path
 from typing import Union, Any
-from fileidentification.models import SFoutput, SfInfo
-from fileidentification.conf.settings import SiegfriedConf, LibreOfficePath, ErrMsgFF, ErrMsgIM, LibreOfficePdfSettings, Bin
+from fileidentification.models import SfInfo
+from fileidentification.conf.settings import LibreOfficePath, ErrMsgFF, ErrMsgIM, LibreOfficePdfSettings, Bin
 
 
 class Analytics(ABC):
@@ -19,21 +19,6 @@ class Analytics(ABC):
     def parse_output(sfinfo: SfInfo, std_out, std_err, verbose: bool = False) \
             -> tuple[bool, str, str | dict[str, Any] | None]:
         ...
-
-class Siegfried:
-    @staticmethod
-    def analyse(path: Union[str, Path]) -> list[SFoutput]:
-        """analyse a file or folder recursively, returns a list of files with the information
-        gathered with siegfried in json"""
-        res = subprocess.run(["sf", "-json", "-hash", SiegfriedConf.ALG,
-                              "-multi", SiegfriedConf.MULTI,  path], capture_output=True, text=True)
-        res.check_returncode()
-        res = json.loads(res.stdout)
-        return res['files']
-
-    @staticmethod
-    def update() -> None:
-        subprocess.run(["sf", "-update"])
 
 
 class Ffmpeg(Analytics):
@@ -138,7 +123,7 @@ class Converter:
         :returns the constructed target path, the cmd run and the log path
         """
 
-        wdir = Path(sfinfo._wdir / f'{sfinfo.filename.name}_{sfinfo.filehash[:6]}')
+        wdir = Path(sfinfo._wdir / f'{sfinfo.filename.name}_{sfinfo.md5[:6]}')
         if not wdir.exists():
             os.makedirs(wdir)
 
@@ -161,8 +146,8 @@ class Converter:
             case Bin.MAGICK:
                 cmd = f'magick {args["processing_args"]} {inputfile} {outfile} 2> {logfile}'
             # construct command if its inkscape
-            case Bin.INCSCAPE:
-                cmd = f'inkscape --export-filename={outfile} {args["processing_args"]} {inputfile} 2> {logfile}'
+            # case Bin.INCSCAPE:
+                # cmd = f'inkscape --export-filename={outfile} {args["processing_args"]} {inputfile} 2> {logfile}'
             # construct command if its LibreOffice
             case Bin.SOFFICE:
                 cmd = f'{soffice} {args["processing_args"]} {args["target_container"]} {inputfile} '

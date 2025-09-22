@@ -1,12 +1,12 @@
 from __future__ import annotations
 import re
+import hashlib
 from datetime import datetime, UTC
-from typing import Type, Dict, Any
 from dataclasses import dataclass, field
 from pydantic import BaseModel, Field
 from enum import StrEnum
 from pathlib import Path
-from fileidentification.conf.settings import SiegfriedConf, PolicyMsg
+from fileidentification.conf.settings import PolicyMsg
 
 
 class LogMsg(BaseModel):
@@ -33,7 +33,7 @@ class SfInfo(BaseModel):
     filesize: int
     modified: str
     errors: str
-    filehash: str = Field(alias=SiegfriedConf.ALG)
+    md5: str = None
     matches: list | None = None
     # added during processing
     status: Status | None = None
@@ -53,6 +53,8 @@ class SfInfo(BaseModel):
             self.status = Status()
         if not self.processed_as:
             self.processed_as = self._fetch_puid()
+        if not self.md5:
+            self.md5 = get_md5(self.filename)
 
     def _fetch_puid(self) -> str | None:
         if self.matches[0]['id'] == 'UNKNOWN':
@@ -113,10 +115,10 @@ class BasicAnalytics:
 
     def append(self, sfinfo: SfInfo):
         if sfinfo.processed_as:
-            if sfinfo.filehash not in self.filehashes:
-                self.filehashes[sfinfo.filehash] = [sfinfo.filename]
+            if sfinfo.md5 not in self.filehashes:
+                self.filehashes[sfinfo.md5] = [sfinfo.filename]
             else:
-                self.filehashes[sfinfo.filehash].append(sfinfo.filename)
+                self.filehashes[sfinfo.md5].append(sfinfo.filename)
             if sfinfo.processed_as not in self.puid_unique:
                 self.puid_unique[sfinfo.processed_as] = [sfinfo]
             else:
@@ -128,20 +130,9 @@ class BasicAnalytics:
             self.puid_unique[puid] = sorted(self.puid_unique[puid], key=lambda x: x.filesize, reverse=False)
 
 
-
-SFoutput: Type = Dict[str, Any]
-"""
-single file information output of siegfried (json)
-
-has the following values among others
-
-{
-    "filename": "abs/path/to/file.ext",
-    "matches": [
-        {
-            "id": "processed_as",
-            "warning": "some warnings"
-        }
-    ]
-}
-"""
+def get_md5(path: str | Path) -> hashlib.sha256:
+    md5 = hashlib.md5()
+    with open(path, "rb") as s:
+        for chunk in iter(lambda: s.read(4096), b""):
+            md5.update(chunk)
+    return md5.hexdigest()

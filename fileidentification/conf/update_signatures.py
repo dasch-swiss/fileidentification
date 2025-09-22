@@ -7,7 +7,6 @@ import typer
 from typer import secho, colors
 from bs4 import BeautifulSoup
 from fileidentification.conf.settings import PathsConfig, DroidSigURL
-from fileidentification.wrappers.wrappers import Siegfried
 
 
 def write_fmt2ext(link=None, outpath=""):
@@ -86,10 +85,6 @@ def update_signatures():
 
     # update fm
     write_fmt2ext(link=link, outpath=PathsConfig.FMT2EXT)
-
-    # update siegfried
-    secho("... updating siegfried")
-    Siegfried.update()
 
 
 if __name__ == '__main__':

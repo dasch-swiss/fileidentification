@@ -11,10 +11,10 @@ class PolicyParams:
     format_name: str = field(default_factory=str)
     bin: str = field(default_factory=str)
     accepted: bool = True
-    remove_original: bool = False
     target_container: str = field(default_factory=str)
     processing_args: str = field(default_factory=str)
     expected: list = field(default_factory=list)
+    remove_original: bool = False
 
 
 def generate_policies(outpath: Path, ba: BasicAnalytics, fmt2ext: dict, strict: bool = False, remove_original: bool = False,

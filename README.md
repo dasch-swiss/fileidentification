@@ -1,54 +1,48 @@
 # Fileidentification
 
 A python CLI to identify file formats and bulk convert files. It is designed for digital preservation workflows
-and is basically a python wrapper around several programs. It uses siegfried, ffmpeg, imagemagick (inkscape)
-and LibreOffice, so you need to have those installed for this to work. Most probable use case might be
-when you need to test and possibly convert a huge amount of files and you don't know in advance
-what file types you are dealing with. It features:
+and is basically a python wrapper around several programs. It uses [pygfried](https://pypi.org/project/pygfried/)
+(a CPython extension for [siegfried](https://www.itforarchivists.com/siegfried)), ffmpeg, imagemagick (optionally inkscape) and
+LibreOffice, so it's recommended to have those installed. If you are not using fileidentification a lot and don't want
+to install these programs, you can run the script in a docker container. There is a dockerfile ready, the current docker
+image is still heavy though.
 
-- file format identification and extraction of technical metadata with siegfried, ffprobe and imagemagick
+Most probable use case might be when you need to test and possibly convert a huge amount of files and you
+don't know in advance what file types you are dealing with. It features:
+
+- file format identification and extraction of technical metadata with pygfried, ffprobe and imagemagick
 - file integrity testing with ffmpeg and imagemagick
 - file conversion with ffmpeg, imagemagick and LibreOffice using a json file as a protocol
 - detailed logging
 
-## Required Programs
+## Installation
 
-Install siegfried, ffmpeg, imagemagick (inkscape) and LibreOffice if not already installed.
+### Recommended Programs
 
-### MacOS (using homebrew)
+Install ffmpeg, imagemagick and LibreOffice if not already installed, or alternatively use a docker image.
+
+#### MacOS (using homebrew)
 
 ```bash
-brew install richardlehane/digipres/siegfried
 brew install ffmpeg
-brew install --cask inkscape
 brew install imagemagick
 brew install ghostscript
 brew install --cask libreoffice
 ```
 
-### Linux
+#### Linux
 
 Depending on your distribution:
 
-- [siegfried](https://github.com/richardlehane/siegfried/wiki/Getting-started)
 - [ffmpeg](https://ffmpeg.org/download.html#build-linux)
 - [imagemagick](https://imagemagick.org/script/download.php#linux)
-- [inkscape](https://wiki.inkscape.org/wiki/Installing_Inkscape#Linux)
 - [LibreOffice](https://www.libreoffice.org/download/download-libreoffice)
 
-On Debian/Ubuntu, add siegfried to the apt sources:
-
-```bash
-curl -sL "http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x20F802FE798E6857" | gpg --dearmor | sudo tee /usr/share/keyrings/siegfried-archive-keyring.gpg
-echo "deb [signed-by=/usr/share/keyrings/siegfried-archive-keyring.gpg] https://www.itforarchivists.com/ buster main" | sudo tee -a /etc/apt/sources.list.d/siegfried.list
-sudo apt-get update && sudo apt-get install siegfried
-```
-
-ffmpeg, inkscape imagemagick and LibreOffice:
+On Debian/Ubuntu
 
 ```bash
 sudo apt-get update
-sudo apt-get install ffmpeg imagemagick ghostscript inkscape libreoffice
+sudo apt-get install ffmpeg imagemagick ghostscript libreoffice
 ```
 
 ### Python Dependencies
@@ -75,6 +69,17 @@ uv run identify.py --help
 
 3. **Test files and apply the policies:**
 `uv run indentify.py path/to/directory -iar`
+or **if you want to use a docker image:**
+`uv run indentify.py path/to/directory -iar --docker` this runs the script with the flags **-iar**
+in a docker container (see **options** below)
+
+### Docker
+
+With the flag `--docker`, the script generates a docker image and executes itself in a docker container.
+
+If you don't have the required programs installed, you need to append this flag if you run the script with
+any of the flags `-i`, `-a`, `-t` (inspecting the files, file conversion and test conversion for a policy).
+for all other options you are perfectly fine with the python dependencies.
 
 ## Single Execution Steps
 
@@ -117,10 +122,25 @@ Delete all temporary files and folders and move the converted files next to thei
 ### Combining Steps - Custom Policies and Working Directory
 
 If you don't need these intermediary steps, you can run the desired steps at once by combining their flags.
-Here is an example how to do verboose testing, applying a custom policy and set the location to the working
+Here is an example how to do verbose testing, applying a custom policy and set the location to the working
 directory other than default (see **option** below for more information about the flags):
 
 `uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json -w path/to/workingdir`
+
+Another use case example: If you have a customised policies file and want to run it against a different folder and
+apply it using docker
+
+1. First generate the policies file for the folder with using an existing policies and extend it with file formats
+encountered in the folder that are missing in the policies passed:
+`uv run identify.py path/to/directory -ep somewhere/else/policies.json`
+
+2. You might have a blank policy for a file type you didn't expect in the bulk file folder. Edit the policy with the
+desired file conversion an run test conversion in a docker container:
+`uv run identify.py path/to/directory --docker -t`
+
+3. Inspect the files verbose, apply the policies and replace the parent files with the converted ones
+all running in a docker container:
+`uv run identify.py path/to/directory -ivarx --docker`
 
 ### Log
 
@@ -153,7 +173,7 @@ A policy for a file type consists of the following fields and uses its PRONOM Un
 | **remove_original**  | **bool**       | required if field accepted is false |
 
 - `format_name`: The name of the file format.
-- `bin`: Program to convert or test the file. Literal[`""`, `"magick"`, `"ffmpeg"`, `"soffice"`, `"inkscape"`].
+- `bin`: Program to convert or test the file. Literal[`""`, `"magick"`, `"ffmpeg"`, `"soffice"`].
 (Testing currently only is supported on image/audio/video, i.e. ffmpeg and magick.)
 - `accepted`: `false` if the file needs to be converted, `true` if it doesn't.
 - `processing_args`: The arguments used with bin. Can also be an empty string if there is no need for such arguments.
@@ -261,9 +281,13 @@ get an additional output as csv aside from the log.json
 `--convert`
 re-convert the files that failed during file conversion
 
+`--docker`
+this runs the script with the flags in a docker container. Please note that with this
+option the flags **-p**, **-w**, **-b** and **-e** are ignored.
+
 ## using it in your code
 
-as long as you have all the dependencies installed and run python **version >=3.8**, have **typer** and **pydanic**
+as long as you have all the dependencies installed and run python **version >=3.8**, have **typer**, **pydanic**, **pygfried**
 installed in your project, you can copy the fileidentification folder into your project folder and import the
 FileHandler to your code
 
@@ -288,7 +312,7 @@ fh.write_logs("path/where/to/log", to_csv=True)
 ## Updating Signatures
 
 ```bash
-uv run update.py
+uv run update.py && uv lock --upgrade
 ```
 
 ## Useful Links

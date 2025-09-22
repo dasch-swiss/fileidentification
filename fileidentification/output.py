@@ -1,5 +1,5 @@
 from typer import secho, colors
-from fileidentification.conf.settings import SiegfriedConf, FileDiagnosticsMsg
+from fileidentification.conf.settings import FileDiagnosticsMsg
 from fileidentification.models import LogMsg
 from fileidentification.helpers import format_bite_size
 
@@ -72,7 +72,7 @@ class Output:
         if fh.ba.filehashes:
             secho("\n----------- duplicates -----------", bold=True)
             for k in fh.ba.filehashes:
-                print(f'\n{SiegfriedConf.ALG}: {k} - files: ')
+                print(f'\nmd5: {k} - files: ')
                 [print(f'{path}') for path in fh.ba.filehashes[k]]
             print("\n")
 
