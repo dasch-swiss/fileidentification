@@ -1,8 +1,8 @@
 import json
 import os
 from pathlib import Path
-from lxml import etree, objectify
-import requests
+from lxml import etree, objectify  # type: ignore
+import requests  # type: ignore
 import typer
 from typer import secho, colors
 from bs4 import BeautifulSoup
@@ -12,7 +12,7 @@ from fileidentification.conf.settings import PathsConfig, DroidSigURL
 def write_fmt2ext(link=None, outpath=""):
 
     if not link:
-        version = "V119.xml"
+        version = "V120.xml"
         link = f'{DroidSigURL.cdnNA}{version}'
 
     # outpath
@@ -41,11 +41,11 @@ def write_fmt2ext(link=None, outpath=""):
     objectify.deannotate(root, cleanup_namespaces=True)
 
     # parse XML and write json
-    puids: dict = {}
+    puids: dict = {}  # type: ignore
 
     for target in root.findall('.//FileFormat'):
-        format_info: dict = {}
-        file_extensions: list = []
+        format_info: dict = {}  # type: ignore
+        file_extensions: list = []  # type: ignore
 
         puid = target.attrib['PUID']
 

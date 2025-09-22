@@ -7,7 +7,7 @@ from fileidentification.filehandling import FileHandler
 
 def main(
         root_folder: Annotated[Path, typer.Argument(help="path to the directory or file")],
-        tmp_dir: Annotated[Path, typer.Option("--working-dir", "-w",
+        tmp_dir: Annotated[Path | None, typer.Option("--working-dir", "-w",
             help="path to working dir where the processed files are stored")] = None,
         integrity_tests: Annotated[bool, typer.Option("--integrity-tests", "-i",
             help="do integrity tests on the files in the selected folder")] = False,
@@ -16,13 +16,13 @@ def main(
         remove_tmp: Annotated[bool, typer.Option("--remove-tmp", "-r",
             help="removes all temporary items and moves the converted files to the folder of its original file"
                  "[with -x: it replaces the original files with the converted one]")] = False,
-        policies_path: Annotated[Path, typer.Option("--policies-path", "-p",
+        policies_path: Annotated[Path | None, typer.Option("--policies-path", "-p",
             help="path to the json file with the policies")] = None,
         blank: Annotated[bool, typer.Option("--blank", "-b",
             help="create a blank policies.json based on the files in the dir")] = False,
         extend: Annotated[bool, typer.Option("--extend-policies", "-e",
             help="append filetypes found in root_folder to the given policies if they are missing in it")] = False,
-        test_puid: Annotated[str, typer.Option("--test-filetype", "-tf",
+        test_puid: Annotated[str | None, typer.Option("--test-filetype", "-tf",
             help="test a puid from the policies with a respective sample of the directory")] = None,
         test_policies: Annotated[bool, typer.Option("--test", "-t",
             help="test all file conversions from the policies with a respective sample of the directory")] = False,

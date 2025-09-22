@@ -4,15 +4,14 @@ import hashlib
 from datetime import datetime, UTC
 from dataclasses import dataclass, field
 from pydantic import BaseModel, Field
-from enum import StrEnum
 from pathlib import Path
-from fileidentification.conf.settings import PolicyMsg
+from fileidentification.conf.settings import PolicyMsg, FileDiagnosticsMsg
 
 
 class LogMsg(BaseModel):
     name: str
     msg: str
-    timestamp: datetime = None
+    timestamp: datetime | None = None
 
     def model_post_init(self, __context):
         if not self.timestamp:
@@ -26,6 +25,17 @@ class Status(BaseModel):
     added: bool = False
 
 
+# class Match(BaseModel):
+#     ns: str = Field(default_factory=str)
+#     id: str = Field(default_factory=str)
+#     format: str = Field(default_factory=str)
+#     version: str = Field(default_factory=str)
+#     mime: str = Field(default_factory=str)
+#     fclass: str = Field(default_factory=str, alias="class")
+#     basis: str = Field(default_factory=str)
+#     warning: str = Field(default_factory=str)
+
+
 class SfInfo(BaseModel):
     """file info object mapped from siegfried output, gets extended while processing."""
     # output from siegfried
@@ -33,10 +43,10 @@ class SfInfo(BaseModel):
     filesize: int
     modified: str
     errors: str
-    md5: str = None
-    matches: list | None = None
+    md5: str = Field(default_factory=str)
+    matches: list = Field(default_factory=list)
     # added during processing
-    status: Status | None = None
+    status: Status = Field(default_factory=Status)
     processed_as: str | None = None
     media_info: list[LogMsg] = Field(default_factory=list[LogMsg])
     processing_logs: list[LogMsg] = Field(default_factory=list[LogMsg])
@@ -44,9 +54,9 @@ class SfInfo(BaseModel):
     derived_from: SfInfo | None = None
     dest: Path | None = None
     # paths used during processing, they are not written out
-    _path: Path | None = None
-    _root_folder: Path | None = None
-    _wdir: Path | None = None
+    path: Path = Field(default_factory=Path, exclude=True)
+    root_folder: Path = Field(default_factory=Path, exclude=True)
+    wdir: Path = Field(default_factory=Path, exclude=True)
 
     def model_post_init(self, __context):
         if not self.status:
@@ -57,30 +67,32 @@ class SfInfo(BaseModel):
             self.md5 = get_md5(self.filename)
 
     def _fetch_puid(self) -> str | None:
-        if self.matches[0]['id'] == 'UNKNOWN':
-            fmts = re.findall(r"(fmt|x-fmt)/([\d]+)", self.matches[0]['warning'])
-            fmts = [f'{el[0]}/{el[1]}' for el in fmts]
-            if fmts:
-                self.processing_logs.append(LogMsg(name='filehandler', msg=PolicyMsg.FALLBACK))
-                return fmts[0]
-            return None
-        else:
-            return self.matches[0]['id']
+        if self.matches:
+            if self.matches[0]['id'] == 'UNKNOWN':
+                fmts = re.findall(r"(fmt|x-fmt)/([\d]+)", self.matches[0]['warning'])
+                fmts = [f'{el[0]}/{el[1]}' for el in fmts]
+                if fmts:
+                    self.processing_logs.append(LogMsg(name='filehandler', msg=PolicyMsg.FALLBACK))
+                    return fmts[0]
+                return None
+            else:
+                return self.matches[0]['id']
+        return None
 
     def set_processing_paths(self, root_folder: Path, wdir: Path, initial=False):
 
         if root_folder.is_file():
             root_folder = root_folder.parent
-        self._root_folder = root_folder
-        self._wdir = wdir
+        self.root_folder = root_folder
+        self.wdir = wdir
         if initial:
             self.filename = self.filename.parent.relative_to(root_folder) / self.filename.name
         if not self.dest:
-            self._path = self._root_folder / self.filename
+            self.path = self.root_folder / self.filename
 
 
 class LogOutput(BaseModel):
-    files: list[SfInfo] = None
+    files: list[SfInfo] | None = None
     errors: list[SfInfo] | None = None
 
 
@@ -88,19 +100,20 @@ class LogOutput(BaseModel):
 class LogTables:
     """table to store errors and warnings"""
 
-    diagnostics: dict[StrEnum.name, list[SfInfo]] = field(default_factory=dict)
+    diagnostics: dict[str, list[SfInfo]] = field(default_factory=dict)
     errors: list[tuple[LogMsg, SfInfo]] = field(default_factory=list)
 
-    def diagnostics_add(self, sfinfo: SfInfo, reason: StrEnum):
-        if reason.name not in self.diagnostics:
-            self.diagnostics[reason.name] = []
-        self.diagnostics[reason.name].append(sfinfo)
+    def diagnostics_add(self, sfinfo: SfInfo, fdgm: FileDiagnosticsMsg):
+        if fdgm.name not in self.diagnostics:
+            self.diagnostics[fdgm.name] = []
+        self.diagnostics[fdgm.name].append(sfinfo)
 
     def dump_errors(self) -> list[SfInfo] | None:
         if self.errors:
-            [el[1].processing_logs.append(el[0]) for el in self.errors]
+            for el in self.errors:
+                el[1].processing_logs.append(el[0])
             return [el[1] for el in self.errors]
-        return
+        return None
 
 
 @dataclass
@@ -110,8 +123,7 @@ class BasicAnalytics:
     puid_unique: dict[str, list[SfInfo]] = field(default_factory=dict)
     siegfried_errors: list[SfInfo] = field(default_factory=list)
     total_size: dict[str, int] = field(default_factory=dict)
-    presets: dict[str, str] = None
-    blank: list = None
+    blank: list | None = None
 
     def append(self, sfinfo: SfInfo):
         if sfinfo.processed_as:
@@ -130,7 +142,7 @@ class BasicAnalytics:
             self.puid_unique[puid] = sorted(self.puid_unique[puid], key=lambda x: x.filesize, reverse=False)
 
 
-def get_md5(path: str | Path) -> hashlib.sha256:
+def get_md5(path: str | Path) -> str:
     md5 = hashlib.md5()
     with open(path, "rb") as s:
         for chunk in iter(lambda: s.read(4096), b""):

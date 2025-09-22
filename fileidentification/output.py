@@ -27,19 +27,15 @@ class Output:
             nbr, fmtname, = len(fh.ba.puid_unique[puid]), f'{fh.fmt2ext[puid]["name"]}'
             if fh.mode.STRICT and puid not in fh.policies:
                 pn = "strict"
-                secho(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {"": <25} | {fmtname}', fg=colors.RED)
+                secho(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {"remove": <25} | {fmtname}', fg=colors.RED)
             if puid in fh.policies and not fh.policies[puid]['accepted']:
                 bin = fh.policies[puid]['bin']
                 pn = ""
-                if fh.ba.presets and puid in fh.ba.presets:
-                   pn = fh.ba.presets[puid]
                 secho(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {bin: <25} | {fmtname}', fg=colors.YELLOW)
             if puid in fh.policies and fh.policies[puid]['accepted']:
                 pn = ""
                 if fh.ba.blank and puid in fh.ba.blank:
                     pn = "blank"
-                if fh.ba.presets and puid in fh.ba.presets:
-                   pn = fh.ba.presets[puid]
                 print(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {"": <25} | {fmtname}')
 
     @staticmethod
