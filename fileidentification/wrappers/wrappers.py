@@ -31,7 +31,7 @@ class Ffmpeg:
 
 
     @staticmethod
-    def parse_output(sfinfo: SfInfo, std_out, _, verbose: bool) -> tuple[bool, str, dict[str, Any] | None]:
+    def parse_output(sfinfo: SfInfo, std_out: str, _: str, verbose: bool) -> tuple[bool, str, dict[str, Any] | None]:
 
         std_out = std_out.replace(f'{sfinfo.path.parent}', "")
         streams = Ffmpeg.media_info(sfinfo.path)
@@ -54,7 +54,7 @@ class Ffmpeg:
         res = subprocess.run(cmd, capture_output=True)  # type: ignore
         if res.returncode == 0:
             streams = json.loads(res.stdout)['streams']
-            return streams
+            return streams  # type: ignore
         return None
 
 
@@ -100,7 +100,7 @@ class ImageMagick:
 
 class Converter:
     @staticmethod
-    def convert(sfinfo: SfInfo, args: dict, soffice: str = LibreOfficePath.Darwin) -> tuple[Path, str, Path]:
+    def convert(sfinfo: SfInfo, args: dict[str, Any], soffice: str = LibreOfficePath.Darwin) -> tuple[Path, str, Path]:
         """converts a file (filepath from SfInfo.filename to the desired format passed by the args
 
         :params sfinfo the metadata object of the file
@@ -155,7 +155,7 @@ class Converter:
 class Rsync:
 
     @staticmethod
-    def copy(source: str | Path, dest: str | Path) -> tuple[bool, str, list]:
+    def copy(source: str | Path, dest: str | Path) -> tuple[bool, str, list[str]]:
         """rsync the source to dest.
         :returns True, stderr, cmd if there was an error, else False, stderr, cmd"""
         cmd = ['rsync', '-avh', str(source), str(dest)]

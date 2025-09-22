@@ -13,7 +13,7 @@ class LogMsg(BaseModel):
     msg: str
     timestamp: datetime | None = None
 
-    def model_post_init(self, __context):
+    def model_post_init(self, __context):  # type: ignore
         if not self.timestamp:
             self.timestamp = datetime.now(UTC)
 
@@ -25,17 +25,6 @@ class Status(BaseModel):
     added: bool = False
 
 
-# class Match(BaseModel):
-#     ns: str = Field(default_factory=str)
-#     id: str = Field(default_factory=str)
-#     format: str = Field(default_factory=str)
-#     version: str = Field(default_factory=str)
-#     mime: str = Field(default_factory=str)
-#     fclass: str = Field(default_factory=str, alias="class")
-#     basis: str = Field(default_factory=str)
-#     warning: str = Field(default_factory=str)
-
-
 class SfInfo(BaseModel):
     """file info object mapped from siegfried output, gets extended while processing."""
     # output from siegfried
@@ -44,7 +33,7 @@ class SfInfo(BaseModel):
     modified: str
     errors: str
     md5: str = Field(default_factory=str)
-    matches: list = Field(default_factory=list)
+    matches: list = Field(default_factory=list)  # type: ignore
     # added during processing
     status: Status = Field(default_factory=Status)
     processed_as: str | None = None
@@ -58,7 +47,7 @@ class SfInfo(BaseModel):
     root_folder: Path = Field(default_factory=Path, exclude=True)
     wdir: Path = Field(default_factory=Path, exclude=True)
 
-    def model_post_init(self, __context):
+    def model_post_init(self, __context):  # type: ignore
         if not self.status:
             self.status = Status()
         if not self.processed_as:
@@ -73,13 +62,13 @@ class SfInfo(BaseModel):
                 fmts = [f'{el[0]}/{el[1]}' for el in fmts]
                 if fmts:
                     self.processing_logs.append(LogMsg(name='filehandler', msg=PolicyMsg.FALLBACK))
-                    return fmts[0]
+                    return fmts[0]  # type: ignore
                 return None
             else:
-                return self.matches[0]['id']
+                return self.matches[0]['id']  # type: ignore
         return None
 
-    def set_processing_paths(self, root_folder: Path, wdir: Path, initial=False):
+    def set_processing_paths(self, root_folder: Path, wdir: Path, initial: bool = False) -> None:
 
         if root_folder.is_file():
             root_folder = root_folder.parent
@@ -103,7 +92,7 @@ class LogTables:
     diagnostics: dict[str, list[SfInfo]] = field(default_factory=dict)
     errors: list[tuple[LogMsg, SfInfo]] = field(default_factory=list)
 
-    def diagnostics_add(self, sfinfo: SfInfo, fdgm: FileDiagnosticsMsg):
+    def diagnostics_add(self, sfinfo: SfInfo, fdgm: FileDiagnosticsMsg) -> None:
         if fdgm.name not in self.diagnostics:
             self.diagnostics[fdgm.name] = []
         self.diagnostics[fdgm.name].append(sfinfo)
@@ -123,9 +112,9 @@ class BasicAnalytics:
     puid_unique: dict[str, list[SfInfo]] = field(default_factory=dict)
     siegfried_errors: list[SfInfo] = field(default_factory=list)
     total_size: dict[str, int] = field(default_factory=dict)
-    blank: list | None = None
+    blank: list[str] | None = None
 
-    def append(self, sfinfo: SfInfo):
+    def append(self, sfinfo: SfInfo) -> None:
         if sfinfo.processed_as:
             if sfinfo.md5 not in self.filehashes:
                 self.filehashes[sfinfo.md5] = [sfinfo.filename]

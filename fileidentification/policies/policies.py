@@ -1,6 +1,7 @@
 import json
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
+from typing import Any
 from fileidentification.models import BasicAnalytics
 from fileidentification.conf.settings import JsonOutput
 from fileidentification.policies.default import default_policies
@@ -13,14 +14,15 @@ class PolicyParams:
     accepted: bool = True
     target_container: str = field(default_factory=str)
     processing_args: str = field(default_factory=str)
-    expected: list = field(default_factory=list)
+    expected: list[str] = field(default_factory=list)
     remove_original: bool = False
 
 
-def generate_policies(outpath: Path, ba: BasicAnalytics, fmt2ext: dict, strict: bool = False, remove_original: bool = False,
-                      blank: bool = False, loaded_pol: dict[str, PolicyParams] | None = None) -> dict:
+def generate_policies(outpath: Path, ba: BasicAnalytics, fmt2ext: dict[str, Any], strict: bool = False,
+                      remove_original: bool = False, blank: bool = False,
+                      loaded_pol: dict[str, PolicyParams] | None = None) -> dict[str, Any]:
 
-    policies: dict = {}
+    policies: dict[str, Any] = {}
     jsonfile = f'{outpath}{JsonOutput.POLICIES}'
 
     # blank caveat

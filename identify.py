@@ -38,7 +38,7 @@ def main(
             help="just print errors and warnings")] = False,
         to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False,
         use_docker: Annotated[bool, typer.Option("--docker", help="run the script in a docker container")] = False
-    ):
+    ) -> None:
 
     if use_docker:
         print("... creating docker image. this may take a while ... \n")

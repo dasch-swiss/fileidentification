@@ -1,87 +1,84 @@
 from typer import secho, colors
+from typing import Any
 from fileidentification.conf.settings import FileDiagnosticsMsg
-from fileidentification.models import LogMsg
+from fileidentification.models import LogMsg, BasicAnalytics, LogTables
 from fileidentification.helpers import format_bite_size
 
 
-class Output:
-
-    @staticmethod
-    def print_siegfried_errors(fh):
-        if fh.ba.siegfried_errors:
-            print('got the following errors from siegfried')
-            for sfinfo in fh.ba.siegfried_errors:
-                print(f'{sfinfo.filename} \n{sfinfo.errors} {Output._print_logs(sfinfo.processing_logs)}')
+def print_siegfried_errors(ba: BasicAnalytics) -> None:
+    if ba.siegfried_errors:
+        print('got the following errors from siegfried')
+        for sfinfo in ba.siegfried_errors:
+            print(f'{sfinfo.filename} \n{sfinfo.errors}')
 
 
-    @staticmethod
-    def print_fileformats(fh, puids: list[str]):
-        secho("\n----------- file formats -----------\n", bold=True)
-        secho(f"{'no. of files': <13} | {'combined size': <14} | {'fmt type': <10} | {'policy': <10} | {'bin (associated program)': <25} | {'format name'}", bold=True)
-        for puid in puids:
-            bytes_size: int = 0
-            for sfinfo in fh.ba.puid_unique[puid]:
-                bytes_size += sfinfo.filesize
-            fh.ba.total_size[puid] = bytes_size
-            size = format_bite_size(bytes_size)
-            nbr, fmtname, = len(fh.ba.puid_unique[puid]), f'{fh.fmt2ext[puid]["name"]}'
-            if fh.mode.STRICT and puid not in fh.policies:
-                pn = "strict"
-                secho(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {"remove": <25} | {fmtname}', fg=colors.RED)
-            if puid in fh.policies and not fh.policies[puid]['accepted']:
-                bin = fh.policies[puid]['bin']
-                pn = ""
-                secho(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {bin: <25} | {fmtname}', fg=colors.YELLOW)
-            if puid in fh.policies and fh.policies[puid]['accepted']:
-                pn = ""
-                if fh.ba.blank and puid in fh.ba.blank:
-                    pn = "blank"
-                print(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {"": <25} | {fmtname}')
+def print_fileformats(puids: list[str], ba: BasicAnalytics, fmt2ext: dict[str, Any],
+                      policies: dict[str, Any], strict: bool) -> None:
+    secho("\n----------- file formats -----------\n", bold=True)
+    secho(f"{'no. of files': <13} | {'combined size': <14} | {'fmt type': <10} | {'policy': <10} | {'bin (associated program)': <25} | {'format name'}", bold=True)
+    for puid in puids:
+        bytes_size: int = 0
+        for sfinfo in ba.puid_unique[puid]:
+            bytes_size += sfinfo.filesize
+        ba.total_size[puid] = bytes_size
+        size = format_bite_size(bytes_size)
+        nbr, fmtname, = len(ba.puid_unique[puid]), f'{fmt2ext[puid]["name"]}'
+        if strict and puid not in policies:
+            pn = "strict"
+            secho(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {"remove": <25} | {fmtname}', fg=colors.RED)
+        if puid in policies and not policies[puid]['accepted']:
+            bin = policies[puid]['bin']
+            pn = ""
+            secho(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {bin: <25} | {fmtname}', fg=colors.YELLOW)
+        if puid in policies and policies[puid]['accepted']:
+            pn = ""
+            if ba.blank and puid in ba.blank:
+                pn = "blank"
+            print(f'{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {"": <25} | {fmtname}')
 
-    @staticmethod
-    def print_diagnostic(fh) -> None:
 
-        # lists all corrupt files with the respective errors thrown
-        if fh.log_tables.diagnostics:
-            if FileDiagnosticsMsg.ERROR.name in fh.log_tables.diagnostics.keys():
-                secho("\n----------- errors -----------", bold=True)
-                for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.ERROR.name]:
+def print_diagnostic(log_tables: LogTables, verbose: bool) -> None:
+
+    # lists all corrupt files with the respective errors thrown
+    if log_tables.diagnostics:
+        if FileDiagnosticsMsg.ERROR.name in log_tables.diagnostics.keys():
+            secho("\n----------- errors -----------", bold=True)
+            for sfinfo in log_tables.diagnostics[FileDiagnosticsMsg.ERROR.name]:
+                print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
+                _print_logs(sfinfo.processing_logs)
+        if verbose:
+            if FileDiagnosticsMsg.WARNING.name in log_tables.diagnostics.keys():
+                secho("\n----------- warnings -----------", bold=True)
+                for sfinfo in log_tables.diagnostics[FileDiagnosticsMsg.WARNING.name]:
                     print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
-                    Output._print_logs(sfinfo.processing_logs)
-            if fh.mode.VERBOSE:
-                if FileDiagnosticsMsg.WARNING.name in fh.log_tables.diagnostics.keys():
-                    secho("\n----------- warnings -----------", bold=True)
-                    for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.WARNING.name]:
-                        print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
-                        Output._print_logs(sfinfo.processing_logs)
-                if FileDiagnosticsMsg.EXTMISMATCH.name in fh.log_tables.diagnostics.keys():
-                    secho("\n----------- extension missmatch -----------", bold=True)
-                    for sfinfo in fh.log_tables.diagnostics[FileDiagnosticsMsg.EXTMISMATCH.name]:
-                        print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
-                        Output._print_logs(sfinfo.processing_logs)
-                print("\n")
-
-    @staticmethod
-    def print_duplicates(fh) -> None:
-        # pop uniques files
-        [fh.ba.filehashes.pop(k) for k in fh.ba.filehashes.copy() if len(fh.ba.filehashes[k]) == 1]
-        if fh.ba.filehashes:
-            secho("\n----------- duplicates -----------", bold=True)
-            for k in fh.ba.filehashes:
-                print(f'\nmd5: {k} - files: ')
-                [print(f'{path}') for path in fh.ba.filehashes[k]]
+                    _print_logs(sfinfo.processing_logs)
+            if FileDiagnosticsMsg.EXTMISMATCH.name in log_tables.diagnostics.keys():
+                secho("\n----------- extension missmatch -----------", bold=True)
+                for sfinfo in log_tables.diagnostics[FileDiagnosticsMsg.EXTMISMATCH.name]:
+                    print(f'\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}')
+                    _print_logs(sfinfo.processing_logs)
             print("\n")
 
 
-    @staticmethod
-    def _print_logs(logs: list[LogMsg]):
-        for l in logs:
-            print(f'{l.timestamp}    {l.name}:    {l.msg.replace("\n", " ")}')
+def print_duplicates(ba: BasicAnalytics) -> None:
+    # pop uniques files
+    [ba.filehashes.pop(k) for k in ba.filehashes.copy() if len(ba.filehashes[k]) == 1]
+    if ba.filehashes:
+        secho("\n----------- duplicates -----------", bold=True)
+        for k in ba.filehashes:
+            print(f'\nmd5: {k} - files: ')
+            [print(f'{path}') for path in ba.filehashes[k]]
+        print("\n")
 
-    @staticmethod
-    def print_processing_errors(fh) -> None:
-        if fh.log_tables.errors:
-            secho("\n----------- processing errors -----------", bold=True)
-            for err in fh.log_tables.errors:
-                print(f'\n{format_bite_size(err[1].filesize): >10}    {err[1].filename}')
-                Output._print_logs([err[0]])
+
+def print_processing_errors(log_tables: LogTables) -> None:
+    if log_tables.errors:
+        secho("\n----------- processing errors -----------", bold=True)
+        for err in log_tables.errors:
+            print(f'\n{format_bite_size(err[1].filesize): >10}    {err[1].filename}')
+            _print_logs([err[0]])
+
+
+def _print_logs(logs: list[LogMsg]) -> None:
+    for l in logs:
+        print(f'{l.timestamp}    {l.name}:    {l.msg.replace("\n", " ")}')

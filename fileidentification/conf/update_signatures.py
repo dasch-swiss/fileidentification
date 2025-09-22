@@ -9,11 +9,7 @@ from bs4 import BeautifulSoup
 from fileidentification.conf.settings import PathsConfig, DroidSigURL
 
 
-def write_fmt2ext(link=None, outpath=""):
-
-    if not link:
-        version = "V120.xml"
-        link = f'{DroidSigURL.cdnNA}{version}'
+def write_fmt2ext(link: str, outpath: str = "") -> None:
 
     # outpath
     json_path = Path('fmt2ext.json') if not outpath else Path(outpath)
@@ -66,7 +62,7 @@ def write_fmt2ext(link=None, outpath=""):
         secho(f"extensions and names updated to {link[-8:-4]} in {json_path}", fg=colors.GREEN)
 
 
-def update_signatures():
+def update_signatures() -> None:
     # get the latest signaturefile link
     secho(f'... updating {PathsConfig.FMT2EXT}')
     url = DroidSigURL.NALIST
@@ -76,15 +72,14 @@ def update_signatures():
         raise typer.Exit(1)
 
     soup = BeautifulSoup(res.content, 'html.parser')
-    versions = [el.get("href") for el in soup.find_all("a") if el.get("href") and
-                el.get("href").startswith(DroidSigURL.cdnNA)]
-    link = (sorted(versions)[-1])
+    versions = [el.get("href") for el in soup.find_all("a") if el.get("href") and  # type: ignore
+                el.get("href").startswith(DroidSigURL.cdnNA)]  # type: ignore
+    link = (sorted(versions)[-1])  # type: ignore
     if not link:
         secho(f'could not parse links out of {url}', fg=colors.RED)
         raise typer.Exit(1)
-
     # update fm
-    write_fmt2ext(link=link, outpath=PathsConfig.FMT2EXT)
+    write_fmt2ext(link=link, outpath=PathsConfig.FMT2EXT)  # type: ignore
 
 
 if __name__ == '__main__':

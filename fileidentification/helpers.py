@@ -1,5 +1,6 @@
 import math
 from fileidentification.models import SfInfo
+from typing import Any
 
 
 def format_bite_size(bytes_size: int) -> str:
@@ -14,7 +15,7 @@ def format_bite_size(bytes_size: int) -> str:
     return f'{round(tmp, 3)} MB'
 
 
-def sfinfo2csv(sfinfo: SfInfo) -> dict:
+def sfinfo2csv(sfinfo: SfInfo) -> dict[str, Any]:
     res = {"filename": f'{sfinfo.filename}',
            "filesize": sfinfo.filesize,
            "modified": sfinfo.modified,
