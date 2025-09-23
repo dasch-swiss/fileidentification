@@ -68,14 +68,14 @@ CSVFIELDS = [
 
 # msg
 class PolicyMsg(StrEnum):
-    FALLBACK = f"fmt not detected, falling back on ext"
-    NOTINPOLICIES = f"file format is not in policies. running strict mode: file removed"
+    FALLBACK = "fmt not detected, falling back on ext"
+    NOTINPOLICIES = "file format is not in policies. running strict mode: file removed"
     SKIPPED = "file format is not in policies, skipped"
 
 
 class FileDiagnosticsMsg(StrEnum):
     EMPTYSOURCE = "empty source"
-    ERROR = f"file is corrupt: removed"
+    ERROR = "file is corrupt: removed"
     WARNING = "file has warnings"
     EXTMISMATCH = "extension mismatch"
 

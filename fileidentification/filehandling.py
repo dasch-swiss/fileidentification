@@ -335,7 +335,7 @@ class FileHandler:
             if self.ba.blank:
                 print(
                     f"there are some non default policies: {[el for el in self.ba.blank]}\n",
-                    f"-> you may adjust them (they are set as accepted now)",
+                    "-> you may adjust them (they are set as accepted now)",
                 )
 
     def _test_policies(self, puid: str | None = None) -> None:
@@ -352,7 +352,7 @@ class FileHandler:
             ]
 
         if not puids:
-            print(f"no files found that should be converted with given policies")
+            print("no files found that should be converted with given policies")
         else:
             print_fileformats(
                 puids=[el for el in self.ba.puid_unique],

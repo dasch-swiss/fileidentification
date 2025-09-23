@@ -106,5 +106,5 @@ def print_processing_errors(log_tables: LogTables) -> None:
 
 
 def _print_logs(logs: list[LogMsg]) -> None:
-    for l in logs:
-        print(f"{l.timestamp}    {l.name}:    {l.msg.replace('\n', ' ')}")
+    for log in logs:
+        print(f"{log.timestamp}    {log.name}:    {log.msg.replace('\n', ' ')}")
