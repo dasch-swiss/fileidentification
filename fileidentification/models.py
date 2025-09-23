@@ -63,26 +63,20 @@ class SfInfo(BaseModel):
                 fmts = re.findall(r"(fmt|x-fmt)/([\d]+)", self.matches[0]["warning"])
                 fmts = [f"{el[0]}/{el[1]}" for el in fmts]
                 if fmts:
-                    self.processing_logs.append(
-                        LogMsg(name="filehandler", msg=PolicyMsg.FALLBACK)
-                    )
+                    self.processing_logs.append(LogMsg(name="filehandler", msg=PolicyMsg.FALLBACK))
                     return fmts[0]  # type: ignore
                 return None
             else:
                 return self.matches[0]["id"]  # type: ignore
         return None
 
-    def set_processing_paths(
-        self, root_folder: Path, wdir: Path, initial: bool = False
-    ) -> None:
+    def set_processing_paths(self, root_folder: Path, wdir: Path, initial: bool = False) -> None:
         if root_folder.is_file():
             root_folder = root_folder.parent
         self.root_folder = root_folder
         self.wdir = wdir
         if initial:
-            self.filename = (
-                self.filename.parent.relative_to(root_folder) / self.filename.name
-            )
+            self.filename = self.filename.parent.relative_to(root_folder) / self.filename.name
         if not self.dest:
             self.path = self.root_folder / self.filename
 
@@ -134,9 +128,7 @@ class BasicAnalytics:
             self.siegfried_errors.append(sfinfo)
 
     def sort_puid_unique_by_size(self, puid: str) -> None:
-        self.puid_unique[puid] = sorted(
-            self.puid_unique[puid], key=lambda x: x.filesize, reverse=False
-        )
+        self.puid_unique[puid] = sorted(self.puid_unique[puid], key=lambda x: x.filesize, reverse=False)
 
 
 def get_md5(path: str | Path) -> str:

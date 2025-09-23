@@ -25,7 +25,9 @@ dev = [
     "ruff>=0.13.0",
 ]
 
-# TODO: First fix the errors that appear without the following settings. Then, uncomment the settings below.
- [tool.mypy]
- strict = true
- enable_error_code = ["possibly-undefined"]
+[tool.mypy]
+strict = true
+enable_error_code = ["possibly-undefined"]
+
+[tool.ruff]
+line-length = 120

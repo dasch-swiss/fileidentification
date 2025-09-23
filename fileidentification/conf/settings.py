@@ -5,9 +5,7 @@ from enum import StrEnum
 class DroidSigURL(StrEnum):
     """urls to fetch droid signature xml from national archives"""
 
-    NALIST = (
-        "https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm"
-    )
+    NALIST = "https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm"
     cdnNA = "https://cdn.nationalarchives.gov.uk/documents/DROID_SignatureFile_"
 
 

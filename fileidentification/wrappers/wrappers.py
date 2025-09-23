@@ -16,9 +16,7 @@ from fileidentification.conf.settings import (
 
 class Ffmpeg:
     @staticmethod
-    def is_corrupt(
-        sfinfo: SfInfo, verbose: bool
-    ) -> tuple[bool, str, dict[str, Any] | None]:
+    def is_corrupt(sfinfo: SfInfo, verbose: bool) -> tuple[bool, str, dict[str, Any] | None]:
         """
         check for errors with ffprobe -show_error -> std.out shows the error, std.err has file information
         in verbose mode: run the file in ffmpeg dropping frames instead of showing it, returns stderr as string.
@@ -37,9 +35,7 @@ class Ffmpeg:
         return Ffmpeg.parse_output(sfinfo, res.stdout, res.stderr, verbose)
 
     @staticmethod
-    def parse_output(
-        sfinfo: SfInfo, std_out: str, _: str, verbose: bool
-    ) -> tuple[bool, str, dict[str, Any] | None]:
+    def parse_output(sfinfo: SfInfo, std_out: str, _: str, verbose: bool) -> tuple[bool, str, dict[str, Any] | None]:
         std_out = std_out.replace(f"{sfinfo.path.parent}", "")
         streams = Ffmpeg.media_info(sfinfo.path)
         if verbose:
@@ -91,9 +87,7 @@ class ImageMagick:
         return ImageMagick.parse_output(sfinfo, res.stdout, res.stderr, verbose)
 
     @staticmethod
-    def parse_output(
-        sfinfo: SfInfo, std_out: str, std_err: str, verbose: bool
-    ) -> tuple[bool, str, str]:
+    def parse_output(sfinfo: SfInfo, std_out: str, std_err: str, verbose: bool) -> tuple[bool, str, str]:
         std_out = std_out.replace(f"{sfinfo.path.parent}", "")
         std_err = std_err.replace(f"{sfinfo.path.parent}", "")
 
@@ -116,9 +110,7 @@ class ImageMagick:
 
 class Converter:
     @staticmethod
-    def convert(
-        sfinfo: SfInfo, args: dict[str, Any], soffice: str = LibreOfficePath.Darwin
-    ) -> tuple[Path, str, Path]:
+    def convert(sfinfo: SfInfo, args: dict[str, Any], soffice: str = LibreOfficePath.Darwin) -> tuple[Path, str, Path]:
         """converts a file (filepath from SfInfo.filename to the desired format passed by the args
 
         :params sfinfo the metadata object of the file
@@ -176,9 +168,7 @@ class Rsync:
         """rsync the source to dest.
         :returns True, stderr, cmd if there was an error, else False, stderr, cmd"""
         cmd = ["rsync", "-avh", str(source), str(dest)]
-        res = subprocess.run(
-            cmd, capture_output=True
-        )  # output in stderr and b'', because of certain char issues
+        res = subprocess.run(cmd, capture_output=True)  # output in stderr and b'', because of certain char issues
         if res.returncode != 0:
             return True, res.stderr.decode("utf-8", "backslashreplace"), cmd
         return False, res.stderr.decode("utf-8", "backslashreplace"), cmd

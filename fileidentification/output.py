@@ -51,9 +51,7 @@ def print_fileformats(
             pn = ""
             if ba.blank and puid in ba.blank:
                 pn = "blank"
-            print(
-                f"{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {'': <25} | {fmtname}"
-            )
+            print(f"{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {'': <25} | {fmtname}")
 
 
 def print_diagnostic(log_tables: LogTables, verbose: bool) -> None:
@@ -62,26 +60,18 @@ def print_diagnostic(log_tables: LogTables, verbose: bool) -> None:
         if FileDiagnosticsMsg.ERROR.name in log_tables.diagnostics.keys():
             secho("\n----------- errors -----------", bold=True)
             for sfinfo in log_tables.diagnostics[FileDiagnosticsMsg.ERROR.name]:
-                print(
-                    f"\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}"
-                )
+                print(f"\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                 _print_logs(sfinfo.processing_logs)
         if verbose:
             if FileDiagnosticsMsg.WARNING.name in log_tables.diagnostics.keys():
                 secho("\n----------- warnings -----------", bold=True)
                 for sfinfo in log_tables.diagnostics[FileDiagnosticsMsg.WARNING.name]:
-                    print(
-                        f"\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}"
-                    )
+                    print(f"\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                     _print_logs(sfinfo.processing_logs)
             if FileDiagnosticsMsg.EXTMISMATCH.name in log_tables.diagnostics.keys():
                 secho("\n----------- extension missmatch -----------", bold=True)
-                for sfinfo in log_tables.diagnostics[
-                    FileDiagnosticsMsg.EXTMISMATCH.name
-                ]:
-                    print(
-                        f"\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}"
-                    )
+                for sfinfo in log_tables.diagnostics[FileDiagnosticsMsg.EXTMISMATCH.name]:
+                    print(f"\n{format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                     _print_logs(sfinfo.processing_logs)
             print("\n")
 

@@ -25,13 +25,9 @@ def main(
     ] = False,
     apply: Annotated[
         bool,
-        typer.Option(
-            "--apply", "-a", help="apply the policies and convert the pending files"
-        ),
+        typer.Option("--apply", "-a", help="apply the policies and convert the pending files"),
     ] = False,
-    convert: Annotated[
-        bool, typer.Option("--convert", help="re-convert failed pending files")
-    ] = False,
+    convert: Annotated[bool, typer.Option("--convert", help="re-convert failed pending files")] = False,
     remove_tmp: Annotated[
         bool,
         typer.Option(
@@ -43,9 +39,7 @@ def main(
     ] = False,
     policies_path: Annotated[
         Path | None,
-        typer.Option(
-            "--policies-path", "-p", help="path to the json file with the policies"
-        ),
+        typer.Option("--policies-path", "-p", help="path to the json file with the policies"),
     ] = None,
     blank: Annotated[
         bool,
@@ -105,15 +99,9 @@ def main(
             help="catches more warnings on video and image files during the integrity tests",
         ),
     ] = False,
-    mode_quiet: Annotated[
-        bool, typer.Option("--quiet", "-q", help="just print errors and warnings")
-    ] = False,
-    to_csv: Annotated[
-        bool, typer.Option("--csv", help="get a csv out of the log.json")
-    ] = False,
-    use_docker: Annotated[
-        bool, typer.Option("--docker", help="run the script in a docker container")
-    ] = False,
+    mode_quiet: Annotated[bool, typer.Option("--quiet", "-q", help="just print errors and warnings")] = False,
+    to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False,
+    use_docker: Annotated[bool, typer.Option("--docker", help="run the script in a docker container")] = False,
 ) -> None:
     if use_docker:
         print("... creating docker image. this may take a while ... \n")
