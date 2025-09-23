@@ -4,7 +4,10 @@ from enum import StrEnum
 # application settings
 class DroidSigURL(StrEnum):
     """urls to fetch droid signature xml from national archives"""
-    NALIST = "https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm"
+
+    NALIST = (
+        "https://www.nationalarchives.gov.uk/aboutapps/pronom/droid-signature-files.htm"
+    )
     cdnNA = "https://cdn.nationalarchives.gov.uk/documents/DROID_SignatureFile_"
 
 
@@ -23,8 +26,8 @@ class LibreOfficePath(StrEnum):
 
 class LibreOfficePdfSettings(StrEnum):
     # it needs libreoffice v7.4 + for this to work
-    version2a = ":writer_pdf_Export:{\"SelectPdfVersion\":{\"type\":\"long\",\"value\":\"2\"}}"
-    version1a = ":writer_pdf_Export:{\"SelectPdfVersion\":{\"type\":\"long\",\"value\":\"1\"}}"
+    version2a = ':writer_pdf_Export:{"SelectPdfVersion":{"type":"long","value":"2"}}'
+    version1a = ':writer_pdf_Export:{"SelectPdfVersion":{"type":"long","value":"1"}}'
 
 
 # paths
@@ -36,6 +39,7 @@ class PathsConfig(StrEnum):
     TEST: folder name within WDIR to store the outcome of testing policies
     PRESETS: path relative to the script root
     """
+
     WDIR = "WORKINGDIR"
     REMOVED = "_REMOVED"
     TEST = "_TEST"
@@ -48,20 +52,30 @@ class JsonOutput(StrEnum):
     LOG = "_log.json"
 
 
-CSVFIELDS = ["filename", "filesize", "md5", "modified", "errors", "processed_as", "media_info",
-             "processing_logs", "status", "derived_from"]
+CSVFIELDS = [
+    "filename",
+    "filesize",
+    "md5",
+    "modified",
+    "errors",
+    "processed_as",
+    "media_info",
+    "processing_logs",
+    "status",
+    "derived_from",
+]
 
 
 # msg
 class PolicyMsg(StrEnum):
-    FALLBACK = f'fmt not detected, falling back on ext'
-    NOTINPOLICIES = f'file format is not in policies. running strict mode: file removed'
+    FALLBACK = f"fmt not detected, falling back on ext"
+    NOTINPOLICIES = f"file format is not in policies. running strict mode: file removed"
     SKIPPED = "file format is not in policies, skipped"
 
 
 class FileDiagnosticsMsg(StrEnum):
-    EMPTYSOURCE = 'empty source'
-    ERROR = f'file is corrupt: removed'
+    EMPTYSOURCE = "empty source"
+    ERROR = f"file is corrupt: removed"
     WARNING = "file has warnings"
     EXTMISMATCH = "extension mismatch"
 
