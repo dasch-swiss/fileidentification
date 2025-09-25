@@ -537,7 +537,6 @@ class FileHandler:
         # set the mode
         mode = Mode(remove_original, mode_verbose, mode_strict, mode_quiet)
         self.mode = mode
-        print(mode)
         # generate a list of SfInfo objects out of the target folder
         self._load_sfinfos(root_folder)
         # generate policies
