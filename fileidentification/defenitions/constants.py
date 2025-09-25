@@ -25,10 +25,8 @@ class LibreOfficePath(StrEnum):
     Linux = "libreoffice"
 
 
-class LibreOfficePdfSettings(StrEnum):
-    # it needs libreoffice v7.4 + for this to work
-    version2a = ':writer_pdf_Export:{"SelectPdfVersion":{"type":"long","value":"2"}}'
-    version1a = ':writer_pdf_Export:{"SelectPdfVersion":{"type":"long","value":"1"}}'
+# it needs libreoffice v7.4 + for this to work, set to pdf/A version 2
+PDFSETTINGS = ':writer_pdf_Export:{"SelectPdfVersion":{"type":"long","value":"2"}}'
 
 
 CSVFIELDS = [

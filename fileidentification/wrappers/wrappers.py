@@ -4,13 +4,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from fileidentification.defenitions.constants import (
-    Bin,
-    ErrMsgFF,
-    ErrMsgIM,
-    LibreOfficePath,
-    LibreOfficePdfSettings,
-)
+from fileidentification.defenitions.constants import Bin, ErrMsgFF, ErrMsgIM, LibreOfficePath, PDFSETTINGS
 from fileidentification.defenitions.models import PolicyParams, SfInfo
 
 
@@ -151,7 +145,7 @@ class Converter:
                 cmd = f"{soffice} {args.processing_args} {args.target_container} {inputfile} "
                 # add the version if its pdf
                 if args.target_container == "pdf":
-                    cmd = f"{soffice} {args.processing_args} 'pdf{LibreOfficePdfSettings.version2a}' {inputfile} "
+                    cmd = f"{soffice} {args.processing_args} 'pdf{PDFSETTINGS}' {inputfile} "
                 cmd = cmd + f"--outdir {shlex.quote(str(wdir))} > {logfile}"
 
         # run cmd in shell (and as a string, so [error]output is redirected to logfile)

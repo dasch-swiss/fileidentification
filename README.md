@@ -125,7 +125,7 @@ If you don't need these intermediary steps, you can run the desired steps at onc
 Here is an example how to do verbose testing, applying a custom policy and set the location to the tmp
 directory other than default (see **option** below for more information about the flags):
 
-`uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json --tmp-dir path/to/workingdir`
+`uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json --tmp-dir path/to/tmp-dir`
 
 Another use case example: If you have a customised policies file and want to run it against a different folder and
 apply it using docker
@@ -170,7 +170,7 @@ A policy for a file type consists of the following fields and uses its PRONOM Un
 | **target_container** | **str**        | required if field accepted is false |
 | **processing_args**  | **str**        | required if field accepted is false |
 | **expected**         | **list[str]**  | required if field accepted is false |
-| **remove_original**  | **bool**       | optional                            |
+| **remove_original**  | **bool**       | optional (default is `false`)       |
 
 - `format_name`: The name of the file format.
 - `bin`: Program to convert or test the file. Literal[`""`, `"magick"`, `"ffmpeg"`, `"soffice"`].
@@ -229,8 +229,11 @@ If you just want to test a specific policy, append f and the puid
 
 ## Modifying Default Settings
 
-In the .env file you can alter the default paths for default policies and set custom tmp dir and where to store the
-json output.
+In the .env file you can customise some default path: e.g. the paths to the default policies, set custom default
+tmp dir location.
+
+Other default params such as PDF/A export settings for LibreOffice or other strings are in 
+`fileidentification/defenitions/constants.py`.
 
 ## Options
 
@@ -271,7 +274,7 @@ fileidentification/policies/default.py
 `-q`
 [`--quiet`] just print errors and warnings
 
-`--working-dir` set a custom tmp directory where converted / removed files are stored. default is path/to/directory_TMP
+`--tmp-dir` set a custom tmp directory where converted / removed files are stored. default is path/to/directory_TMP
 
 `--csv`
 get an additional output as csv aside from the log.json
@@ -281,7 +284,7 @@ re-convert the files that failed during file conversion
 
 `--docker`
 this runs the script with the flags in a docker container. Please note that with this
-option the flags **-p**, **-w**, **-b** and **-e** are ignored.
+option the flags **--tmp-dir**, **-p**, **-b** and **-e** are ignored.
 
 ## using it in your code
 
