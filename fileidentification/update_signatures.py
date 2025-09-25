@@ -56,7 +56,10 @@ def write_fmt2ext(link: str, outpath: str = "") -> None:
         puids[puid] = format_info
 
     json_path.write_text(json.dumps(puids, indent=4, ensure_ascii=False))
-    secho(f"extensions and names updated to {link[-8:-4]} in {json_path}", fg=colors.GREEN,)
+    secho(
+        f"extensions and names updated to {link[-8:-4]} in {json_path}",
+        fg=colors.GREEN,
+    )
 
 
 def update_signatures() -> None:

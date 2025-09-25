@@ -137,6 +137,7 @@ class BasicAnalytics:
 
 # Policies realated models
 
+
 class PolicyParams(BaseModel):
     format_name: str = Field(default_factory=str)
     bin: str = Field(default="")
@@ -146,21 +147,21 @@ class PolicyParams(BaseModel):
     expected: list[str] = Field(default=[""])
     remove_original: bool = Field(default=False)
 
-    @field_validator('bin', mode='after')
+    @field_validator("bin", mode="after")
     @classmethod
     def allowed_bin(cls, value: str) -> str:
         if value not in Bin:
-            raise ValueError(f'{value} is not an allowed bin')
+            raise ValueError(f"{value} is not an allowed bin")
         return value
 
-    @field_validator('processing_args', mode='after')
+    @field_validator("processing_args", mode="after")
     @classmethod
     def allowed_args(cls, value: str) -> str:
         if ";" in value:
             raise ValueError("the char ';' is not an allowed in processing_args")
         return value
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def assert_conv_args(self) -> Self:
         if self.accepted is False:
             if self.target_container == "":

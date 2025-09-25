@@ -66,6 +66,7 @@ class Mode:
 @dataclass
 class FilePaths:
     """the paths loaded from .env"""
+
     TMP_DIR: Path = field(default=Path(os.getenv("TMP_DIR")))  # type: ignore
     RMV_DIR: Path = field(default=Path(os.getenv("RMV_DIR")))  # type: ignore
     POLICIES_J: Path = field(default=Path(os.getenv("POLICIES_J")))  # type: ignore
@@ -271,7 +272,12 @@ class FileHandler:
             jsonfile.comment += " blank policies"
             for puid in self.ba.puid_unique:
                 jsonfile.policies.update(
-                    {puid: PolicyParams(format_name=self.fmt2ext[puid]["name"], remove_original=self.mode.REMOVEORIGINAL)})
+                    {
+                        puid: PolicyParams(
+                            format_name=self.fmt2ext[puid]["name"], remove_original=self.mode.REMOVEORIGINAL
+                        )
+                    }
+                )
             # write out policies with name of the folder, return policies
             jsonfile.name.write_text(jsonfile.model_dump_json(indent=4, exclude_none=True))
             self.policies = jsonfile.policies
@@ -279,7 +285,7 @@ class FileHandler:
 
         # default values
         default_policies = self._load_policies(Path(os.getenv("DEFAULTPOLICIES")))  # type: ignore
-        jsonfile.comment += f' using default policies {os.getenv("DEFAULTPOLICIES")}'
+        jsonfile.comment += f" using default policies {os.getenv('DEFAULTPOLICIES')}"
         jsonfile.comment += " in strict mode" if self.mode.STRICT else ""
         jsonfile.comment += f" updating from {outpath}" if extend else ""
         self.ba.blank = []
@@ -302,7 +308,6 @@ class FileHandler:
         jsonfile.name.write_text(jsonfile.model_dump_json(indent=4, exclude_none=True))
 
     def _manage_policies(self, policies_path: Path | None = None, blank: bool = False, extend: bool = False) -> None:
-
         # default policies found and no external policies are passed
         if not policies_path and self.fp.POLICIES_J.is_file():
             # set default location
@@ -347,7 +352,7 @@ class FileHandler:
             print_fmts([el for el in self.ba.puid_unique], self.ba, self.fmt2ext, self.policies, self.mode.STRICT)
             print("\n --- testing policies with a sample from the directory ---")
 
-            for puid in puids: # noqa PLR1704
+            for puid in puids:  # noqa PLR1704
                 # we want the smallest file first for running the test in FileHandler.test_conversion()
                 self.ba.sort_puid_unique_by_size(puid)
                 sample = self.ba.puid_unique[puid][0]
@@ -569,15 +574,15 @@ class FileHandler:
         if root_folder.is_file():
             root_folder = Path(f"{root_folder.parent}_{root_folder.stem}")
         if not self.fp.TMP_DIR.is_absolute():
-            self.fp.TMP_DIR = Path(f'{root_folder}{self.fp.TMP_DIR}')
+            self.fp.TMP_DIR = Path(f"{root_folder}{self.fp.TMP_DIR}")
         if tmp_dir:
             self.fp.TMP_DIR = tmp_dir
         if not self.fp.RMV_DIR.is_absolute():
             self.fp.RMV_DIR = self.fp.TMP_DIR / self.fp.RMV_DIR
         if not self.fp.LOG_J.is_absolute():
-            self.fp.LOG_J = Path(f'{root_folder}{self.fp.LOG_J}')
+            self.fp.LOG_J = Path(f"{root_folder}{self.fp.LOG_J}")
         if not self.fp.POLICIES_J.is_absolute():
-            self.fp.POLICIES_J = Path(f'{root_folder}{self.fp.POLICIES_J}')
+            self.fp.POLICIES_J = Path(f"{root_folder}{self.fp.POLICIES_J}")
 
 
 class FileConverter:

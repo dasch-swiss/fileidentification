@@ -14,9 +14,7 @@ def print_siegfried_errors(ba: BasicAnalytics) -> None:
             print(f"{sfinfo.filename} \n{sfinfo.errors}")
 
 
-def print_fmts(
-    puids: list[str], ba: BasicAnalytics, fmt2ext: dict[str, Any], policies: Policies, strict: bool
-) -> None:
+def print_fmts(puids: list[str], ba: BasicAnalytics, fmt2ext: dict[str, Any], policies: Policies, strict: bool) -> None:
     secho("\n----------- file formats -----------\n", bold=True)
     secho(
         f"{'no. of files': <13} | {'combined size': <14} | {'fmt type': <10} | {'policy': <10} | {'bin (associated program)': <25} | {'format name'}",
