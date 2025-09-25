@@ -1,7 +1,9 @@
-from typer import secho, colors
 from typing import Any
-from fileidentification.conf.settings import FileDiagnosticsMsg
-from fileidentification.models import LogMsg, BasicAnalytics, LogTables
+
+from typer import colors, secho
+
+from fileidentification.defenitions.constants import FileDiagnosticsMsg
+from fileidentification.defenitions.models import BasicAnalytics, LogMsg, LogTables, Policies
 from fileidentification.helpers import format_bite_size
 
 
@@ -12,12 +14,8 @@ def print_siegfried_errors(ba: BasicAnalytics) -> None:
             print(f"{sfinfo.filename} \n{sfinfo.errors}")
 
 
-def print_fileformats(
-    puids: list[str],
-    ba: BasicAnalytics,
-    fmt2ext: dict[str, Any],
-    policies: dict[str, Any],
-    strict: bool,
+def print_fmts(
+    puids: list[str], ba: BasicAnalytics, fmt2ext: dict[str, Any], policies: Policies, strict: bool
 ) -> None:
     secho("\n----------- file formats -----------\n", bold=True)
     secho(
@@ -30,24 +28,16 @@ def print_fileformats(
             bytes_size += sfinfo.filesize
         ba.total_size[puid] = bytes_size
         size = format_bite_size(bytes_size)
-        (
-            nbr,
-            fmtname,
-        ) = len(ba.puid_unique[puid]), f"{fmt2ext[puid]['name']}"
-        if strict and puid not in policies:
-            pn = "strict"
-            secho(
-                f"{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {'remove': <25} | {fmtname}",
-                fg=colors.RED,
-            )
-        if puid in policies and not policies[puid]["accepted"]:
-            bin = policies[puid]["bin"]
+        nbr, fmtname = len(ba.puid_unique[puid]), f"{fmt2ext[puid]['name']}"
+        if puid not in policies:
+            pn = "missing"
+            rm = "remove" if strict else ""
+            secho(f"{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {rm: <25} | {fmtname}", fg=colors.RED)
+        if puid in policies and not policies[puid].accepted:
+            ubin = policies[puid].bin
             pn = ""
-            secho(
-                f"{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {bin: <25} | {fmtname}",
-                fg=colors.YELLOW,
-            )
-        if puid in policies and policies[puid]["accepted"]:
+            secho(f"{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {ubin: <25} | {fmtname}", fg=colors.YELLOW)
+        if puid in policies and policies[puid].accepted:
             pn = ""
             if ba.blank and puid in ba.blank:
                 pn = "blank"

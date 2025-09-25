@@ -1,17 +1,17 @@
-import subprocess
 import json
 import shlex
-import os
+import subprocess
 from pathlib import Path
 from typing import Any
-from fileidentification.models import SfInfo
-from fileidentification.conf.settings import (
-    LibreOfficePath,
+
+from fileidentification.defenitions.constants import (
+    Bin,
     ErrMsgFF,
     ErrMsgIM,
+    LibreOfficePath,
     LibreOfficePdfSettings,
-    Bin,
 )
+from fileidentification.defenitions.models import PolicyParams, SfInfo
 
 
 class Ffmpeg:
@@ -110,7 +110,7 @@ class ImageMagick:
 
 class Converter:
     @staticmethod
-    def convert(sfinfo: SfInfo, args: dict[str, Any], soffice: str = LibreOfficePath.Darwin) -> tuple[Path, str, Path]:
+    def convert(sfinfo: SfInfo, args: PolicyParams, soffice: str = LibreOfficePath.Darwin) -> tuple[Path, str, Path]:
         """converts a file (filepath from SfInfo.filename to the desired format passed by the args
 
         :params sfinfo the metadata object of the file
@@ -120,14 +120,14 @@ class Converter:
         :returns the constructed target path, the cmd run and the log path
         """
 
-        wdir = Path(sfinfo.wdir / f"{sfinfo.filename.name}_{sfinfo.md5[:6]}")
+        wdir = Path(sfinfo.tdir / f"{sfinfo.filename.name}_{sfinfo.md5[:6]}")
         if not wdir.exists():
-            os.makedirs(wdir)
+            wdir.mkdir(parents=True)
 
         # TODO Metadata such as exif... are lost when reencoded,
         #  need to implement something to copy some parts of these metadata?
 
-        target = Path(wdir / f"{sfinfo.filename.stem}.{args['target_container']}")
+        target = Path(wdir / f"{sfinfo.filename.stem}.{args.target_container}")
         logfile_path = Path(wdir / f"{sfinfo.filename.stem}.log")
 
         # set input, outputfile and log for shell
@@ -135,26 +135,24 @@ class Converter:
         outfile = shlex.quote(str(target))
         logfile = shlex.quote(str(logfile_path))
 
-        match args["bin"]:
+        cmd: str = ""
+        match args.bin:
             # construct command if its ffmpeg
             case Bin.FFMPEG:
-                cmd = f"ffmpeg -y -i {inputfile} {args['processing_args']} {outfile} 2> {logfile}"
+                cmd = f"ffmpeg -y -i {inputfile} {args.processing_args} {outfile} 2> {logfile}"
             # construct command if its imagemagick
             case Bin.MAGICK:
-                cmd = f"magick {args['processing_args']} {inputfile} {outfile} 2> {logfile}"
+                cmd = f"magick {args.processing_args} {inputfile} {outfile} 2> {logfile}"
             # construct command if its inkscape
             # case Bin.INCSCAPE:
             # cmd = f'inkscape --export-filename={outfile} {args["processing_args"]} {inputfile} 2> {logfile}'
             # construct command if its LibreOffice
             case Bin.SOFFICE:
-                cmd = f"{soffice} {args['processing_args']} {args['target_container']} {inputfile} "
+                cmd = f"{soffice} {args.processing_args} {args.target_container} {inputfile} "
                 # add the version if its pdf
-                if args["target_container"] == "pdf":
-                    cmd = f"{soffice} {args['processing_args']} 'pdf{LibreOfficePdfSettings.version2a}' {inputfile} "
+                if args.target_container == "pdf":
+                    cmd = f"{soffice} {args.processing_args} 'pdf{LibreOfficePdfSettings.version2a}' {inputfile} "
                 cmd = cmd + f"--outdir {shlex.quote(str(wdir))} > {logfile}"
-            case _:
-                print(f"unknown bin {args['bin']} in policies. aborting ...")
-                quit()
 
         # run cmd in shell (and as a string, so [error]output is redirected to logfile)
         subprocess.run(cmd, shell=True)

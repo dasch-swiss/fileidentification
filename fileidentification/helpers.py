@@ -1,13 +1,14 @@
 import math
-from fileidentification.models import SfInfo
 from typing import Any
+
+from fileidentification.defenitions.models import SfInfo
 
 
 def format_bite_size(bytes_size: int) -> str:
     tmp = bytes_size / (1024**2)
-    if math.ceil(tmp) > 1000:
+    if math.ceil(tmp) > 1000:  # noqa PLR2004
         tmp = tmp / 1024
-        if math.ceil(tmp) > 1000:
+        if math.ceil(tmp) > 1000:  # noqa PLR2004
             tmp = tmp / 1024
             return f"{round(tmp, 3)} TB"
         return f"{round(tmp, 3)} GB"

@@ -9,6 +9,9 @@ class DroidSigURL(StrEnum):
     cdnNA = "https://cdn.nationalarchives.gov.uk/documents/DROID_SignatureFile_"
 
 
+FMT2EXT = "fileidentification/defenitions/fmt2ext.json"
+
+
 class Bin(StrEnum):
     MAGICK = "magick"
     FFMPEG = "ffmpeg"
@@ -26,28 +29,6 @@ class LibreOfficePdfSettings(StrEnum):
     # it needs libreoffice v7.4 + for this to work
     version2a = ':writer_pdf_Export:{"SelectPdfVersion":{"type":"long","value":"2"}}'
     version1a = ':writer_pdf_Export:{"SelectPdfVersion":{"type":"long","value":"1"}}'
-
-
-# paths
-class PathsConfig(StrEnum):
-    """default directory paths.
-    WDIR: the working directory. it adds the string to the root_folder -> path/to/folder_WORKINGDIR
-    if the string contains a slash, it's treated as a path.
-    REMOVED: folder name within WDIR to store the files that got removed from root_folder during processing.
-    TEST: folder name within WDIR to store the outcome of testing policies
-    PRESETS: path relative to the script root
-    """
-
-    WDIR = "WORKINGDIR"
-    REMOVED = "_REMOVED"
-    TEST = "_TEST"
-    # do not change this
-    FMT2EXT = "fileidentification/conf/fmt2ext.json"
-
-
-class JsonOutput(StrEnum):
-    POLICIES = "_policies.json"
-    LOG = "_log.json"
 
 
 CSVFIELDS = [

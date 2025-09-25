@@ -1,0 +1,1067 @@
+{
+    "name": "policies/dasch.json",
+    "comment": "some pixelbased images dont need to be converted, as SIPI does convert them to jp2",
+    "policies": {
+        "x-fmt/392": {
+            "format_name": "JP2 (JPEG 2000 part 1)",
+            "bin": "magick",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/11": {
+            "format_name": "Portable Network Graphics",
+            "bin": "magick",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/12": {
+            "format_name": "Portable Network Graphics",
+            "bin": "magick",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/13": {
+            "format_name": "Portable Network Graphics",
+            "bin": "magick",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/353": {
+            "format_name": "Tagged Image File Format",
+            "bin": "magick",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/42": {
+            "format_name": "JPEG File Interchange Format",
+            "bin": "magick",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/43": {
+            "format_name": "JPEG File Interchange Format",
+            "bin": "magick",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/44": {
+            "format_name": "JPEG File Interchange Format",
+            "bin": "magick",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/1507": {
+            "format_name": "Exchangeable Image File Format (Compressed)",
+            "bin": "magick",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/592": {
+            "format_name": "Canon RAW",
+            "bin": "magick",
+            "accepted": false,
+            "target_container": "tif",
+            "processing_args": "",
+            "expected": [
+                "fmt/353"
+            ],
+            "remove_original": false
+        },
+        "fmt/593": {
+            "format_name": "Canon RAW",
+            "bin": "magick",
+            "accepted": false,
+            "target_container": "tif",
+            "processing_args": "",
+            "expected": [
+                "fmt/353"
+            ],
+            "remove_original": false
+        },
+        "fmt/91": {
+            "format_name": "Scalable Vector Graphics",
+            "bin": "magick",
+            "accepted": false,
+            "target_container": "tif",
+            "processing_args": "-density 300",
+            "expected": [
+                "fmt/353"
+            ],
+            "remove_original": false
+        },
+        "fmt/92": {
+            "format_name": "Scalable Vector Graphics",
+            "bin": "magick",
+            "accepted": false,
+            "target_container": "tif",
+            "processing_args": "-density 300",
+            "expected": [
+                "fmt/353"
+            ],
+            "remove_original": false
+        },
+        "fmt/413": {
+            "format_name": "Scalable Vector Graphics Tiny",
+            "bin": "magick",
+            "accepted": false,
+            "target_container": "tif",
+            "processing_args": "-density 300",
+            "expected": [
+                "fmt/353"
+            ],
+            "remove_original": false
+        },
+        "fmt/134": {
+            "format_name": "MPEG 1/2 Audio Layer 3",
+            "bin": "ffmpeg",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/6": {
+            "format_name": "Waveform Audio",
+            "bin": "ffmpeg",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/141": {
+            "format_name": "Waveform Audio (PCMWAVEFORMAT)",
+            "bin": "ffmpeg",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/142": {
+            "format_name": "Waveform Audio (WAVEFORMATEX)",
+            "bin": "ffmpeg",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/143": {
+            "format_name": "Waveform Audio (WAVEFORMATEXTENSIBLE)",
+            "bin": "ffmpeg",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/414": {
+            "format_name": "Audio Interchange File Format",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "wav",
+            "processing_args": "-codec copy",
+            "expected": [
+                "fmt/141",
+                "fmt/142",
+                "fmt/143"
+            ],
+            "remove_original": false
+        },
+        "fmt/596": {
+            "format_name": "Apple Lossless Audio Codec",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "wav",
+            "processing_args": "-c:a pcm_s16le",
+            "expected": [
+                "fmt/141",
+                "fmt/142",
+                "fmt/143"
+            ],
+            "remove_original": false
+        },
+        "x-fmt/136": {
+            "format_name": "Audio Interchange File Format (compressed)",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "wav",
+            "processing_args": "-c:a pcm_s16le",
+            "expected": [
+                "fmt/141",
+                "fmt/142",
+                "fmt/143"
+            ],
+            "remove_original": false
+        },
+        "fmt/279": {
+            "format_name": "FLAC (Free Lossless Audio Codec)",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "wav",
+            "processing_args": "-c:a pcm_s16le",
+            "expected": [
+                "fmt/141",
+                "fmt/142",
+                "fmt/143"
+            ],
+            "remove_original": false
+        },
+        "fmt/947": {
+            "format_name": "Ogg FLAC Compressed Multimedia File",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "wav",
+            "processing_args": "-c:a pcm_s16le",
+            "expected": [
+                "fmt/141",
+                "fmt/142",
+                "fmt/143"
+            ],
+            "remove_original": false
+        },
+        "fmt/203": {
+            "format_name": "Ogg Vorbis Codec Compressed Multimedia File",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "wav",
+            "processing_args": "-c:a pcm_s16le",
+            "expected": [
+                "fmt/141",
+                "fmt/142",
+                "fmt/143"
+            ],
+            "remove_original": false
+        },
+        "fmt/946": {
+            "format_name": "Ogg Opus Codec Compressed Multimedia File",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "wav",
+            "processing_args": "-c:a pcm_s16le",
+            "expected": [
+                "fmt/141",
+                "fmt/142",
+                "fmt/143"
+            ],
+            "remove_original": false
+        },
+        "fmt/948": {
+            "format_name": "Ogg Speex Codec Multimedia File",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "wav",
+            "processing_args": "-c:a pcm_s16le",
+            "expected": [
+                "fmt/141",
+                "fmt/142",
+                "fmt/143"
+            ],
+            "remove_original": false
+        },
+        "fmt/199": {
+            "format_name": "MPEG-4 Media File",
+            "bin": "ffmpeg",
+            "accepted": true,
+            "target_container": "mp4",
+            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
+            "expected": [
+                "fmt/199"
+            ],
+            "remove_original": false
+        },
+        "fmt/5": {
+            "format_name": "Audio/Video Interleaved Format",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "mp4",
+            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
+            "expected": [
+                "fmt/199"
+            ],
+            "remove_original": false
+        },
+        "x-fmt/384": {
+            "format_name": "Quicktime",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "mp4",
+            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
+            "expected": [
+                "fmt/199"
+            ],
+            "remove_original": false
+        },
+        "fmt/797": {
+            "format_name": "Apple ProRes",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "mp4",
+            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
+            "expected": [
+                "fmt/199"
+            ],
+            "remove_original": false
+        },
+        "fmt/585": {
+            "format_name": "MPEG-2 Transport Stream",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "mp4",
+            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
+            "expected": [
+                "fmt/199"
+            ],
+            "remove_original": false
+        },
+        "fmt/425": {
+            "format_name": "Video Object File (MPEG-2 subset)",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "mp4",
+            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
+            "expected": [
+                "fmt/199"
+            ],
+            "remove_original": false
+        },
+        "fmt/945": {
+            "format_name": "Ogg Theora Video",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "mp4",
+            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
+            "expected": [
+                "fmt/199"
+            ],
+            "remove_original": false
+        },
+        "fmt/569": {
+            "format_name": "Matroska",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "mp4",
+            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
+            "expected": [
+                "fmt/199"
+            ],
+            "remove_original": false
+        },
+        "x-fmt/152": {
+            "format_name": "Digital Video",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "mp4",
+            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
+            "expected": [
+                "fmt/199"
+            ],
+            "remove_original": false
+        },
+        "fmt/133": {
+            "format_name": "Windows Media Video",
+            "bin": "ffmpeg",
+            "accepted": false,
+            "target_container": "mp4",
+            "processing_args": "-c:v libx264 -crf 18 -pix_fmt yuv420p -c:a aac",
+            "expected": [
+                "fmt/199"
+            ],
+            "remove_original": false
+        },
+        "fmt/95": {
+            "format_name": "Acrobat PDF/A - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/354": {
+            "format_name": "Acrobat PDF/A - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/476": {
+            "format_name": "Acrobat PDF/A - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/477": {
+            "format_name": "Acrobat PDF/A - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/478": {
+            "format_name": "Acrobat PDF/A - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/479": {
+            "format_name": "Acrobat PDF/A - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/480": {
+            "format_name": "Acrobat PDF/A - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/481": {
+            "format_name": "Acrobat PDF/A - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/1910": {
+            "format_name": "Acrobat PDF/A - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/1911": {
+            "format_name": "Acrobat PDF/A - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/1912": {
+            "format_name": "Acrobat PDF/A - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/14": {
+            "format_name": "Acrobat PDF 1.0 - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/15": {
+            "format_name": "Acrobat PDF 1.1 - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/16": {
+            "format_name": "Acrobat PDF 1.2 - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/17": {
+            "format_name": "Acrobat PDF 1.3 - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/18": {
+            "format_name": "Acrobat PDF 1.4 - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/19": {
+            "format_name": "Acrobat PDF 1.5 - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/20": {
+            "format_name": "Acrobat PDF 1.6 - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/276": {
+            "format_name": "Acrobat PDF 1.7 - Portable Document Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/214": {
+            "format_name": "Microsoft Excel for Windows",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/189": {
+            "format_name": "Microsoft Office Open XML",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/215": {
+            "format_name": "Microsoft Powerpoint for Windows",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/412": {
+            "format_name": "Microsoft Word for Windows",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/487": {
+            "format_name": "Macro Enabled Microsoft Powerpoint",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/523": {
+            "format_name": "Macro enabled Microsoft Word Document OOXML",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/629": {
+            "format_name": "Microsoft PowerPoint Show",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/630": {
+            "format_name": "Microsoft PowerPoint Macro-Enabled Show",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/40": {
+            "format_name": "Microsoft Word Document",
+            "bin": "soffice",
+            "accepted": false,
+            "target_container": "docx",
+            "processing_args": "--headless --convert-to",
+            "expected": [
+                "fmt/412"
+            ],
+            "remove_original": false
+        },
+        "fmt/609": {
+            "format_name": "Microsoft Word (Generic)",
+            "bin": "soffice",
+            "accepted": false,
+            "target_container": "docx",
+            "processing_args": "--headless --convert-to",
+            "expected": [
+                "fmt/412"
+            ],
+            "remove_original": false
+        },
+        "fmt/39": {
+            "format_name": "Microsoft Word Document",
+            "bin": "soffice",
+            "accepted": false,
+            "target_container": "docx",
+            "processing_args": "--headless --convert-to",
+            "expected": [
+                "fmt/412"
+            ],
+            "remove_original": false
+        },
+        "fmt/125": {
+            "format_name": "Microsoft Powerpoint Presentation",
+            "bin": "soffice",
+            "accepted": false,
+            "target_container": "pptx",
+            "processing_args": "--headless --convert-to",
+            "expected": [
+                "fmt/215"
+            ],
+            "remove_original": false
+        },
+        "fmt/126": {
+            "format_name": "Microsoft Powerpoint Presentation",
+            "bin": "soffice",
+            "accepted": false,
+            "target_container": "pptx",
+            "processing_args": "--headless --convert-to",
+            "expected": [
+                "fmt/215"
+            ],
+            "remove_original": false
+        },
+        "fmt/181": {
+            "format_name": "Microsoft PowerPoint for Macintosh",
+            "bin": "soffice",
+            "accepted": false,
+            "target_container": "pptx",
+            "processing_args": "--headless --convert-to",
+            "expected": [
+                "fmt/215"
+            ],
+            "remove_original": false
+        },
+        "fmt/59": {
+            "format_name": "Microsoft Excel 5.0/95 Workbook (xls)",
+            "bin": "soffice",
+            "accepted": false,
+            "target_container": "xlsx",
+            "processing_args": "--headless --convert-to",
+            "expected": [
+                "fmt/214"
+            ],
+            "remove_original": false
+        },
+        "fmt/61": {
+            "format_name": "Microsoft Excel 97 Workbook (xls)",
+            "bin": "soffice",
+            "accepted": false,
+            "target_container": "xlsx",
+            "processing_args": "--headless --convert-to",
+            "expected": [
+                "fmt/214"
+            ],
+            "remove_original": false
+        },
+        "fmt/62": {
+            "format_name": "Microsoft Excel 2000-2003 Workbook (xls)",
+            "bin": "soffice",
+            "accepted": false,
+            "target_container": "xlsx",
+            "processing_args": "--headless --convert-to",
+            "expected": [
+                "fmt/214"
+            ],
+            "remove_original": false
+        },
+        "x-fmt/14": {
+            "format_name": "Macintosh Text File",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/15": {
+            "format_name": "MS-DOS Text File",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/16": {
+            "format_name": "Unicode Text File",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/21": {
+            "format_name": "7-bit ANSI Text",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/22": {
+            "format_name": "7-bit ASCII Text",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/111": {
+            "format_name": "Plain Text File",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/130": {
+            "format_name": "MS-DOS Text File with line breaks",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/282": {
+            "format_name": "8-bit ANSI Text",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/62": {
+            "format_name": "Log File",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/101": {
+            "format_name": "Extensible Markup Language",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/280": {
+            "format_name": "XML Schema Definition",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/1474": {
+            "format_name": "TEI P4 XML - Single Text File",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/1475": {
+            "format_name": "TEI P4 XML - Corpus File",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/1476": {
+            "format_name": "TEI P5 - Single Text File",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/1477": {
+            "format_name": "TEI P5 XML - Corpus File",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/18": {
+            "format_name": "Comma Separated Values",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/817": {
+            "format_name": "JSON Data Interchange Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/263": {
+            "format_name": "ZIP Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/265": {
+            "format_name": "Tape Archive Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "x-fmt/266": {
+            "format_name": "GZIP Format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/1671": {
+            "format_name": "Z Compressed Data",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        },
+        "fmt/484": {
+            "format_name": "7Zip format",
+            "bin": "",
+            "accepted": true,
+            "target_container": "",
+            "processing_args": "",
+            "expected": [
+                ""
+            ],
+            "remove_original": false
+        }
+    }
+}

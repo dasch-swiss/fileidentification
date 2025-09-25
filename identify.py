@@ -1,7 +1,9 @@
-from pathlib import Path
 import subprocess
+from pathlib import Path
+
 import typer
 from typing_extensions import Annotated
+
 from fileidentification.filehandling import FileHandler
 
 
@@ -10,9 +12,8 @@ def main(
     tmp_dir: Annotated[
         Path | None,
         typer.Option(
-            "--working-dir",
-            "-w",
-            help="path to working dir where the processed files are stored",
+            "--tmp-dir",
+            help="path to tmp dir where the converted / removed files are stored",
         ),
     ] = None,
     integrity_tests: Annotated[

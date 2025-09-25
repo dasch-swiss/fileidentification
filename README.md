@@ -99,7 +99,7 @@ that was encountered in the folder according to the default policies located in
 
 `uv run identify.py path/to/directory -i`
 
-Test the files for their integrity and move corrupted files to the folder in `path/to/directory_WORKINGDIR/_REMOVED`.
+Test the files for their integrity and move corrupted files to the folder in `path/to/directory_TMP/_REMOVED`.
 
 You can also add the flag `-v` (`--verbose`) for more detailed inspection. (see **options** below)
 
@@ -110,7 +110,7 @@ NOTE: Currently only audio/video and image files are tested.
 `uv run identify.py path/to/directory -a`
 
 Apply the policies defined in `path/to/directory_policies.json` and convert files into their target file format.
-The converted files are temporary stored in `path/to/directory_WORKINGDIR` (default) with the log output
+The converted files are temporary stored in `path/to/directory_TMP` (default) with the log output
 of the program used as log.txt next to it.
 
 ### Clean Up Temporary Files
@@ -122,10 +122,10 @@ Delete all temporary files and folders and move the converted files next to thei
 ### Combining Steps - Custom Policies and Working Directory
 
 If you don't need these intermediary steps, you can run the desired steps at once by combining their flags.
-Here is an example how to do verbose testing, applying a custom policy and set the location to the working
+Here is an example how to do verbose testing, applying a custom policy and set the location to the tmp
 directory other than default (see **option** below for more information about the flags):
 
-`uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json -w path/to/workingdir`
+`uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json --tmp-dir path/to/workingdir`
 
 Another use case example: If you have a customised policies file and want to run it against a different folder and
 apply it using docker
@@ -170,7 +170,7 @@ A policy for a file type consists of the following fields and uses its PRONOM Un
 | **target_container** | **str**        | required if field accepted is false |
 | **processing_args**  | **str**        | required if field accepted is false |
 | **expected**         | **list[str]**  | required if field accepted is false |
-| **remove_original**  | **bool**       | required if field accepted is false |
+| **remove_original**  | **bool**       | optional                            |
 
 - `format_name`: The name of the file format.
 - `bin`: Program to convert or test the file. Literal[`""`, `"magick"`, `"ffmpeg"`, `"soffice"`].
@@ -221,7 +221,7 @@ otherwise pass the path to the file with -p) with
 `uv run identify.py path/to/directory -t`
 
 The script takes the smallest file for each conversion policy and converts it.
-The converted files are located in _WORKINGDIR/_TEST.
+The converted files are located in _TMP/_TEST.
 
 If you just want to test a specific policy, append f and the puid
 
@@ -229,9 +229,8 @@ If you just want to test a specific policy, append f and the puid
 
 ## Modifying Default Settings
 
-The default setting for file conversion are in **fileidentification/policies/default.py**, you can add or modify the
-entries there. All other settings such as default path values or hash algorithm are in
-**fileidentification/conf/settings.py**
+In the .env file you can alter the default paths for default policies and set custom tmp dir and where to store the
+json output.
 
 ## Options
 
@@ -251,14 +250,11 @@ it handles some warnings as an error.
 
 `-x`
 [`--remove-original`] this overwrites the remove_original value in the policies and sets it to true when removing
-the tmp files. the original files are moved to the WORKINGDIR/_REMOVED folder.
+the tmp files. the original files are moved to the TMP/_REMOVED folder.
 When used in generating policies, it sets remove_original in the policies to true (default false).
 
 `-p`
 [`--policies-path`] load a custom policies json file
-
-`-w`
-[`--working-dir`] set a custom working directory. default is path/to/directory_WORKINGDIR
 
 `-s`
 [`--strict`] when run in strict mode, it moves the files that are not listed in policies.json to the folder _REMOVED
@@ -274,6 +270,8 @@ fileidentification/policies/default.py
 
 `-q`
 [`--quiet`] just print errors and warnings
+
+`--working-dir` set a custom tmp directory where converted / removed files are stored. default is path/to/directory_TMP
 
 `--csv`
 get an additional output as csv aside from the log.json

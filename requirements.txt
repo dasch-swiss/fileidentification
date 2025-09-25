@@ -19,3 +19,4 @@ typer==0.15.1
 typing-extensions==4.12.2
 typing-inspection==0.4.1
 urllib3==2.3.0
+dotenv==0.9.9

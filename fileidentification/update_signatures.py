@@ -1,31 +1,32 @@
 import json
-import os
 from pathlib import Path
-from lxml import etree, objectify  # type: ignore
+
 import requests  # type: ignore
 import typer
-from typer import secho, colors
 from bs4 import BeautifulSoup
-from fileidentification.conf.settings import PathsConfig, DroidSigURL
+from lxml import etree, objectify  # type: ignore
+from typer import colors, secho
+
+from fileidentification.defenitions.constants import FMT2EXT, DroidSigURL
 
 
 def write_fmt2ext(link: str, outpath: str = "") -> None:
     # outpath
-    json_path = Path("fmt2ext.json") if not outpath else Path(outpath)
+    json_path = Path(FMT2EXT) if not outpath else Path(outpath)
 
     # tmp xml_filname
     xml_filename = Path(f"droid_{link[-8:]}")
 
     # get the droid xml content and save it to file (as it is large and to avoid error on etree.parse)
     res = requests.get(link)
-    if res.status_code != 200:
+    if res.status_code != 200:  # noqa PLR2004
         secho(f"could not fetch {link}", fg=colors.RED)
         raise typer.Exit(1)
     xml_filename.write_text(res.content.decode("utf-8"))
 
     # open XML file and strip namespaces, delete the xml
     tree = etree.parse(xml_filename)
-    os.remove(xml_filename)
+    xml_filename.unlink()
     root = tree.getroot()
     for elem in root.getiterator():
         if not hasattr(elem.tag, "find"):
@@ -54,22 +55,16 @@ def write_fmt2ext(link: str, outpath: str = "") -> None:
 
         puids[puid] = format_info
 
-    with open(json_path, "w") as f:
-        json.dump(puids, f, indent=4, ensure_ascii=False)
-
-    if json_path.is_file():
-        secho(
-            f"extensions and names updated to {link[-8:-4]} in {json_path}",
-            fg=colors.GREEN,
-        )
+    json_path.write_text(json.dumps(puids, indent=4, ensure_ascii=False))
+    secho(f"extensions and names updated to {link[-8:-4]} in {json_path}", fg=colors.GREEN,)
 
 
 def update_signatures() -> None:
     # get the latest signaturefile link
-    secho(f"... updating {PathsConfig.FMT2EXT}")
+    secho(f"... updating {FMT2EXT}")
     url = DroidSigURL.NALIST
     res = requests.get(url)
-    if res.status_code != 200:
+    if res.status_code != 200:  # noqa PLR2004
         secho(f"could not fetch {url}", fg=colors.RED)
         raise typer.Exit(1)
 
@@ -85,7 +80,7 @@ def update_signatures() -> None:
         secho(f"could not parse links out of {url}", fg=colors.RED)
         raise typer.Exit(1)
     # update fm
-    write_fmt2ext(link=link, outpath=PathsConfig.FMT2EXT)  # type: ignore
+    write_fmt2ext(link=link, outpath=FMT2EXT)  # type: ignore
 
 
 if __name__ == "__main__":

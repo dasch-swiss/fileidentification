@@ -26,3 +26,4 @@ RUN python3 -m venv /app/.venv && /app/.venv/bin/pip3 install --no-cache-dir --u
 # copy the app
 COPY ./fileidentification /app/fileidentification
 COPY ./identify.py /app/.
+COPY .env /app/.

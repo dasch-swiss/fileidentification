@@ -1,11 +1,15 @@
 from __future__ import annotations
-import re
+
 import hashlib
-from datetime import datetime, UTC
+import re
 from dataclasses import dataclass, field
-from pydantic import BaseModel, Field
+from datetime import UTC, datetime
 from pathlib import Path
-from fileidentification.conf.settings import PolicyMsg, FileDiagnosticsMsg
+
+from pydantic import BaseModel, Field, field_validator, model_validator
+from typing_extensions import Self
+
+from fileidentification.defenitions.constants import Bin, FileDiagnosticsMsg, PolicyMsg
 
 
 class LogMsg(BaseModel):
@@ -47,7 +51,7 @@ class SfInfo(BaseModel):
     # paths used during processing, they are not written out
     path: Path = Field(default_factory=Path, exclude=True)
     root_folder: Path = Field(default_factory=Path, exclude=True)
-    wdir: Path = Field(default_factory=Path, exclude=True)
+    tdir: Path = Field(default_factory=Path, exclude=True)
 
     def model_post_init(self, __context):  # type: ignore
         if not self.status:
@@ -70,11 +74,11 @@ class SfInfo(BaseModel):
                 return self.matches[0]["id"]  # type: ignore
         return None
 
-    def set_processing_paths(self, root_folder: Path, wdir: Path, initial: bool = False) -> None:
+    def set_processing_paths(self, root_folder: Path, tdir: Path, initial: bool = False) -> None:
         if root_folder.is_file():
             root_folder = root_folder.parent
         self.root_folder = root_folder
-        self.wdir = wdir
+        self.tdir = tdir
         if initial:
             self.filename = self.filename.parent.relative_to(root_folder) / self.filename.name
         if not self.dest:
@@ -131,9 +135,55 @@ class BasicAnalytics:
         self.puid_unique[puid] = sorted(self.puid_unique[puid], key=lambda x: x.filesize, reverse=False)
 
 
+# Policies realated models
+
+class PolicyParams(BaseModel):
+    format_name: str = Field(default_factory=str)
+    bin: str = Field(default="")
+    accepted: bool = Field(default=True)
+    target_container: str = Field(default="")
+    processing_args: str = Field(default="")
+    expected: list[str] = Field(default=[""])
+    remove_original: bool = Field(default=False)
+
+    @field_validator('bin', mode='after')
+    @classmethod
+    def allowed_bin(cls, value: str) -> str:
+        if value not in Bin:
+            raise ValueError(f'{value} is not an allowed bin')
+        return value
+
+    @field_validator('processing_args', mode='after')
+    @classmethod
+    def allowed_args(cls, value: str) -> str:
+        if ";" in value:
+            raise ValueError("the char ';' is not an allowed in processing_args")
+        return value
+
+    @model_validator(mode='after')
+    def assert_conv_args(self) -> Self:
+        if self.accepted is False:
+            if self.target_container == "":
+                raise ValueError('your missing "target_container" in policy')
+            if self.expected == [""]:
+                raise ValueError('your missing "expected" in policy')
+            if self.bin == "":
+                raise ValueError('your missing "bin" in policy')
+        return self
+
+
+Policies = dict[str, PolicyParams]
+
+
+class PoliciesFile(BaseModel):
+    name: Path = Field(default_factory=Path)
+    comment: str = Field(default_factory=str)
+    policies: Policies = Field(default_factory=Policies)
+
+
 def get_md5(path: str | Path) -> str:
     md5 = hashlib.md5()
-    with open(path, "rb") as s:
+    with open(path, "rb") as s:  # noqa PTH123
         for chunk in iter(lambda: s.read(4096), b""):
             md5.update(chunk)
     return md5.hexdigest()
