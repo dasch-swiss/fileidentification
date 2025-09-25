@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from fileidentification.defenitions.constants import Bin, ErrMsgFF, ErrMsgIM, LibreOfficePath, PDFSETTINGS
+from fileidentification.defenitions.constants import PDFSETTINGS, Bin, ErrMsgFF, ErrMsgIM, LibreOfficePath
 from fileidentification.defenitions.models import PolicyParams, SfInfo
 
 
