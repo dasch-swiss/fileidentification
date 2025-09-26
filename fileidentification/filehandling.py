@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from typer import colors, secho
 
-from fileidentification.defenitions.constants import (
+from fileidentification.definitions.constants import (
     CSVFIELDS,
     FMT2EXT,
     Bin,
@@ -25,7 +25,7 @@ from fileidentification.defenitions.constants import (
     LibreOfficePath,
     PolicyMsg,
 )
-from fileidentification.defenitions.models import (
+from fileidentification.definitions.models import (
     BasicAnalytics,
     LogMsg,
     LogOutput,
