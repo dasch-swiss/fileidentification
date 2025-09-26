@@ -14,7 +14,7 @@ to provide comprehensive file processing capabilities.
 ### Package Management
 
 - **Install dependencies**: `uv sync --all-extras --dev`
-- **Run the main script**: `uv run identify.py [path] [options]` 
+- **Run the main script**: `uv run identify.py [path] [options]`
 - **Update signatures**: `uv run update.py && uv lock --upgrade`
 
 ### Code Quality
@@ -48,7 +48,7 @@ The project does not use a formal test framework like pytest. Instead, it uses t
    - Handles file identification, integrity testing, policy application, and conversion
    - Manages temporary directories and file movements
 
-3. **Models** (`fileidentification/defenitions/models.py`)
+3. **Models** (`fileidentification/definitions/models.py`)
    - **SfInfo**: Core file information model (from siegfried output)
    - **PolicyParams**: File conversion policy specifications
    - **LogMsg/LogOutput**: Logging and error tracking models
@@ -69,13 +69,15 @@ The project does not use a formal test framework like pytest. Instead, it uses t
 
 ### Key File Structures
 
-- **Policies JSON**: Maps PRONOM PUIDs to conversion specifications with fields like `bin`, `accepted`, `target_container`, `processing_args`
+- **Policies JSON**: Maps PRONOM PUIDs to conversion specifications
+  with fields like `bin`, `accepted`, `target_container`, `processing_args`
 - **Log JSON**: Tracks all file operations and modifications
-- **Default Policies**: Located in `fileidentification/defenitions/default_policies.json`
+- **Default Policies**: Located in `fileidentification/definitions/default_policies.json`
 
 ## Configuration
 
 ### Environment Variables (`.env`)
+
 - `DEFAULTPOLICIES`: Path to default policies JSON
 - `TMP_DIR`: Temporary directory suffix (default: `_TMP`)
 - `POLICIES_J`: Policies JSON file suffix (default: `_policies.json`)
@@ -83,6 +85,7 @@ The project does not use a formal test framework like pytest. Instead, it uses t
 - `RMV_DIR`: Removed files directory suffix (default: `_REMOVED`)
 
 ### External Dependencies
+
 The project requires these external programs for full functionality:
 - **siegfried** (via pygfried): File format identification
 - **ffmpeg**: Audio/video processing and integrity testing
@@ -93,14 +96,17 @@ The project requires these external programs for full functionality:
 ## Common Workflow Patterns
 
 ### Full Processing Pipeline
+
 ```bash
 uv run identify.py path/to/directory -iar
 ```
+
 - `-i`: integrity tests
 - `-a`: apply conversion policies
 - `-r`: remove temporary files and finalize
 
 ### Policy Development
+
 1. Generate policies: `uv run identify.py path/to/directory`
 2. Edit the generated `*_policies.json` file
 3. Test policies: `uv run identify.py path/to/directory -t`
