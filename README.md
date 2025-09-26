@@ -337,3 +337,22 @@ if you want to convert to pdf/A, you need LibreOffice version 7.4+
 when you convert svg, you might run into errors as the default library of imagemagick is not that good.
 easiest workaround is installing inkscape ( `brew install --cask inkscape` ), make sure that you reinstall imagemagick,
 so its uses inkscape as default for converting svg ( `brew remove imagemagick` , `brew install imagemagick`)
+
+## Dedicated Dockerfile for Galaxy integration
+
+```bash
+docker build -f Dockerfile.galaxy -t fileidentification-galaxy .
+```
+
+Spin up Galaxy, to run the tool:
+
+```bash
+planemo serve
+```
+
+Run the tests:
+
+```bash
+planemo test fileidentification-galaxy.xml
+```
+

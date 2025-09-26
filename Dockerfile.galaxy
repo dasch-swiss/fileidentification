@@ -1,0 +1,24 @@
+FROM python:3.13-trixie
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+# Set environment variables to prevent interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=UTC
+
+# Configure uv to use container-internal cache
+ENV UV_CACHE_DIR=/app/.uv-cache
+
+# Update package lists and install system dependencies
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    imagemagick \
+    ghostscript \
+    libreoffice \
+    golang  # used for pygfried/siegfried \
+    rsync \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies
+COPY . /app/
+WORKDIR /app
+RUN uv sync

@@ -1,0 +1,29 @@
+<tool id="fileidentification" name="Analyse your files" version="0.1.0" python_template_version="3.5">
+    <requirements>
+        <container type="docker">
+            fileidentification-galaxy:latest
+        </container>
+    </requirements> 
+    <!---echo "pwd" && pwd && \
+        echo "ls -l ." && ls -l . && \
+        echo "ls -l .." && ls -l .. && \ -->
+    <command detect_errors="exit_code"><![CDATA[
+        unzip $input1 -d input_dir &&
+        uv run identify.py ./input_dir > results.txt
+    ]]></command>
+    <inputs>
+        <param type="data" name="input1" format="zip" />
+    </inputs>
+    <outputs>
+        <data name="out" format="txt" from_work_dir="result.txt"  label="${tool.name} on ${on_string}" />
+    </outputs>
+    <tests>
+        <test>
+            <param name="input1" value="test-data.zip"/>
+            <output name="out" ftype="txt" file="output_results.txt"/>
+        </test>
+    </tests>
+    <help><![CDATA[
+        TODO: Fill in help.
+    ]]></help>
+</tool>

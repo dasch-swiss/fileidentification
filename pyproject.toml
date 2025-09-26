@@ -23,6 +23,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "mypy>=1.18.1",
+    "planemo>=0.75.32",
     "ruff>=0.13.0",
 ]
 
