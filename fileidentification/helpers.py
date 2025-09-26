@@ -1,7 +1,7 @@
 import math
 from typing import Any
 
-from fileidentification.defenitions.models import SfInfo
+from fileidentification.definitions.models import SfInfo
 
 
 def format_bite_size(bytes_size: int) -> str:

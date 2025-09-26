@@ -233,7 +233,7 @@ In the .env file you can customise some default path: e.g. the paths to the defa
 tmp dir location.
 
 Other default params such as PDF/A export settings for LibreOffice or other strings are in 
-`fileidentification/defenitions/constants.py`.
+`fileidentification/definitions/constants.py`.
 
 ## Options
 

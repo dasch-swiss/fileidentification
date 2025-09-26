@@ -2,8 +2,8 @@ from typing import Any
 
 from typer import colors, secho
 
-from fileidentification.defenitions.constants import FileDiagnosticsMsg
-from fileidentification.defenitions.models import BasicAnalytics, LogMsg, LogTables, Policies
+from fileidentification.definitions.constants import FileDiagnosticsMsg
+from fileidentification.definitions.models import BasicAnalytics, LogMsg, LogTables, Policies
 from fileidentification.helpers import format_bite_size
 
 

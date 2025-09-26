@@ -9,7 +9,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, field_validator, model_validator
 from typing_extensions import Self
 
-from fileidentification.defenitions.constants import Bin, FileDiagnosticsMsg, PolicyMsg
+from fileidentification.definitions.constants import Bin, FileDiagnosticsMsg, PolicyMsg
 
 
 class LogMsg(BaseModel):
