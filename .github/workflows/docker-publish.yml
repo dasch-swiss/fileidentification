@@ -1,0 +1,26 @@
+name: Publish Docker Image to Dockerhub
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+        
+
+jobs:
+  publish-from-branch:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build docker image
+        run: docker build -f Dockerfile.galaxy -t daschswiss/fileidentification-galaxy:latest .
+      - name: Publish image to Dockerhub
+        run: |
+          echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
+          docker push daschswiss/fileidentification-galaxy:latest
+      
