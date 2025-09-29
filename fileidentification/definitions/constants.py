@@ -9,7 +9,7 @@ class DroidSigURL(StrEnum):
     cdnNA = "https://cdn.nationalarchives.gov.uk/documents/DROID_SignatureFile_"
 
 
-FMT2EXT = "fileidentification/defenitions/fmt2ext.json"
+FMT2EXT = "fileidentification/definitions/fmt2ext.json"
 
 
 class Bin(StrEnum):
