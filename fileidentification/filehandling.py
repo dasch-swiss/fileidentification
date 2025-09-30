@@ -44,7 +44,7 @@ from fileidentification.output import (
     print_siegfried_errors,
 )
 from fileidentification.wrappers.wrappers import Converter as Con
-from fileidentification.wrappers.wrappers import Ffmpeg, ImageMagick, Rsync
+from fileidentification.wrappers.wrappers import Ffmpeg, ImageMagick
 
 load_dotenv()
 
@@ -150,19 +150,17 @@ class FileHandler:
                 return
 
     def _remove(self, sfinfo: SfInfo) -> None:
-        dest: Path = self.fp.RMV_DIR / sfinfo.filename.parent
-        if not dest.exists():
-            dest.mkdir(parents=True)
-        err, msg, cmd = Rsync.copy(sfinfo.path, dest)
-        # if there was an error, append to processing err tables
-        if err:
-            secho(f"{FileProcessingMsg.FAILEDMOVE} {cmd}", fg=colors.RED)
-            self.log_tables.errors.append((LogMsg(name="rsync", msg=msg), sfinfo))
-        else:
-            sfinfo.path.unlink()
-        sfinfo.status.removed = True
-        if sfinfo.processed_as:
-            self.ba.puid_unique[sfinfo.processed_as].remove(sfinfo)
+        dest: Path = self.fp.RMV_DIR / sfinfo.filename
+        if not dest.parent.exists():
+            dest.parent.mkdir(parents=True)
+        try:
+            sfinfo.path.rename(dest)
+            sfinfo.status.removed = True
+            if sfinfo.processed_as:
+                self.ba.puid_unique[sfinfo.processed_as].remove(sfinfo)
+        except OSError as e:
+            secho(f"{e}", fg=colors.RED)
+            self.log_tables.errors.append((LogMsg(name="filehandler", msg=str(e)), sfinfo))
 
     def _rename(self, sfinfo: SfInfo, ext: str) -> None:
         dest = sfinfo.path.with_suffix(ext)
@@ -480,22 +478,20 @@ class FileHandler:
                 if abs_dest.is_file():
                     abs_dest = Path(abs_dest.parent, f"{sfinfo.filename.stem}_{sfinfo.md5[:6]}{sfinfo.filename.suffix}")
                 # if its converted with docker container but -r flag is executed outside of docker, change the path
-                if not sfinfo.filename.is_file():
+                if not sfinfo.filename.is_file() and sfinfo.filename.is_relative_to("/data"):
                     sfinfo.filename = sfinfo.root_folder.parent / sfinfo.filename.relative_to("/data")
                 # move the file
-                err, msg, cmd = Rsync.copy(sfinfo.filename, abs_dest)
-                # check if the return status is true
-                if not err:
-                    # remove working dir
+                try:
+                    sfinfo.filename.rename(abs_dest)
                     if sfinfo.filename.parent.is_dir():
                         shutil.rmtree(sfinfo.filename.parent)
                     # set relative path in sfinfo.filename, set flags
                     sfinfo.filename = sfinfo.dest / abs_dest.name
                     sfinfo.status.added = True
                     sfinfo.dest = None
-                else:  # rsync failed
-                    secho(cmd, fg=colors.RED, bold=True)
-                    self.log_tables.errors.append((LogMsg(name="rsync", msg=msg), sfinfo))
+                except OSError as e:
+                    secho(f"{e}", fg=colors.RED)
+                    self.log_tables.errors.append((LogMsg(name="filehandler", msg=str(e)), sfinfo))
 
         return write_logs
 

@@ -152,15 +152,3 @@ class Converter:
         subprocess.run(cmd, shell=True)
 
         return target, cmd, logfile_path
-
-
-class Rsync:
-    @staticmethod
-    def copy(source: str | Path, dest: str | Path) -> tuple[bool, str, list[str]]:
-        """rsync the source to dest.
-        :returns True, stderr, cmd if there was an error, else False, stderr, cmd"""
-        cmd = ["rsync", "-avh", str(source), str(dest)]
-        res = subprocess.run(cmd, capture_output=True)  # output in stderr and b'', because of certain char issues
-        if res.returncode != 0:
-            return True, res.stderr.decode("utf-8", "backslashreplace"), cmd
-        return False, res.stderr.decode("utf-8", "backslashreplace"), cmd
