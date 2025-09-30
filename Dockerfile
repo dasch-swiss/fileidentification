@@ -1,4 +1,12 @@
-FROM debian:stable-slim
+FROM python:3.12-slim-trixie AS py_env
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+RUN apt-get update && apt-get install -y golang
+
+WORKDIR /app
+COPY . .
+RUN uv sync --no-group dev
+
+FROM python:3.12-slim-trixie
 
 # Set environment variables to prevent interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
@@ -10,17 +18,11 @@ RUN apt-get update && apt-get install -y \
     imagemagick \
     ghostscript \
     libreoffice-nogui \
-    golang \
-    python3-pip \
-    python3-venv \
     && rm -rf /var/lib/apt/lists/*
-
 
 WORKDIR /app
 
-# for some reason, pygfried fails installing with uv
-COPY ./d_requirements.txt /app/requirements.txt
-RUN python3 -m venv /app/.venv && /app/.venv/bin/pip3 install --no-cache-dir --upgrade -r /app/requirements.txt
+COPY --from=py_env /app/.venv /app/.venv
 
 # copy the app
 COPY ./fileidentification /app/fileidentification

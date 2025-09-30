@@ -313,7 +313,7 @@ fh.write_logs("path/where/to/log", to_csv=True)
 ## Updating Signatures
 
 ```bash
-uv run update.py && uv lock --upgrade
+uv sync --extra update_fmt && uv run update.py
 ```
 
 ## Useful Links
