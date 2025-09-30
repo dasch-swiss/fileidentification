@@ -23,9 +23,9 @@ to provide comprehensive file processing capabilities.
 - **Format with ruff**: `uv run ruff format .`
 - **Type check with mypy**: `uv run mypy .`
 
-### Testing
+### Policy Testing
 
-The project does not use a formal test framework like pytest. Instead, it uses the `-t` flag for policy testing:
+If the user edited auto-generated policies, the outcome of the policies can be tested using the `-t` flag:
 
 - **Test conversion policies**: `uv run identify.py path/to/directory -t`
 - **Test specific policy**: `uv run identify.py path/to/directory -tf fmt/XXX`
