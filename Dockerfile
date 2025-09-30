@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     imagemagick \
     ghostscript \
-    libreoffice \
+    libreoffice-nogui \
     golang \
     python3-pip \
     python3-venv \
@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # for some reason, pygfried fails installing with uv
-COPY ./requirements.txt /app/requirements.txt
+COPY ./d_requirements.txt /app/requirements.txt
 RUN python3 -m venv /app/.venv && /app/.venv/bin/pip3 install --no-cache-dir --upgrade -r /app/requirements.txt
 
 # copy the app

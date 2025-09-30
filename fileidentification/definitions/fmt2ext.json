@@ -1886,7 +1886,7 @@
         ]
     },
     "x-fmt/302": {
-        "name": "Visualization Toolkit",
+        "name": "Adobe FrameMaker Document",
         "file_extensions": [
             "fm"
         ]
@@ -8559,7 +8559,8 @@
     "fmt/930": {
         "name": "Magick Image File Format",
         "file_extensions": [
-            "mif"
+            "mif",
+            "miff"
         ]
     },
     "fmt/931": {
@@ -9282,7 +9283,7 @@
         "file_extensions": []
     },
     "fmt/1046": {
-        "name": "Draco File Format",
+        "name": "Draco 1",
         "file_extensions": [
             "drc"
         ]
@@ -15519,7 +15520,7 @@
         ]
     },
     "fmt/2027": {
-        "name": " Microsoft Project",
+        "name": "Microsoft Project",
         "file_extensions": [
             "mpp"
         ]
@@ -15594,6 +15595,181 @@
         "name": "HxC Floppy Emulator Stream Image",
         "file_extensions": [
             "hfe"
+        ]
+    },
+    "fmt/2040": {
+        "name": "CityGML File",
+        "file_extensions": [
+            "gml",
+            "xml"
+        ]
+    },
+    "fmt/2041": {
+        "name": "Android Package File",
+        "file_extensions": [
+            "apk"
+        ]
+    },
+    "fmt/2042": {
+        "name": "Android App Bundle File",
+        "file_extensions": [
+            "aab"
+        ]
+    },
+    "fmt/2043": {
+        "name": "Android Archive File",
+        "file_extensions": [
+            "aar"
+        ]
+    },
+    "fmt/2044": {
+        "name": "OpenDocument Text",
+        "file_extensions": [
+            "odt"
+        ]
+    },
+    "fmt/2045": {
+        "name": "OpenDocument Spreadsheet",
+        "file_extensions": [
+            "ods"
+        ]
+    },
+    "fmt/2046": {
+        "name": "OpenDocument Presentation",
+        "file_extensions": [
+            "odp"
+        ]
+    },
+    "fmt/2047": {
+        "name": "OpenDocument Database",
+        "file_extensions": [
+            "odb"
+        ]
+    },
+    "fmt/2048": {
+        "name": "OpenDocument Graphics",
+        "file_extensions": [
+            "odg"
+        ]
+    },
+    "fmt/2049": {
+        "name": "ArcGIS Pro Layer File",
+        "file_extensions": [
+            "lyrx"
+        ]
+    },
+    "fmt/2050": {
+        "name": "PDF/UA Portable Document Format",
+        "file_extensions": [
+            "pdf"
+        ]
+    },
+    "fmt/2052": {
+        "name": "PDF/UA Portable Document Format",
+        "file_extensions": [
+            "pdf"
+        ]
+    },
+    "fmt/2051": {
+        "name": "Cineon",
+        "file_extensions": [
+            "cin"
+        ]
+    },
+    "fmt/2053": {
+        "name": "Apache Arrow IPC Format",
+        "file_extensions": [
+            "arrow"
+        ]
+    },
+    "fmt/2054": {
+        "name": "JSON Lines Text Format",
+        "file_extensions": [
+            "jsonl"
+        ]
+    },
+    "fmt/2055": {
+        "name": "Apple Mail EMLX Format",
+        "file_extensions": [
+            "emlx"
+        ]
+    },
+    "fmt/2056": {
+        "name": "Immersive Audio Model Format",
+        "file_extensions": [
+            "iamf"
+        ]
+    },
+    "fmt/2057": {
+        "name": "A2R Disk Image File",
+        "file_extensions": [
+            "a2r"
+        ]
+    },
+    "fmt/2058": {
+        "name": "A2R Disk Image File",
+        "file_extensions": [
+            "a2r"
+        ]
+    },
+    "fmt/2059": {
+        "name": "WOZ Disk Image File",
+        "file_extensions": [
+            "woz"
+        ]
+    },
+    "fmt/2060": {
+        "name": "WOZ Disk Image File",
+        "file_extensions": [
+            "woz"
+        ]
+    },
+    "fmt/2061": {
+        "name": "MOOF Disk Image File",
+        "file_extensions": [
+            "moof"
+        ]
+    },
+    "fmt/2062": {
+        "name": "AV1 Image File Format",
+        "file_extensions": [
+            "avif"
+        ]
+    },
+    "fmt/2063": {
+        "name": "DaVinci Resolve Timeline File",
+        "file_extensions": [
+            "drt"
+        ]
+    },
+    "fmt/2064": {
+        "name": "DaVinci Resolve Project File",
+        "file_extensions": [
+            "drp"
+        ]
+    },
+    "fmt/2065": {
+        "name": "TOML",
+        "file_extensions": [
+            "toml"
+        ]
+    },
+    "fmt/2066": {
+        "name": "Rust Source File",
+        "file_extensions": [
+            "rs"
+        ]
+    },
+    "fmt/2067": {
+        "name": "XYZ Coordinate Data",
+        "file_extensions": [
+            "xyz"
+        ]
+    },
+    "fmt/2068": {
+        "name": "Macintosh File System",
+        "file_extensions": [
+            "mfs"
         ]
     }
 }
