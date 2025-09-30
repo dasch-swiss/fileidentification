@@ -85,5 +85,6 @@ def update_signatures() -> None:
     # update fm
     write_fmt2ext(link=link, outpath=FMT2EXT)  # type: ignore
 
+
 if __name__ == "__main__":
     typer.run(update_signatures)
