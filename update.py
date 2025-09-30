@@ -1,8 +1,8 @@
-import typer
 import json
 from pathlib import Path
 
 import requests  # type: ignore
+import typer
 from bs4 import BeautifulSoup
 from lxml import etree, objectify  # type: ignore
 from typer import colors, secho
