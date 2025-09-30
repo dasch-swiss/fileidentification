@@ -73,10 +73,9 @@ def update_signatures() -> None:
 
     soup = BeautifulSoup(res.content, "html.parser")
     versions = [
-        el.get("href")  # type: ignore
+        el.get("href")
         for el in soup.find_all("a")
-        if el.get("href")  # type: ignore
-        and el.get("href").startswith(DroidSigURL.cdnNA)  # type: ignore
+        if el.get("href") and el.get("href").startswith(DroidSigURL.cdnNA)  # type: ignore
     ]
     link = sorted(versions)[-1]  # type: ignore
     if not link:
