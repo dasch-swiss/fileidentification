@@ -478,7 +478,7 @@ class FileHandler:
                 if abs_dest.is_file():
                     abs_dest = Path(abs_dest.parent, f"{sfinfo.filename.stem}_{sfinfo.md5[:6]}{sfinfo.filename.suffix}")
                 # if its converted with docker container but -r flag is executed outside of docker, change the path
-                if not sfinfo.filename.is_file():
+                if not sfinfo.filename.is_file() and sfinfo.filename.is_relative_to("/data"):
                     sfinfo.filename = sfinfo.root_folder.parent / sfinfo.filename.relative_to("/data")
                 # move the file
                 try:
