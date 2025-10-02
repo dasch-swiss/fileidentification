@@ -505,7 +505,7 @@ class FileHandler:
             print_processing_errors(log_tables=self.log_tables)
 
         if to_csv:
-            with open(f"{self.fp.LOG_J}", "w") as f:  # noqa PTH123
+            with open(f"{self.fp.LOG_J}.csv", "w") as f:  # noqa PTH123
                 w = csv.DictWriter(f, CSVFIELDS)
                 w.writeheader()
                 [w.writerow(sfinfo2csv(el)) for el in self.stack]
