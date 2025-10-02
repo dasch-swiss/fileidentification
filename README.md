@@ -17,9 +17,31 @@ don't know in advance what file types you are dealing with. It features:
 
 ## Installation
 
-### Recommended Programs
+## Docker
 
-Install ffmpeg, imagemagick and LibreOffice if not already installed, or alternatively use a docker image.
+build the image, make the bash script executable and link it
+```bash
+docker build -t fileidentification .
+chmod +x ./fidr.sh
+ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
+```
+
+### Quickstart
+
+1. **Generate policies for your files:**
+`fidr path/to/directory`
+
+2. **Review generated policies:** Edit `path/to/directory_policies.json` to customize conversion rules
+
+3. **Test files and apply the policies:**
+`fidr path/to/directory -iar`
+
+
+## Manual installation
+
+Install ffmpeg, imagemagick and LibreOffice if not already installed
+
+### System Dependencies
 
 #### MacOS (using homebrew)
 
@@ -59,27 +81,6 @@ This creates a venv and installs all necessary python dependencies:
 ```bash
 uv run identify.py --help
 ```
-
-## Quick Start
-
-1. **Generate policies for your files:**
-`uv run identify.py path/to/directory`
-
-2. **Review generated policies:** Edit `path/to/directory_policies.json` to customize conversion rules
-
-3. **Test files and apply the policies:**
-`uv run indentify.py path/to/directory -iar`
-or **if you want to use a docker image:**
-`uv run indentify.py path/to/directory -iar --docker` this runs the script with the flags **-iar**
-in a docker container (see **options** below)
-
-### Dockerflag
-
-With the flag `--docker`, the script generates a docker image and executes itself in a docker container.
-
-If you don't have the required programs installed, you need to append this flag if you run the script with
-any of the flags `-i`, `-a`, `-t` (inspecting the files, file conversion and test conversion for a policy).
-for all other options you are perfectly fine with the python dependencies.
 
 ## Single Execution Steps
 
@@ -288,7 +289,7 @@ option the flags **--tmp-dir**, **-p**, **-b** and **-e** are ignored.
 
 ## using it in your code
 
-as long as you have all the dependencies installed and run python **version >=3.8**, have **typer**, **pydanic**, **pygfried**
+as long as you have all the dependencies installed and run python **version >=3.8**, have **typer**, **pydantic**, **pygfried**
 installed in your project, you can copy the fileidentification folder into your project folder and import the
 FileHandler to your code
 
