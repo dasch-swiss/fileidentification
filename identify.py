@@ -106,16 +106,14 @@ def main(
 ) -> None:
     if use_docker:
         print("... creating docker image. this may take a while ... \n")
-        subprocess.run(["docker", "build", "-t", "fileconverter", "."])
+        subprocess.run(["docker", "build", "-t", "fileidentification", "."])
         cmd = [
             "docker",
             "run",
             "--rm",
             "-v",
             f"{root_folder.parent}:/data",
-            "fileconverter:latest",
-            ".venv/bin/python3",
-            "identify.py",
+            "fileidentification",
             f"/data/{root_folder.name}",
         ]
         if integrity_tests:
