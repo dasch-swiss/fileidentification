@@ -36,6 +36,11 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 3. **Test files and apply the policies:**
 `fidr path/to/directory -iar`
 
+4. **logfile**: see `path/to/directory_log.json`
+If you wish a simpler csv output, you can add the flag `--csv` anytime when you run the script,
+which converts the `log.json` of the actual status of the directory to a csv.
+`fidr path/to/directory --csv`
+
 
 ## Manual installation
 
@@ -82,7 +87,7 @@ This creates a venv and installs all necessary python dependencies:
 uv run identify.py --help
 ```
 
-## Single Execution Steps
+## Single Execution Steps Explained
 
 ### Detect File Formats - Generate Conversion Policies
 
@@ -93,8 +98,7 @@ Generate two json files:
 **path/to/directory_log.json** : The technical metadata of all the files in the folder
 
 **path/to/directory_policies.json** : A file conversion protocol for each file format
-that was encountered in the folder according to the default policies located in
-`fileidentification/policies/default.py`. Edit it to customize conversion rules.
+that was encountered in the folder according to the default policies. Edit it to customize conversion rules.
 
 ### File Integrity Tests
 
@@ -127,21 +131,6 @@ Here is an example how to do verbose testing, applying a custom policy and set t
 directory other than default (see **option** below for more information about the flags):
 
 `uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json --tmp-dir path/to/tmp-dir`
-
-Another use case example: If you have a customised policies file and want to run it against a different folder and
-apply it using docker
-
-1. First generate the policies file for the folder with using an existing policies and extend it with file formats
-encountered in the folder that are missing in the policies passed:
-`uv run identify.py path/to/directory -ep somewhere/else/policies.json`
-
-2. You might have a blank policy for a file type you didn't expect in the bulk file folder. Edit the policy with the
-desired file conversion an run test conversion in a docker container:
-`uv run identify.py path/to/directory --docker -t`
-
-3. Inspect the files verbose, apply the policies and replace the parent files with the converted ones
-all running in a docker container:
-`uv run identify.py path/to/directory -ivarx --docker`
 
 ### Log
 
@@ -283,9 +272,6 @@ get an additional output as csv aside from the log.json
 `--convert`
 re-convert the files that failed during file conversion
 
-`--docker`
-this runs the script with the flags in a docker container. Please note that with this
-option the flags **--tmp-dir**, **-p**, **-b** and **-e** are ignored.
 
 ## using it in your code
 
