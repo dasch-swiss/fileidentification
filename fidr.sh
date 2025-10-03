@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # get variables for mounting the volume in docker
-input_dir=$1
+input_dir=$(realpath "$1")
 parent_dir=${input_dir%/*}
 dir_name=${input_dir##*/}
 
