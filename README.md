@@ -19,7 +19,8 @@ don't know in advance what file types you are dealing with. It features:
 
 ## Docker
 
-build the image, make the bash script executable and link it
+build the image, make the bash script executable and link it, where it is included in PATH (e.g. $HOME/.lcoal/bin)
+
 ```bash
 docker build -t fileidentification .
 chmod +x ./fidr.sh
@@ -28,25 +29,31 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 
 ### Quickstart
 
-1. **Generate policies for your files:**
-`fidr path/to/directory`
+- **Generate policies for your files:**
 
-2. **Review generated policies:** Edit `path/to/directory_policies.json` to customize conversion rules
+    `fidr path/to/directory`
 
-3. **Test files and apply the policies:**
-`fidr path/to/directory -iar`
+- **Review generated policies:**
 
-4. **logfile**: see `path/to/directory_log.json`
-If you wish a simpler csv output, you can add the flag `--csv` anytime when you run the script,
-which converts the `log.json` of the actual status of the directory to a csv.
-`fidr path/to/directory --csv`
+    Edit `path/to/directory_policies.json` to customize conversion rules. If edited, test the outcome of the policies
 
+    `fidr path/to/directory -t`
+
+- **Test the integrity of the files and apply the policies:**
+
+    `fidr path/to/directory -iar`
+
+- **Logfile**: see `path/to/directory_log.json`
+
+    If you wish a simpler csv output, run `fidr path/to/directory --csv` to get a csv
+
+-> see **Options** below for more available flags
 
 ## Manual installation
 
-Install ffmpeg, imagemagick and LibreOffice if not already installed
+### Dependencies
 
-### System Dependencies
+Install ffmpeg, imagemagick and LibreOffice if not already installed
 
 #### MacOS (using homebrew)
 
@@ -100,7 +107,7 @@ Generate two json files:
 **path/to/directory_policies.json** : A file conversion protocol for each file format
 that was encountered in the folder according to the default policies. Edit it to customize conversion rules.
 
-### File Integrity Tests
+### File Integrity Tests (-i)
 
 `uv run identify.py path/to/directory -i`
 
@@ -110,7 +117,7 @@ You can also add the flag `-v` (`--verbose`) for more detailed inspection. (see 
 
 NOTE: Currently only audio/video and image files are tested.
 
-### File Conversion
+### Applying Policies, File Conversion (-a)
 
 `uv run identify.py path/to/directory -a`
 
@@ -118,7 +125,7 @@ Apply the policies defined in `path/to/directory_policies.json` and convert file
 The converted files are temporary stored in `path/to/directory_TMP` (default) with the log output
 of the program used as log.txt next to it.
 
-### Clean Up Temporary Files
+### Clean Up Temporary Files (-r)
 
 `uv run identify.py path/to/directory -r`
 
@@ -246,9 +253,6 @@ it handles some warnings as an error.
 the tmp files. the original files are moved to the TMP/_REMOVED folder.
 When used in generating policies, it sets remove_original in the policies to true (default false).
 
-`-p`
-[`--policies-path`] load a custom policies json file
-
 `-s`
 [`--strict`] when run in strict mode, it moves the files that are not listed in policies.json to the folder _REMOVED
 (instead of throwing a warning).
@@ -258,13 +262,8 @@ fileidentification/policies/default.py
 `-b`
 [`--blank`] creates a blank policies based on the files encountered in the given directory.
 
-`-e`
-[`--extend-policies`] append filetypes found in the directory to the given policies if they are missing in it.
-
 `-q`
 [`--quiet`] just print errors and warnings
-
-`--tmp-dir` set a custom tmp directory where converted / removed files are stored. default is path/to/directory_TMP
 
 `--csv`
 get an additional output as csv aside from the log.json
@@ -272,30 +271,15 @@ get an additional output as csv aside from the log.json
 `--convert`
 re-convert the files that failed during file conversion
 
+the following options are currently not supported when running it in a docker container
 
-## using it in your code
+`-p`
+[`--policies-path`] load a custom policies json file instead of the default policies
 
-as long as you have all the dependencies installed and run python **version >=3.8**, have **typer**, **pydantic**, **pygfried**
-installed in your project, you can copy the fileidentification folder into your project folder and import the
-FileHandler to your code
+`-e`
+[`--extend-policies`] append filetypes found in the directory to the given policies if they are missing in it.
 
-```python
-from fileidentification.filehandling import FileHandler
-
-
-# this runs it with default parameters (flags -ivarq), but change the parameters to your needs
-fh = FileHandler()
-fh.run("path/to/directory")
-
-
-# or if you just want to do integrity tests
-fh = FileHandler()
-fh.integrity_tests("path/to/directory")
-
-# log it at some point and have an additional csv
-fh.write_logs("path/where/to/log", to_csv=True)
-
-```
+`--tmp-dir` set a custom tmp directory where converted / removed files are stored. default is path/to/directory_TMP
 
 ## Updating Signatures
 
