@@ -347,11 +347,11 @@ class FileHandler:
         if not puids:
             print("no files found that should be converted with given policies")
         else:
-            print_fmts([el for el in self.ba.puid_unique], self.ba, self.fmt2ext, self.policies, self.mode.STRICT)
+            print_fmts([el for el in puids], self.ba, self.fmt2ext, self.policies, self.mode.STRICT)
             print("\n --- testing policies with a sample from the directory ---")
 
             for puid in puids:  # noqa PLR1704
-                # we want the smallest file first for running the test in FileHandler.test_conversion()
+                # we want the smallest file first for running the test
                 self.ba.sort_puid_unique_by_size(puid)
                 sample = self.ba.puid_unique[puid][0]
                 secho(f"\n{puid}", fg=colors.YELLOW)
@@ -361,14 +361,11 @@ class FileHandler:
                     secho(f"You find the file with the log in {t_sfinfo.filename.parent}")
 
     def _load_sfinfos(self, root_folder: Path) -> None:
+        initial = True
         # if there is a log, try to read from there
         if self.fp.LOG_J.is_file():
-            for metadata in json.loads(self.fp.LOG_J.read_text())["files"]:
-                self.stack.append(SfInfo(**metadata))
-            # append the root path values
-            for sfinfo in self.stack:
-                if not sfinfo.status.removed:
-                    sfinfo.set_processing_paths(root_folder, self.fp.TMP_DIR)
+            initial = False
+            self.stack.extend([SfInfo(**metadata) for metadata in json.loads(self.fp.LOG_J.read_text())["files"]])
 
         # else scan the root_folder with pygfried
         if not self.stack:
@@ -376,19 +373,23 @@ class FileHandler:
                 SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True
             ) as prog:
                 prog.add_task(description="analysing files with siegfried...", total=None)
-                for f in root_folder.rglob("*"):
-                    if f.is_file():
-                        self.stack.append(SfInfo(**pygfried.identify(f"{f}", detailed=True)["files"][0]))  # type:ignore
+                self.stack.extend(
+                    [
+                        SfInfo(**pygfried.identify(f"{f}", detailed=True)["files"][0])  # type:ignore
+                        for f in root_folder.rglob("*")
+                        if f.is_file()
+                    ]
+                )
                 if root_folder.is_file():
                     self.stack.append(SfInfo(**pygfried.identify(f"{root_folder}", detailed=True)["files"][0]))  # type:ignore
-            # append the path values, set sfinfo.filename relative to root_folder
-            for sfinfo in self.stack:
-                sfinfo.set_processing_paths(root_folder, self.fp.TMP_DIR, initial=True)
 
-        # run basic analytics
+        # append path values run basic analytics
         for sfinfo in self.stack:
+            if not sfinfo.status.removed:
+                sfinfo.set_processing_paths(root_folder, self.fp.TMP_DIR, initial=initial)
             if not (sfinfo.status.removed or sfinfo.dest):
                 self.ba.append(sfinfo)
+
         print_siegfried_errors(ba=self.ba)
         if not self.mode.QUIET:
             print_duplicates(ba=self.ba)
@@ -420,10 +421,7 @@ class FileHandler:
     def convert(self) -> None:
         """convert files whose metadata status.pending is True"""
 
-        pending: list[SfInfo] = []
-        for sfinfo in self.stack:
-            if sfinfo.status.pending:
-                pending.append(sfinfo)
+        pending: list[SfInfo] = [sfinfo for sfinfo in self.stack if sfinfo.status.pending]
 
         if not pending:
             if not self.mode.QUIET:
