@@ -5,7 +5,7 @@ and is basically a python wrapper around several programs. It uses [pygfried](ht
 (a CPython extension for [siegfried](https://www.itforarchivists.com/siegfried)), ffmpeg, imagemagick (optionally inkscape) and
 LibreOffice, so it's recommended to have those installed. If you are not using fileidentification a lot and don't want
 to install these programs, you can run the script in a docker container. There is a dockerfile ready, the current docker
-image is still heavy though (1.7 G).
+image is still heavy though (1.1 G).
 
 Most probable use case might be when you need to test and possibly convert a huge amount of files and you
 don't know in advance what file types you are dealing with. It features:
