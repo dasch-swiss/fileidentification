@@ -1,4 +1,6 @@
 FROM python:3.12-slim-trixie AS py_env
+
+# installing the py env, pygfried needs golang but just for installing
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 RUN apt-get update && apt-get install -y golang
 
@@ -12,8 +14,8 @@ FROM python:3.12-slim-trixie
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 
-# Update package lists and install system dependencies
-RUN apt-get update && apt-get install -y \
+# install the programs
+RUN apt-get update && apt-get install --no-install-recommends -y \
     ffmpeg \
     imagemagick \
     ghostscript \
@@ -22,6 +24,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# add the py env
 COPY --from=py_env /app/.venv /app/.venv
 
 # copy the app

@@ -146,7 +146,7 @@ class Converter:
                 # add the version if its pdf
                 if args.target_container == "pdf":
                     cmd = f"{soffice} {args.processing_args} 'pdf{PDFSETTINGS}' {inputfile} "
-                cmd = cmd + f"--outdir {shlex.quote(str(wdir))} > {logfile}"
+                cmd = cmd + f"--outdir {shlex.quote(str(wdir))} >> {logfile} 2>&1"
 
         # run cmd in shell (and as a string, so [error]output is redirected to logfile)
         subprocess.run(cmd, shell=True)
