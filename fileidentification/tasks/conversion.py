@@ -6,16 +6,18 @@ import pygfried
 from fileidentification.definitions.models import SfInfo, LogMsg, Policies
 from fileidentification.definitions.constants import Bin, FPMsg
 
-from fileidentification.wrappers.wrappers import Ffmpeg, ImageMagick, Converter
+from fileidentification.wrappers.converter import convert
+from fileidentification.wrappers.ffmpeg import ffmpeg_media_info
+from fileidentification.wrappers.imagemagick import imagemagick_media_info
 
 
 def _add_media_info(sfinfo: SfInfo, _bin: str) -> None:
     match _bin:
         case Bin.FFMPEG:
-            streams = Ffmpeg.media_info(sfinfo.filename)
+            streams = ffmpeg_media_info(sfinfo.filename)
             sfinfo.media_info.append(LogMsg(name="ffmpeg", msg=json.dumps(streams)))
         case Bin.MAGICK:
-            sfinfo.media_info.append(LogMsg(name="imagemagick", msg=ImageMagick.media_info(sfinfo.filename)))
+            sfinfo.media_info.append(LogMsg(name="imagemagick", msg=imagemagick_media_info(sfinfo.filename)))
         case _:
             pass
 
@@ -62,7 +64,7 @@ def convert_file(sfinfo: SfInfo, policies: Policies) -> tuple[SfInfo | None, lis
 
     args: PolicyParams = policies[sfinfo.processed_as]  # type: ignore
 
-    target_path, cmd, logfile_path = Converter.convert(sfinfo, args)
+    target_path, cmd, logfile_path = convert(sfinfo, args)
 
     # replace abs path in logs, add name
     processing_log = None

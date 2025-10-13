@@ -3,7 +3,7 @@ from typer import secho, colors
 from fileidentification.definitions.models import SfInfo, LogTables, LogMsg, Policies
 from fileidentification.definitions.constants import PCMsg
 from fileidentification.tasks.os_tasks import remove
-from fileidentification.wrappers.wrappers import Ffmpeg
+from fileidentification.wrappers.ffmpeg import ffmpeg_media_info
 
 
 def apply_policy(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, strict: bool) -> None:
@@ -36,7 +36,7 @@ def apply_policy(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, stri
 
 
 def _has_valid_streams(sfinfo: SfInfo, puid: str) -> bool:
-    streams = Ffmpeg.media_info(sfinfo.path)
+    streams = ffmpeg_media_info(sfinfo.path)
     if not streams:
         secho(f"\t{sfinfo.filename} throwing errors. consider inspection", fg=colors.RED, bold=True)
         return True

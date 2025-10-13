@@ -4,7 +4,8 @@ import json
 from fileidentification.tasks.os_tasks import remove
 from fileidentification.definitions.models import SfInfo, LogMsg, LogTables, Policies
 from fileidentification.definitions.constants import FDMsg, FPMsg, FMT2EXT, Bin, ErrMsgRE
-from fileidentification.wrappers.wrappers import Ffmpeg, ImageMagick
+from fileidentification.wrappers.ffmpeg import ffmpeg_inspect
+from fileidentification.wrappers.imagemagick import imagemagick_inspect
 
 
 def inspect_file(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, verbose: bool) -> None:
@@ -80,7 +81,7 @@ def _content_errors(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, v
     # get the specs and errors
     match pbin:
         case Bin.FFMPEG:
-            error, warning, specs = Ffmpeg.is_corrupt(sfinfo, verbose=verbose)
+            error, warning, specs = ffmpeg_inspect(sfinfo, verbose=verbose)
             if specs and not sfinfo.media_info:
                 sfinfo.media_info.append(LogMsg(name=Bin.FFMPEG, msg=json.dumps(specs)))
             if warning:
@@ -90,9 +91,9 @@ def _content_errors(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, v
                     sfinfo.processing_logs.append(LogMsg(name="filehandler", msg="re-encoding the file"))
                     sfinfo.status.pending = True
         case Bin.MAGICK:
-            error, warning, specs = ImageMagick.is_corrupt(sfinfo, verbose=verbose)  # type: ignore
+            error, warning, specs = imagemagick_inspect(sfinfo, verbose=verbose)
             if specs and not sfinfo.media_info:
-                sfinfo.media_info.append(LogMsg(name=Bin.MAGICK, msg=specs))  # type: ignore
+                sfinfo.media_info.append(LogMsg(name=Bin.MAGICK, msg=specs))
             if warning:
                 sfinfo.processing_logs.append(LogMsg(name=Bin.MAGICK, msg=warning))
         case _:
