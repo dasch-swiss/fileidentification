@@ -11,7 +11,7 @@ Most probable use case might be when you need to test and possibly convert a hug
 don't know in advance what file types you are dealing with. It features:
 
 - file format identification and extraction of technical metadata with pygfried, ffprobe and imagemagick
-- file integrity testing with ffmpeg and imagemagick
+- file probing with ffmpeg and imagemagick
 - file conversion with ffmpeg, imagemagick and LibreOffice using a json file as a protocol
 - detailed logging
 
@@ -33,13 +33,14 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 
     `fidr path/to/directory`
 
-- **Review generated policies:**
+  - **Review generated policies:**
 
-    Edit `path/to/directory_policies.json` to customize conversion rules. If edited, test the outcome of the policies
+      Edit `path/to/directory_policies.json` to customize conversion rules. Optional test the outcome of the edited 
+      policies:
 
-    `fidr path/to/directory -t`
+      `fidr path/to/directory -t`
 
-- **Test the integrity of the files and apply the policies:**
+- **Test the files on errors and apply the policies:**
 
     `fidr path/to/directory -iar`
 
@@ -107,11 +108,11 @@ Generate two json files:
 **path/to/directory_policies.json** : A file conversion protocol for each file format
 that was encountered in the folder according to the default policies. Edit it to customize conversion rules.
 
-### File Integrity Tests (-i)
+### Inspect The Files (-i)
 
 `uv run identify.py path/to/directory -i`
 
-Test the files for their integrity and move corrupted files to the folder in `path/to/directory_TMP/_REMOVED`.
+Probes the files on errors and move corrupted files to the folder in `path/to/directory_TMP/_REMOVED`.
 
 You can also add the flag `-v` (`--verbose`) for more detailed inspection. (see **options** below)
 
@@ -235,10 +236,10 @@ Other default params such as PDF/A export settings for LibreOffice or other stri
 ## Options
 
 `-i`
-[`--integrity-tests`] tests the files for their integrity
+[`--inspect`] probes the files on errors
 
 `-v`
-[`--verbose`] catches more warnings on video and image files during the integrity tests.
+[`--verbose`] catches more warnings on video and image files during the tests.
 this can take a significantly longer based on what files you have. As an addition,
 it handles some warnings as an error.
 

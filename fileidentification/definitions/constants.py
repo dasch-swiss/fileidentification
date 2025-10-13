@@ -1,4 +1,7 @@
 from enum import StrEnum
+from typing import Any
+import json
+from pathlib import Path
 
 
 # application settings
@@ -9,7 +12,8 @@ class DroidSigURL(StrEnum):
     cdnNA = "https://cdn.nationalarchives.gov.uk/documents/DROID_SignatureFile_"
 
 
-FMT2EXT = "fileidentification/definitions/fmt2ext.json"
+# dict that resolves the puid to possible ext and file format name
+FMT2EXT: dict[str, Any] = json.loads(Path("fileidentification/definitions/fmt2ext.json").read_text())
 
 
 class Bin(StrEnum):
@@ -20,9 +24,14 @@ class Bin(StrEnum):
     EMPTY = ""
 
 
-class LibreOfficePath(StrEnum):
+class LOPath(StrEnum):
+    """path where LibreOffice exec is according to os"""
     Darwin = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
     Linux = "libreoffice"
+
+
+# foldername for removed files (is in TMP_DIR)
+RMV_DIR = "_REMOVED"
 
 
 # it needs libreoffice v7.4 + for this to work, set to pdf/A version 2
@@ -44,40 +53,44 @@ CSVFIELDS = [
 
 
 # msg
-class PolicyMsg(StrEnum):
+class PCMsg(StrEnum):
+    """policy log messages"""
     FALLBACK = "fmt not detected, falling back on ext"
     NOTINPOLICIES = "file format is not in policies. running strict mode: file removed"
     SKIPPED = "file format is not in policies, skipped"
 
 
-class FileDiagnosticsMsg(StrEnum):
+class FDMsg(StrEnum):
+    """file diagnostic message"""
     EMPTYSOURCE = "empty source"
     ERROR = "file is corrupt: removed"
     WARNING = "file has warnings"
     EXTMISMATCH = "extension mismatch"
 
 
-class FileProcessingMsg(StrEnum):
+class FPMsg(StrEnum):
+    """file processing message"""
     PUIDFAIL = "failed to get fmt type"
     CONVFAILED = "conversion failed"
     NOTEXPECTEDFMT = "converted file does not match the expected fmt."
-    FAILEDMOVE = "failed to rsyc the file"
 
 
 # file corrupt errors to parse from wrappers.wrappers.Ffmpeg when in verbose mode
 class ErrMsgFF(StrEnum):
+    """text in log of ffmpeg that indicate the file is corrupt"""
     ffmpeg1 = "Error opening input files"
     # ffmpeg2 = "A non-intra slice in an IDR NAL unit"
 
 
-# reencode with ffmpeg as it can handle that error
-class ErrMsgReencode(StrEnum):
+class ErrMsgRE(StrEnum):
+    """text in log for smaller errors that can be solved with re encoding the file"""
     ffmpeg1 = "A non-intra slice in an IDR NAL unit"
 
 
 # file corrupt errors to parse form wrappers.wrappers.ImageMagick
 # there must be more... add them when encountered
 class ErrMsgIM(StrEnum):
+    """text in log that indicate that the file is corrupt"""
     magic1 = "identify: Cannot read"
     magic2 = "identify: Sanity check on directory count failed"
     magic3 = "identify: Failed to read directory"

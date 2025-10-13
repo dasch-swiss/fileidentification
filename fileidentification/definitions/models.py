@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import hashlib
 import re
-from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 from typing_extensions import Self
 
-from fileidentification.definitions.constants import Bin, FileDiagnosticsMsg, PolicyMsg
+from fileidentification.definitions.constants import Bin, FDMsg, PCMsg
 
 
 class LogMsg(BaseModel):
@@ -30,6 +29,7 @@ class Status(BaseModel):
     added: bool = False
 
 
+# main metadata object where information is stored and added
 class SfInfo(BaseModel):
     """file info object mapped from siegfried output, gets extended while processing."""
 
@@ -67,14 +67,14 @@ class SfInfo(BaseModel):
                 fmts = re.findall(r"(fmt|x-fmt)/([\d]+)", self.matches[0]["warning"])
                 fmts = [f"{el[0]}/{el[1]}" for el in fmts]
                 if fmts:
-                    self.processing_logs.append(LogMsg(name="filehandler", msg=PolicyMsg.FALLBACK))
+                    self.processing_logs.append(LogMsg(name="filehandler", msg=PCMsg.FALLBACK))
                     return fmts[0]  # type: ignore
                 return None
             else:
                 return self.matches[0]["id"]  # type: ignore
         return None
 
-    def set_processing_paths(self, root_folder: Path, tdir: Path, initial: bool = False) -> None:
+    def set_processing_paths(self, root_folder: Path, tdir: Path, initial: bool) -> None:
         if root_folder.is_file():
             root_folder = root_folder.parent
         self.root_folder = root_folder
@@ -86,18 +86,18 @@ class SfInfo(BaseModel):
 
 
 class LogOutput(BaseModel):
+
     files: list[SfInfo] | None = None
     errors: list[SfInfo] | None = None
 
 
-@dataclass
-class LogTables:
+class LogTables(BaseModel):
     """table to store errors and warnings"""
 
-    diagnostics: dict[str, list[SfInfo]] = field(default_factory=dict)
-    errors: list[tuple[LogMsg, SfInfo]] = field(default_factory=list)
+    diagnostics: dict[str, list[SfInfo]] = Field(default_factory=dict)
+    errors: list[tuple[LogMsg, SfInfo]] = Field(default_factory=list)
 
-    def diagnostics_add(self, sfinfo: SfInfo, fdgm: FileDiagnosticsMsg) -> None:
+    def diagnostics_add(self, sfinfo: SfInfo, fdgm: FDMsg) -> None:
         if fdgm.name not in self.diagnostics:
             self.diagnostics[fdgm.name] = []
         self.diagnostics[fdgm.name].append(sfinfo)
@@ -110,24 +110,21 @@ class LogTables:
         return None
 
 
-@dataclass
-class BasicAnalytics:
-    filehashes: dict[str, list[Path]] = field(default_factory=dict)
-    puid_unique: dict[str, list[SfInfo]] = field(default_factory=dict)
-    siegfried_errors: list[SfInfo] = field(default_factory=list)
-    total_size: dict[str, int] = field(default_factory=dict)
+class BasicAnalytics(BaseModel):
+    filehashes: dict[str, list[Path]] = Field(default_factory=dict)
+    puid_unique: dict[str, list[SfInfo]] = Field(default_factory=dict)
+    siegfried_errors: list[SfInfo] = Field(default_factory=list)
+    total_size: dict[str, int] = Field(default_factory=dict)
     blank: list[str] | None = None
 
     def append(self, sfinfo: SfInfo) -> None:
         if sfinfo.processed_as:
             if sfinfo.md5 not in self.filehashes:
-                self.filehashes[sfinfo.md5] = [sfinfo.filename]
-            else:
-                self.filehashes[sfinfo.md5].append(sfinfo.filename)
+                self.filehashes[sfinfo.md5] = []
+            self.filehashes[sfinfo.md5].append(sfinfo.filename)
             if sfinfo.processed_as not in self.puid_unique:
-                self.puid_unique[sfinfo.processed_as] = [sfinfo]
-            else:
-                self.puid_unique[sfinfo.processed_as].append(sfinfo)
+                self.puid_unique[sfinfo.processed_as] = []
+            self.puid_unique[sfinfo.processed_as].append(sfinfo)
         if sfinfo.errors:
             self.siegfried_errors.append(sfinfo)
 
@@ -135,9 +132,7 @@ class BasicAnalytics:
         self.puid_unique[puid] = sorted(self.puid_unique[puid], key=lambda x: x.filesize, reverse=False)
 
 
-# Policies realated models
-
-
+# models for policies
 class PolicyParams(BaseModel):
     format_name: str = Field(default_factory=str)
     bin: str = Field(default="")
@@ -182,9 +177,56 @@ class PoliciesFile(BaseModel):
     policies: Policies = Field(default_factory=Policies)
 
 
+# Settings for the Filehandler Class
+class Mode(BaseModel):
+    """the different modes for the FileHandler.
+    REMOVEORIGINAL: bool, whether to remove the original files of the files that got converted
+    VERBOSE: bool, do verbose analysis of video and image files
+    STRICT: bool, move files that are not listed in policies to FAILED instead of skipping them
+    QUIET: bool, just print warnings and errors"""
+
+    REMOVEORIGINAL: bool = False
+    VERBOSE: bool = False
+    STRICT: bool = False
+    QUIET: bool = False
+
+
+class FilePaths(BaseModel, validate_assignment=True):
+    """"""
+    TMP_DIR: Path = Field(default_factory=Path)
+    POLICIES_J: Path = Field(default_factory=Path)
+    LOG_J: Path = Field(default_factory=Path)
+
+
 def get_md5(path: str | Path) -> str:
     md5 = hashlib.md5()
     with open(path, "rb") as s:  # noqa PTH123
         for chunk in iter(lambda: s.read(4096), b""):
             md5.update(chunk)
     return md5.hexdigest()
+
+
+def sfinfo2csv(sfinfo: SfInfo) -> dict[str, str | int]:
+    res = {
+        "filename": f"{sfinfo.filename}",
+        "filesize": sfinfo.filesize,
+        "modified": sfinfo.modified,
+        "errors": sfinfo.errors,
+        "md5": sfinfo.md5,
+    }
+    if sfinfo.status.pending:
+        res.update({"status": "pending"})
+    if sfinfo.status.added:
+        res.update({"status": "added"})
+    if sfinfo.status.removed:
+        res.update({"status": "removed"})
+    if sfinfo.processed_as:
+        res["processed_as"] = sfinfo.processed_as
+    if sfinfo.media_info:
+        res["media_info"] = sfinfo.media_info[0].msg
+    if sfinfo.processing_logs:
+        res["processing_logs"] = " ; ".join([el.msg for el in sfinfo.processing_logs if el.name == "filehandler"])
+    if sfinfo.derived_from:
+        res["derived_from"] = f"{sfinfo.derived_from.filename}"
+    return res   # type: ignore
+

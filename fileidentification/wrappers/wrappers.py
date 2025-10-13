@@ -1,11 +1,15 @@
 import json
 import shlex
 import subprocess
+import platform
 from pathlib import Path
 from typing import Any
 
-from fileidentification.definitions.constants import PDFSETTINGS, Bin, ErrMsgFF, ErrMsgIM, LibreOfficePath
+from fileidentification.definitions.constants import PDFSETTINGS, Bin, ErrMsgFF, ErrMsgIM, LOPath
 from fileidentification.definitions.models import PolicyParams, SfInfo
+
+
+SOFFICE = LOPath.Linux if platform.system() == LOPath.Linux.name else LOPath.Darwin
 
 
 class Ffmpeg:
@@ -104,7 +108,7 @@ class ImageMagick:
 
 class Converter:
     @staticmethod
-    def convert(sfinfo: SfInfo, args: PolicyParams, soffice: str = LibreOfficePath.Darwin) -> tuple[Path, str, Path]:
+    def convert(sfinfo: SfInfo, args: PolicyParams) -> tuple[Path, str, Path]:
         """converts a file (filepath from SfInfo.filename to the desired format passed by the args
 
         :params sfinfo the metadata object of the file
@@ -117,9 +121,6 @@ class Converter:
         wdir = Path(sfinfo.tdir / f"{sfinfo.filename.name}_{sfinfo.md5[:6]}")
         if not wdir.exists():
             wdir.mkdir(parents=True)
-
-        # TODO Metadata such as exif... are lost when reencoded,
-        #  need to implement something to copy some parts of these metadata?
 
         target = Path(wdir / f"{sfinfo.filename.stem}.{args.target_container}")
         logfile_path = Path(wdir / f"{sfinfo.filename.stem}.log")
@@ -142,10 +143,10 @@ class Converter:
             # cmd = f'inkscape --export-filename={outfile} {args["processing_args"]} {inputfile} 2> {logfile}'
             # construct command if its LibreOffice
             case Bin.SOFFICE:
-                cmd = f"{soffice} {args.processing_args} {args.target_container} {inputfile} "
+                cmd = f"{SOFFICE} {args.processing_args} {args.target_container} {inputfile} "
                 # add the version if its pdf
                 if args.target_container == "pdf":
-                    cmd = f"{soffice} {args.processing_args} 'pdf{PDFSETTINGS}' {inputfile} "
+                    cmd = f"{SOFFICE} {args.processing_args} 'pdf{PDFSETTINGS}' {inputfile} "
                 cmd = cmd + f"--outdir {shlex.quote(str(wdir))} >> {logfile} 2>&1"
 
         # run cmd in shell (and as a string, so [error]output is redirected to logfile)

@@ -1,0 +1,80 @@
+import json
+from pathlib import Path
+from typer import secho, colors
+import pygfried
+
+from fileidentification.definitions.models import SfInfo, LogMsg, Policies
+from fileidentification.definitions.constants import Bin, FPMsg
+
+from fileidentification.wrappers.wrappers import Ffmpeg, ImageMagick, Converter
+
+
+def _add_media_info(sfinfo: SfInfo, _bin: str) -> None:
+    match _bin:
+        case Bin.FFMPEG:
+            streams = Ffmpeg.media_info(sfinfo.filename)
+            sfinfo.media_info.append(LogMsg(name="ffmpeg", msg=json.dumps(streams)))
+        case Bin.MAGICK:
+            sfinfo.media_info.append(LogMsg(name="imagemagick", msg=ImageMagick.media_info(sfinfo.filename)))
+        case _:
+            pass
+
+
+def _verify(target: Path, sfinfo: SfInfo, expected: list[str]) -> SfInfo | None:
+    """analyse the created file with pygfried, returns a SfInfo for the new file if verification passed,
+    :param sfinfo the metadata of the origin
+    :param target the path to the converted file to analyse with siegfried
+    :param expected the expected file format, to verify the conversion
+    """
+    target_sfinfo = None
+    if target.is_file():
+        # generate a SfInfo of the converted file
+        target_sfinfo = SfInfo(**pygfried.identify(f"{target}", detailed=True)["files"][0])  # type:ignore
+        # only add postprocessing information if conversion was successful
+        if target_sfinfo.processed_as in expected:
+            target_sfinfo.dest = sfinfo.filename.parent
+            target_sfinfo.derived_from = sfinfo
+            sfinfo.status.pending = False
+
+        else:
+            p_error = f" did expect {expected}, got {target_sfinfo.processed_as} instead"
+            sfinfo.processing_logs.append(
+                LogMsg(name="filehandler", msg=f"{FPMsg.NOTEXPECTEDFMT}{p_error}")
+            )
+            secho(f"\tERROR: {p_error} when converting {sfinfo.filename} to {target}", fg=colors.YELLOW, bold=True)
+            target_sfinfo = None
+
+    else:
+        # conversion error, nothing to analyse
+        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=f"{FPMsg.CONVFAILED}"))
+        secho(f"\tERROR failed to convert {sfinfo.filename} to {target}", fg=colors.RED, bold=True)
+
+    return target_sfinfo
+
+
+# file migration
+def convert_file(sfinfo: SfInfo, policies: Policies) -> tuple[SfInfo | None, list[str]]:
+    """
+    convert a file, returns the metadata of the converted file as SfInfo
+    :param sfinfo the metadata of the file to convert
+    :param policies the policies for fileconversion
+    """
+
+    args: PolicyParams = policies[sfinfo.processed_as]  # type: ignore
+
+    target_path, cmd, logfile_path = Converter.convert(sfinfo, args)
+
+    # replace abs path in logs, add name
+    processing_log = None
+    logtext = logfile_path.read_text().replace(f"{sfinfo.root_folder}/", "").replace(f"{sfinfo.tdir}/", "")
+    if logtext != "":
+        processing_log = LogMsg(name=f"{args.bin}", msg=logtext)
+
+    # create an SfInfo for target and verify output, add codec and processing logs
+    target_sfinfo = _verify(target_path, sfinfo, args.expected)
+    if target_sfinfo:
+        _add_media_info(target_sfinfo, args.bin)
+        if processing_log:
+            target_sfinfo.processing_logs.append(processing_log)
+
+    return target_sfinfo, [cmd]

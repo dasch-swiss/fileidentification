@@ -15,12 +15,12 @@ def main(
             help="path to tmp dir where the converted / removed files are stored",
         ),
     ] = None,
-    integrity_tests: Annotated[
+    inspect: Annotated[
         bool,
         typer.Option(
-            "--integrity-tests",
+            "--inspect",
             "-i",
-            help="do integrity tests on the files in the selected folder",
+            help="probing the files in the selected folder",
         ),
     ] = False,
     apply: Annotated[
@@ -106,7 +106,7 @@ def main(
     fh.run(
         root_folder=root_folder,
         tmp_dir=tmp_dir,
-        integrity_tests=integrity_tests,
+        inspect=inspect,
         apply=apply,
         convert=convert,
         remove_tmp=remove_tmp,
