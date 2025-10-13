@@ -1,17 +1,17 @@
+import platform
 import shlex
 import subprocess
-import platform
 from pathlib import Path
 
 from fileidentification.definitions.constants import PDFSETTINGS, Bin, LOPath
 from fileidentification.definitions.models import PolicyParams, SfInfo
 
-
 SOFFICE = LOPath.Linux if platform.system() == LOPath.Linux.name else LOPath.Darwin
 
 
 def convert(sfinfo: SfInfo, args: PolicyParams) -> tuple[Path, str, Path]:
-    """converts a file (filepath from SfInfo.filename to the desired format passed by the args
+    """
+    Convert a file to the desired format passed by the args
 
     :params sfinfo the metadata object of the file
     :params args the arguments how to convert {'bin', 'processing_args', 'target_container'}
@@ -52,6 +52,6 @@ def convert(sfinfo: SfInfo, args: PolicyParams) -> tuple[Path, str, Path]:
             cmd = cmd + f"--outdir {shlex.quote(str(wdir))} >> {logfile} 2>&1"
 
     # run cmd in shell (and as a string, so [error]output is redirected to logfile)
-    subprocess.run(cmd, shell=True)
+    subprocess.run(cmd, check=False, shell=True)
 
     return target, cmd, logfile_path

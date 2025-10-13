@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
-from typer import secho, colors
+
 import pygfried
+from typer import colors, secho
 
-from fileidentification.definitions.models import SfInfo, LogMsg, Policies
 from fileidentification.definitions.constants import Bin, FPMsg
-
+from fileidentification.definitions.models import LogMsg, Policies, PolicyParams, SfInfo
 from fileidentification.wrappers.converter import convert
 from fileidentification.wrappers.ffmpeg import ffmpeg_media_info
 from fileidentification.wrappers.imagemagick import imagemagick_media_info
@@ -23,7 +23,8 @@ def _add_media_info(sfinfo: SfInfo, _bin: str) -> None:
 
 
 def _verify(target: Path, sfinfo: SfInfo, expected: list[str]) -> SfInfo | None:
-    """analyse the created file with pygfried, returns a SfInfo for the new file if verification passed,
+    """
+    Analyse the created file with pygfried, returns a SfInfo for the new file if verification passed,
     :param sfinfo the metadata of the origin
     :param target the path to the converted file to analyse with siegfried
     :param expected the expected file format, to verify the conversion
@@ -31,7 +32,7 @@ def _verify(target: Path, sfinfo: SfInfo, expected: list[str]) -> SfInfo | None:
     target_sfinfo = None
     if target.is_file():
         # generate a SfInfo of the converted file
-        target_sfinfo = SfInfo(**pygfried.identify(f"{target}", detailed=True)["files"][0])  # type:ignore
+        target_sfinfo = SfInfo(**pygfried.identify(f"{target}", detailed=True)["files"][0])  # type: ignore[arg-type]
         # only add postprocessing information if conversion was successful
         if target_sfinfo.processed_as in expected:
             target_sfinfo.dest = sfinfo.filename.parent
@@ -40,9 +41,7 @@ def _verify(target: Path, sfinfo: SfInfo, expected: list[str]) -> SfInfo | None:
 
         else:
             p_error = f" did expect {expected}, got {target_sfinfo.processed_as} instead"
-            sfinfo.processing_logs.append(
-                LogMsg(name="filehandler", msg=f"{FPMsg.NOTEXPECTEDFMT}{p_error}")
-            )
+            sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=f"{FPMsg.NOTEXPECTEDFMT}{p_error}"))
             secho(f"\tERROR: {p_error} when converting {sfinfo.filename} to {target}", fg=colors.YELLOW, bold=True)
             target_sfinfo = None
 
@@ -57,12 +56,12 @@ def _verify(target: Path, sfinfo: SfInfo, expected: list[str]) -> SfInfo | None:
 # file migration
 def convert_file(sfinfo: SfInfo, policies: Policies) -> tuple[SfInfo | None, list[str]]:
     """
-    convert a file, returns the metadata of the converted file as SfInfo
+    Convert a file, returns the metadata of the converted file as SfInfo
     :param sfinfo the metadata of the file to convert
     :param policies the policies for fileconversion
     """
 
-    args: PolicyParams = policies[sfinfo.processed_as]  # type: ignore
+    args: PolicyParams = policies[sfinfo.processed_as]  # type: ignore[index]
 
     target_path, cmd, logfile_path = convert(sfinfo, args)
 

@@ -1,14 +1,15 @@
-from pathlib import Path
-from typer import colors, secho
-import shutil
 import os
+import shutil
+from pathlib import Path
 
-from fileidentification.definitions.models import SfInfo, LogTables, LogMsg, Policies, FilePaths
+from typer import colors, secho
+
 from fileidentification.definitions.constants import RMV_DIR
+from fileidentification.definitions.models import FilePaths, LogMsg, LogTables, Policies, SfInfo
 
 
 def remove(sfinfo: SfInfo, log_tables: LogTables) -> None:
-    """moves a file from its sfinfo path to tmp dir / _REMOVED / ..."""
+    """Move a file from its sfinfo path to tmp dir / _REMOVED / ..."""
     dest: Path = sfinfo.tdir / RMV_DIR / sfinfo.filename
     if not dest.parent.exists():
         dest.parent.mkdir(parents=True)
@@ -28,8 +29,8 @@ def move_tmp(stack: list[SfInfo], policies: Policies, log_tables: LogTables, rem
         if sfinfo.dest:
             write_logs = True
             # remove the original if its mentioned and flag it accordingly
-            if policies[sfinfo.derived_from.processed_as].remove_original or remove_original:  # type: ignore
-                derived_from = [sfi for sfi in stack if sfi.filename == sfinfo.derived_from.filename][0]  # type: ignore
+            if policies[sfinfo.derived_from.processed_as].remove_original or remove_original:  # type: ignore[index, union-attr]
+                derived_from = next(sfi for sfi in stack if sfi.filename == sfinfo.derived_from.filename)  # type: ignore[union-attr]
                 if derived_from.path.is_file():
                     remove(derived_from, log_tables)
             # create absolute filepath

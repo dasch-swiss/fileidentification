@@ -1,8 +1,9 @@
-from typer import colors, secho
 import math
 
-from fileidentification.definitions.constants import FDMsg, FMT2EXT
-from fileidentification.definitions.models import BasicAnalytics, LogMsg, LogTables, Policies, Mode
+from typer import colors, secho
+
+from fileidentification.definitions.constants import FMT2EXT, FDMsg
+from fileidentification.definitions.models import BasicAnalytics, LogMsg, LogTables, Mode, Policies
 
 
 def print_siegfried_errors(ba: BasicAnalytics) -> None:
@@ -45,18 +46,18 @@ def print_fmts(puids: list[str], ba: BasicAnalytics, policies: Policies, mode: M
 def print_diagnostic(log_tables: LogTables, mode: Mode) -> None:
     # lists all corrupt files with the respective errors thrown
     if log_tables.diagnostics:
-        if FDMsg.ERROR.name in log_tables.diagnostics.keys():
+        if FDMsg.ERROR.name in log_tables.diagnostics:
             secho("\n----------- errors -----------", bold=True)
             for sfinfo in log_tables.diagnostics[FDMsg.ERROR.name]:
                 secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                 _print_logs(sfinfo.processing_logs)
         if mode.VERBOSE and not mode.QUIET:
-            if FDMsg.WARNING.name in log_tables.diagnostics.keys():
+            if FDMsg.WARNING.name in log_tables.diagnostics:
                 secho("\n----------- warnings -----------", bold=True)
                 for sfinfo in log_tables.diagnostics[FDMsg.WARNING.name]:
                     secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                     _print_logs(sfinfo.processing_logs)
-            if FDMsg.EXTMISMATCH.name in log_tables.diagnostics.keys():
+            if FDMsg.EXTMISMATCH.name in log_tables.diagnostics:
                 secho("\n----------- extension missmatch -----------", bold=True)
                 for sfinfo in log_tables.diagnostics[FDMsg.EXTMISMATCH.name]:
                     secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
@@ -72,7 +73,8 @@ def print_duplicates(ba: BasicAnalytics, mode: Mode) -> None:
         secho("\n----------- duplicates -----------", bold=True)
         for k in ba.filehashes:
             secho(f"\nmd5: {k} - files: ", bold=True)
-            [secho(f"{path}") for path in ba.filehashes[k]]  # type: ignore
+            for path in ba.filehashes[k]:
+                secho(f"{path}")
         secho("\n")
 
 
@@ -96,9 +98,9 @@ def print_msg(msg: str, quiet: bool) -> None:
 
 def _format_bite_size(bytes_size: int) -> str:
     tmp = bytes_size / (1024**2)
-    if math.ceil(tmp) > 1000:  # noqa PLR2004
+    if math.ceil(tmp) > 1000:
         tmp = tmp / 1024
-        if math.ceil(tmp) > 1000:  # noqa PLR2004
+        if math.ceil(tmp) > 1000:
             tmp = tmp / 1024
             return f"{round(tmp, 3)} TB"
         return f"{round(tmp, 3)} GB"

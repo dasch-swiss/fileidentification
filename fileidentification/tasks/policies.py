@@ -1,7 +1,7 @@
-from typer import secho, colors
+from typer import colors, secho
 
-from fileidentification.definitions.models import SfInfo, LogTables, LogMsg, Policies
 from fileidentification.definitions.constants import PCMsg
+from fileidentification.definitions.models import LogMsg, LogTables, Policies, SfInfo
 from fileidentification.tasks.os_tasks import remove
 from fileidentification.wrappers.ffmpeg import ffmpeg_media_info
 
@@ -29,24 +29,23 @@ def apply_policy(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, stri
         return
 
     # check if mp4 / mkv has correct stream (i.e. h264 and aac)
-    if puid in ["fmt/199", "fmt/569"]:
-        if not _has_valid_streams(sfinfo, puid):
-            sfinfo.status.pending = True
-            return
+    if puid in ["fmt/199", "fmt/569"] and _has_invalid_streams(sfinfo, puid):
+        sfinfo.status.pending = True
+        return
 
 
-def _has_valid_streams(sfinfo: SfInfo, puid: str) -> bool:
+def _has_invalid_streams(sfinfo: SfInfo, puid: str) -> bool:
+    """Return true if video and audio codec differ from archival standards"""
     streams = ffmpeg_media_info(sfinfo.path)
     if not streams:
         secho(f"\t{sfinfo.filename} throwing errors. consider inspection", fg=colors.RED, bold=True)
-        return True
-    if puid in ["fmt/199"]:
-        for stream in streams:
-            if stream["codec_name"] not in ["h264", "aac"]:  # type: ignore
-                return False
+        return False
     if puid in ["fmt/569"]:
+        # only the video codec has to be ffv1 -> return false as soon as any stream is ffv1
+        return all(stream["codec_name"] not in ["ffv1"] for stream in streams)  # type: ignore[index]
+    if puid in ["fmt/199"]:
+        # video codec has to be h264, audio codec aac -> return true if any stream does not match
         for stream in streams:
-            if stream["codec_name"] in ["ffv1"]:  # type: ignore
+            if stream["codec_name"] not in ["h264", "aac"]:  # type: ignore[index]
                 return True
-            return False
-    return True
+    return False

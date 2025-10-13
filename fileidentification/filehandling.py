@@ -12,30 +12,29 @@ from typer import colors, secho
 from fileidentification.definitions.constants import CSVFIELDS, FMT2EXT
 from fileidentification.definitions.models import (
     BasicAnalytics,
+    FilePaths,
     LogMsg,
     LogOutput,
     LogTables,
+    Mode,
     Policies,
     PoliciesFile,
     PolicyParams,
     SfInfo,
-    Mode,
-    FilePaths,
     sfinfo2csv,
 )
 from fileidentification.tasks.console_output import (
     print_diagnostic,
     print_duplicates,
     print_fmts,
+    print_msg,
     print_processing_errors,
     print_siegfried_errors,
-    print_msg,
 )
-from fileidentification.tasks.inspection import inspect_file
-from fileidentification.tasks.policies import apply_policy
 from fileidentification.tasks.conversion import convert_file
+from fileidentification.tasks.inspection import inspect_file
 from fileidentification.tasks.os_tasks import move_tmp, set_filepaths
-
+from fileidentification.tasks.policies import apply_policy
 
 load_dotenv()
 
@@ -55,8 +54,11 @@ class FileHandler:
         self.fp: FilePaths = FilePaths()
 
     def _load_sfinfos(self, root_folder: Path) -> None:
-        """checks whether a log json at default location exists. if so, it adds the sfinfos to the stack from there,
-        otherwhise it scans the root_folder with pygfried and adds its output as sfinfos to the stack"""
+        """
+        Add sfinfos to stack.
+        Checks whether a log json at default location exists. if so, it adds the sfinfos to the stack from there,
+        otherwhise it scans the root_folder with pygfried and adds its output as sfinfos to the stack
+        """
         initial = True
         # if there is a log, try to read from there
         if self.fp.LOG_J.is_file():
@@ -71,13 +73,13 @@ class FileHandler:
                 prog.add_task(description="analysing files with pygfried...", total=None)
                 self.stack.extend(
                     [
-                        SfInfo(**pygfried.identify(f"{f}", detailed=True)["files"][0])  # type:ignore
+                        SfInfo(**pygfried.identify(f"{f}", detailed=True)["files"][0])  # type: ignore[arg-type]
                         for f in root_folder.rglob("*")
                         if f.is_file()
                     ]
                 )
                 if root_folder.is_file():
-                    self.stack.append(SfInfo(**pygfried.identify(f"{root_folder}", detailed=True)["files"][0]))  # type:ignore
+                    self.stack.append(SfInfo(**pygfried.identify(f"{root_folder}", detailed=True)["files"][0]))  # type: ignore[arg-type]
 
         # append path values run basic analytics
         for sfinfo in self.stack:
@@ -91,7 +93,7 @@ class FileHandler:
 
     # policies stuff
     def _load_policies(self, policies_path: Path) -> Policies:
-        """loads and validates an existing policies.json"""
+        """Load and validate an existing policies.json"""
         if not policies_path.is_file():
             secho(f"{policies_path} not found", fg=colors.RED)
             sys.exit(1)
@@ -106,7 +108,7 @@ class FileHandler:
 
     def _gen_policies(self, outpath: Path, blank: bool = False, extend: bool = False) -> None:
         """
-        generates a policies.json with the default values of the encountered fileformats
+        Generate a policies.json with the default values of the encountered fileformats
         :param blank if set to True, it generates a blank policies.json
         :param extend if true, it expands the loaded policies with filetypes found in root_folder that are not in the
         loaded policies and writes out an updated policies.json
@@ -120,11 +122,7 @@ class FileHandler:
             jsonfile.comment += " blank policies"
             for puid in self.ba.puid_unique:
                 jsonfile.policies.update(
-                    {
-                        puid: PolicyParams(
-                            format_name=FMT2EXT[puid]["name"], remove_original=self.mode.REMOVEORIGINAL
-                        )
-                    }
+                    {puid: PolicyParams(format_name=FMT2EXT[puid]["name"], remove_original=self.mode.REMOVEORIGINAL)}
                 )
             # write out policies with name of the folder, return policies
             jsonfile.name.write_text(jsonfile.model_dump_json(indent=4, exclude_none=True))
@@ -157,8 +155,10 @@ class FileHandler:
         jsonfile.name.write_text(jsonfile.model_dump_json(indent=4, exclude_none=True))
 
     def _manage_policies(self, policies_path: Path | None = None, blank: bool = False, extend: bool = False) -> None:
-        """sets the policies according to the parameters passed. either default policies, external passed policies or
-        blank."""
+        """
+        Set the policies according to the parameters passed. either default policies, external passed policies or
+        blank.
+        """
         # default policies found and no external policies are passed
         if not policies_path and self.fp.POLICIES_J.is_file():
             # set default location
@@ -179,24 +179,23 @@ class FileHandler:
             print_msg(f"... updating the filetypes in policies {self.fp.POLICIES_J}", self.mode.QUIET)
             self._gen_policies(self.fp.POLICIES_J, extend=extend)
 
-        print_fmts([el for el in self.ba.puid_unique], self.ba, self.policies, self.mode)
+        print_fmts(list(self.ba.puid_unique), self.ba, self.policies, self.mode)
 
     def _test_policies(self, puid: str | None = None) -> None:
-        """test a policies.json with the smallest files of the directory. if puid is passed, it only tests the puid
-        of the policies."""
+        """
+        Test a policies.json with the smallest files of the directory. if puid is passed, it only tests the puid
+        of the policies.
+        """
 
-        if puid:
-            puids = [puid]
-        else:
-            puids = [puid for puid in self.ba.puid_unique if not self.policies[puid].accepted]
+        puids = [puid] if puid else [puid for puid in self.ba.puid_unique if not self.policies[puid].accepted]
 
         if not puids:
             print_msg("no files found that should be converted with given policies", self.mode.QUIET)
         else:
-            print_fmts([el for el in puids], self.ba, self.policies, self.mode)
+            print_fmts(puids, self.ba, self.policies, self.mode)
             print_msg("\n --- testing policies with a sample from the directory ---", self.mode.QUIET)
 
-            for puid in puids:  # noqa PLR1704
+            for puid in puids:  # noqa: PLR1704
                 # we want the smallest file first for running the test
                 self.ba.sort_puid_unique_by_size(puid)
                 sample = self.ba.puid_unique[puid][0]
@@ -225,7 +224,7 @@ class FileHandler:
                     apply_policy(sfinfo, self.policies, self.log_tables, self.mode.STRICT)
 
     def convert(self) -> None:
-        """convert files whose metadata status pending is True"""
+        """Convert files whose metadata status pending is True"""
 
         pending: list[SfInfo] = [sfinfo for sfinfo in self.stack if sfinfo.status.pending]
 
@@ -257,8 +256,8 @@ class FileHandler:
         # remove empty folders in working dir
         if self.fp.TMP_DIR.is_dir():
             for path, _, _ in os.walk(self.fp.TMP_DIR, topdown=False):
-                if len(os.listdir(path)) == 0:
-                    os.rmdir(path)
+                if len(os.listdir(path)) == 0:  # noqa: PTH208
+                    Path(path).rmdir()
         if write_logs:
             print_msg(f"\nmoved the files from {self.fp.TMP_DIR.stem} to {root_folder.stem} ...", self.mode.QUIET)
             self.write_logs(to_csv=to_csv)
@@ -270,7 +269,7 @@ class FileHandler:
         print_processing_errors(log_tables=self.log_tables)
 
         if to_csv:
-            with open(f"{self.fp.LOG_J}.csv", "w") as f:  # noqa PTH123
+            with open(f"{self.fp.LOG_J}.csv", "w") as f:  # noqa: PTH123
                 w = csv.DictWriter(f, CSVFIELDS)
                 w.writeheader()
                 [w.writerow(sfinfo2csv(el)) for el in self.stack]
