@@ -48,6 +48,15 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 
     If you wish a simpler csv output, run `fidr path/to/directory --csv` to get a csv
 
+A more complex example:
+load an external policies json, expand it only with file types defined in the default policies (strict mode), probe the
+files verbose, apply the policies (in strict mode, i.e. remove the files whose file type is not listed in the generated
+policies), remove temporary files and get a simpler csv output:
+
+`fidr path/to/directory -esivar -p path/to/external_policies.json --csv`
+
+the first argument has to be the root folder of your files to process, otherwise combine flags / arguments to your need
+
 -> see **Options** below for more available flags
 
 ## Manual installation
@@ -135,10 +144,10 @@ Delete all temporary files and folders and move the converted files next to thei
 ### Combining Steps - Custom Policies and Working Directory
 
 If you don't need these intermediary steps, you can run the desired steps at once by combining their flags.
-Here is an example how to do verbose testing, applying a custom policy and set the location to the tmp
-directory other than default (see **option** below for more information about the flags):
+Here is an example how to do verbose testing, applying a custom policy
+(see **option** below for more information about the flags):
 
-`uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json --tmp-dir path/to/tmp-dir`
+`uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json`
 
 ### Log
 
@@ -254,11 +263,17 @@ it handles some warnings as an error.
 the tmp files. the original files are moved to the TMP/_REMOVED folder.
 When used in generating policies, it sets remove_original in the policies to true (default false).
 
+`-p`
+[`--policies-path`] load a custom policies json file instead of the default policies
+
+`-e`
+[`--extend-policies`] append filetypes found in the directory to the given policies if they are missing in it.
+
 `-s`
 [`--strict`] when run in strict mode, it moves the files that are not listed in policies.json to the folder _REMOVED
 (instead of throwing a warning).
 When used in generating policies, it does not add blank policies for formats that are not mentioned in
-fileidentification/policies/default.py
+fileidentification/definitions/default_policies.json (or any other default json if modified in .env)
 
 `-b`
 [`--blank`] creates a blank policies based on the files encountered in the given directory.
@@ -272,15 +287,6 @@ get an additional output as csv aside from the log.json
 `--convert`
 re-convert the files that failed during file conversion
 
-the following options are currently not supported when running it in a docker container
-
-`-p`
-[`--policies-path`] load a custom policies json file instead of the default policies
-
-`-e`
-[`--extend-policies`] append filetypes found in the directory to the given policies if they are missing in it.
-
-`--tmp-dir` set a custom tmp directory where converted / removed files are stored. default is path/to/directory_TMP
 
 ## Updating Signatures
 

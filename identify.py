@@ -8,13 +8,6 @@ from fileidentification.filehandling import FileHandler
 
 def main(
     root_folder: Annotated[Path, typer.Argument(help="path to the directory or file")],
-    tmp_dir: Annotated[
-        Path | None,
-        typer.Option(
-            "--tmp-dir",
-            help="path to tmp dir where the converted / removed files are stored",
-        ),
-    ] = None,
     inspect: Annotated[
         bool,
         typer.Option(
@@ -105,7 +98,6 @@ def main(
     fh = FileHandler()
     fh.run(
         root_folder=root_folder,
-        tmp_dir=tmp_dir,
         inspect=inspect,
         apply=apply,
         convert=convert,

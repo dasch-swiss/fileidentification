@@ -38,9 +38,6 @@ def move_tmp(stack: list[SfInfo], policies: Policies, log_tables: LogTables, rem
             # append hash to filename if the path already exists
             if abs_dest.is_file():
                 abs_dest = Path(abs_dest.parent, f"{sfinfo.filename.stem}_{sfinfo.md5[:6]}{sfinfo.filename.suffix}")
-            # if it's converted with docker container but -r flag is executed outside of docker, change the path
-            if not sfinfo.filename.is_file() and sfinfo.filename.is_relative_to("/data"):
-                sfinfo.filename = sfinfo.root_folder.parent / sfinfo.filename.relative_to("/data")
             # move the file
             try:
                 sfinfo.filename.rename(abs_dest)
@@ -57,14 +54,12 @@ def move_tmp(stack: list[SfInfo], policies: Policies, log_tables: LogTables, rem
     return write_logs
 
 
-def set_filepaths(fp: FilePaths, root_folder: Path, tmp_dir: Path | None) -> None:
+def set_filepaths(fp: FilePaths, root_folder: Path) -> None:
     if root_folder.is_file():
         root_folder = Path(f"{root_folder.parent}_{root_folder.stem}")
     fp.TMP_DIR = Path(os.getenv("TMP_DIR", "_TMP"))
     if not fp.TMP_DIR.is_absolute():
         fp.TMP_DIR = Path(f"{root_folder}{fp.TMP_DIR}")
-    if tmp_dir:
-        fp.TMP_DIR = tmp_dir.resolve()
     fp.LOG_J = Path(os.getenv("LOG_J", "_log.json"))
     if not fp.LOG_J.is_absolute():
         fp.LOG_J = Path(f"{root_folder}{fp.LOG_J}")

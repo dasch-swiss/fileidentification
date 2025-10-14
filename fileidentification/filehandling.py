@@ -280,7 +280,6 @@ class FileHandler:
     def run(
         self,
         root_folder: Path | str,
-        tmp_dir: Path | None = None,
         inspect: bool = True,
         apply: bool = True,
         remove_tmp: bool = True,
@@ -298,7 +297,7 @@ class FileHandler:
     ) -> None:
         root_folder = Path(root_folder)
         # set dirs / paths
-        set_filepaths(self.fp, root_folder, tmp_dir)
+        set_filepaths(self.fp, root_folder)
         # set the mode
         self.mode.REMOVEORIGINAL = remove_original
         self.mode.VERBOSE = mode_verbose
