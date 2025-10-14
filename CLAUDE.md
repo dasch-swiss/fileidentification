@@ -13,9 +13,9 @@ to provide comprehensive file processing capabilities.
 
 ### Package Management
 
-- **Install dependencies**: `uv sync --all-extras --dev`
+- **Install dependencies**: `uv sync`
 - **Run the main script**: `uv run identify.py [path] [options]`
-- **Update signatures**: `uv run update.py && uv lock --upgrade`
+- **Update signatures**: `uv sync --extra update_fmt && uv run update.py`
 
 ### Code Quality
 
@@ -32,8 +32,8 @@ If the user edited auto-generated policies, the outcome of the policies can be t
 
 ### Docker
 
-- **Run with Docker**: `uv run identify.py path/to/directory [flags] --docker`
 - **Build manually**: `docker build -t fileidentification .`
+- **execute bash script**: `fidr.sh path/to/directory [options]`
 
 ## Architecture
 
@@ -51,19 +51,18 @@ If the user edited auto-generated policies, the outcome of the policies can be t
 3. **Models** (`fileidentification/definitions/models.py`)
    - **SfInfo**: Core file information model (from siegfried output)
    - **PolicyParams**: File conversion policy specifications
-   - **LogMsg/LogOutput**: Logging and error tracking models
+   - **LogMsg/LogOutput/LogTables**: Logging and error tracking models
 
-4. **Wrappers** (`fileidentification/wrappers/wrappers.py`)
-   - **Ffmpeg**: Audio/video integrity testing and conversion
-   - **ImageMagick**: Image integrity testing and conversion
-   - **Converter**: LibreOffice document conversion
-   - **Rsync**: File synchronization operations
+4. **Wrappers** (`fileidentification/wrappers`):
+   - ffmpeg (`fileidentification/wrappers/ffmpeg.py`): Audio/video file testing
+   - ImageMagick (`fileidentification/wrappers/imagemagick.py`): Image file testing
+   - converter (`fileidentification/wrappers/converter.py`): file conversion
 
 ### Data Flow
 
 1. **File Identification**: Uses pygfried (siegfried) to identify file formats by PRONOM PUID
 2. **Policy Generation**: Creates JSON policies mapping PUIDs to conversion specifications
-3. **Integrity Testing**: Uses ffmpeg/imagemagick to validate file integrity
+3. **Inspection**: Uses ffmpeg/imagemagick to test files on errors, warnings
 4. **Conversion**: Applies policies using appropriate tools (ffmpeg, imagemagick, LibreOffice)
 5. **Cleanup**: Manages temporary files and moves converted files to final locations
 
@@ -82,14 +81,13 @@ If the user edited auto-generated policies, the outcome of the policies can be t
 - `TMP_DIR`: Temporary directory suffix (default: `_TMP`)
 - `POLICIES_J`: Policies JSON file suffix (default: `_policies.json`)
 - `LOG_J`: Log JSON file suffix (default: `_log.json`)
-- `RMV_DIR`: Removed files directory suffix (default: `_REMOVED`)
 
 ### External Dependencies
 
 The project requires these external programs for full functionality:
 - **siegfried** (via pygfried): File format identification
-- **ffmpeg**: Audio/video processing and integrity testing
-- **imagemagick**: Image processing and integrity testing
+- **ffmpeg**: Audio/video processing and testing
+- **imagemagick**: Image processing and testing
 - **LibreOffice**: Document conversion
 - **ghostscript**: PDF processing support
 
@@ -101,7 +99,7 @@ The project requires these external programs for full functionality:
 uv run identify.py path/to/directory -iar
 ```
 
-- `-i`: integrity tests
+- `-i`: inspect the files
 - `-a`: apply conversion policies
 - `-r`: remove temporary files and finalize
 
@@ -111,6 +109,26 @@ uv run identify.py path/to/directory -iar
 2. Edit the generated `*_policies.json` file
 3. Test policies: `uv run identify.py path/to/directory -t`
 4. Apply: `uv run identify.py path/to/directory -ar`
+
+### Available Additional Options
+
+- `-v`: catch more warnings on video and image files during the tests.
+
+- `-x`: move the parents of the converted files to the TMP/_REMOVED folder. When used in generating policies, it sets remove_original in the policies to true (default false).
+
+- `-p path/to/policies.json`: load a custom policies json file instead of the default policies
+
+- `-e`: append file types found in the directory to the given policies if they are missing in it.
+
+- `-s`: move the files that are not listed in the policies to the folder _REMOVED . When used in generating policies, it does not add blank policies for formats that are not mentioned in `DEFAULTPOLICIES` .
+
+- `-b`: create blank policies based on the files types encountered in the given directory.
+
+- `-q`: just print errors
+
+- `--csv`: get an additional output as csv aside from the log.json
+
+- `--convert`: re-convert the files that failed during file conversion
 
 ## Important Notes
 
