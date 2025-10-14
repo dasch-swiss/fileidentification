@@ -11,7 +11,6 @@ from fileidentification.definitions.constants import FMTJSN, DroidSigURL
 
 
 def write_fmt2ext(link: str) -> None:
-
     # tmp xml_filname
     xml_filename = Path(f"droid_{link[-8:]}")
 

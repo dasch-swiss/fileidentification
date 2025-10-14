@@ -192,7 +192,6 @@ class Mode(BaseModel):
 
 
 class FilePaths(BaseModel, validate_assignment=True):
-
     TMP_DIR: Path = Field(default_factory=Path)
     POLICIES_J: Path = Field(default_factory=Path)
     LOG_J: Path = Field(default_factory=Path)
