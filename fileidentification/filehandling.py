@@ -40,9 +40,7 @@ load_dotenv()
 
 
 class FileHandler:
-    """
-    Main class. it can create, verify and apply policies, test the files on errors, convert and move them.
-    """
+    """Main class. It can create, verify and apply policies, test the files on errors, convert and move them."""
 
     def __init__(self) -> None:
         self.mode: Mode = Mode()
