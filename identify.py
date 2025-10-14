@@ -89,7 +89,7 @@ def main(
         typer.Option(
             "--verbose",
             "-v",
-            help="catches more warnings on video and image files during the integrity tests",
+            help="catches more warnings on video and image files during the tests",
         ),
     ] = False,
     mode_quiet: Annotated[bool, typer.Option("--quiet", "-q", help="just print errors and warnings")] = False,

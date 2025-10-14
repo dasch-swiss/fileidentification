@@ -14,8 +14,7 @@ def convert(sfinfo: SfInfo, args: PolicyParams) -> tuple[Path, str, Path]:
     Convert a file to the desired format passed by the args
 
     :params sfinfo the metadata object of the file
-    :params args the arguments how to convert {'bin', 'processing_args', 'target_container'}
-    :params soffic the path to the libreOffice exec (default is Darwin
+    :params args the arguments how to convert ('bin', 'processing_args', 'target_container')
 
     :returns the constructed target path, the cmd run and the log path
     """

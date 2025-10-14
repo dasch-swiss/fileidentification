@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Python CLI tool for file format identification, integrity testing, and bulk file conversion
+This is a Python CLI tool for file format identification, file error testing, and bulk file conversion
 designed for digital preservation workflows.
 It wraps around several external programs (siegfried/pygfried, ffmpeg, imagemagick, LibreOffice)
 to provide comprehensive file processing capabilities.
@@ -45,7 +45,8 @@ If the user edited auto-generated policies, the outcome of the policies can be t
 
 2. **FileHandler** (`fileidentification/filehandling.py`)
    - Central orchestrator class that manages the entire workflow
-   - Handles file identification, integrity testing, policy application, and conversion
+   - Generates policies
+   - Handles file identification, error testing, policy application, and conversion
    - Manages temporary directories and file movements
 
 3. **Models** (`fileidentification/definitions/models.py`)

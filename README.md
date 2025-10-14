@@ -236,8 +236,8 @@ If you just want to test a specific policy, append f and the puid
 
 ## Modifying Default Settings
 
-In the .env file you can customise some default path: e.g. the paths to the default policies, set custom default
-tmp dir location.
+In the .env file you can customise some default path: e.g. DEFAULTPOLICIES the paths to the default policies, 
+set custom default tmp dir location.
 
 Other default params such as PDF/A export settings for LibreOffice or other strings are in 
 `fileidentification/definitions/constants.py`.
@@ -245,18 +245,17 @@ Other default params such as PDF/A export settings for LibreOffice or other stri
 ## Options
 
 `-i`
-[`--inspect`] probes the files on errors
+[`--inspect`] probe the files on errors
 
 `-v`
-[`--verbose`] catches more warnings on video and image files during the tests.
+[`--verbose`] catch more warnings on video and image files during the tests.
 this can take a significantly longer based on what files you have. As an addition,
-it handles some warnings as an error.
 
 `-a`
-[`--apply`] applies the policies
+[`--apply`] apply the policies
 
 `-r`
-[`--remove-tmp`] removes all temporary items and adds the converted files next to their parents.
+[`--remove-tmp`] remove all temporary items and add the converted files next to their parents.
 
 `-x`
 [`--remove-original`] this overwrites the remove_original value in the policies and sets it to true when removing
@@ -270,13 +269,11 @@ When used in generating policies, it sets remove_original in the policies to tru
 [`--extend-policies`] append filetypes found in the directory to the given policies if they are missing in it.
 
 `-s`
-[`--strict`] when run in strict mode, it moves the files that are not listed in policies.json to the folder _REMOVED
-(instead of throwing a warning).
-When used in generating policies, it does not add blank policies for formats that are not mentioned in
-fileidentification/definitions/default_policies.json (or any other default json if modified in .env)
+[`--strict`] move the files that are not listed in policies.json to the folder _REMOVED (instead of throwing a warning).
+When used in generating policies, do not add blank policies for formats that are not mentioned in DEFAULTPOLICIES.
 
 `-b`
-[`--blank`] creates a blank policies based on the files encountered in the given directory.
+[`--blank`] create a blank policies based on the file types encountered in the given directory.
 
 `-q`
 [`--quiet`] just print errors and warnings
