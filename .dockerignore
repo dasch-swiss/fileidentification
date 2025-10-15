@@ -1,1 +1,6 @@
 .venv
+.github
+.mypy_cache
+.ruff_cache
+.venv
+testdata
