@@ -124,25 +124,25 @@ Generate two JSON files:
 **path/to/directory_policies.json** : A file conversion protocol for each file format
 that was encountered in the folder according to the default policies. Edit it to customize conversion rules.
 
-### Inspect The Files (-i)
+### Inspect The Files (`-i` | `--inspect`)
 
 `uv run identify.py path/to/directory -i`
 
 Probes the files on errors and move corrupted files to the folder in `path/to/directory_TMP/_REMOVED`.
 
-You can also add the flag `-v` (`--verbose`) for more detailed inspection. (see **options** below)
+You can also add the flag `-v` (`--verbose`) for more detailed inspection (see **Options** below).
 
-NOTE: Currently only audio/video and image files are tested.
+NOTE: Currently only audio/video and image files are inspected.
 
-### Applying Policies, File Conversion (-a)
+### Convert The Files According to the Policies (`-a` | `--apply`)
 
 `uv run identify.py path/to/directory -a`
 
 Apply the policies defined in `path/to/directory_policies.json` and convert files into their target file format.
-The converted files are temporary stored in `path/to/directory_TMP` (default) with the log output
+The converted files are temporarily stored in `path/to/directory_TMP` (default) with the log output
 of the program used as log.txt next to it.
 
-### Clean Up Temporary Files (-r)
+### Clean Up Temporary Files (`-r` | `--remove-tmp`)
 
 `uv run identify.py path/to/directory -r`
 
@@ -152,7 +152,7 @@ Delete all temporary files and folders and move the converted files next to thei
 
 If you don't need these intermediary steps, you can run the desired steps at once by combining their flags.
 Here is an example how to do verbose testing, applying a custom policy
-(see **option** below for more information about the flags):
+(see **Options** below for more information about the flags):
 
 `uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json`
 
@@ -198,7 +198,7 @@ A policy for a file type consists of the following fields and uses its PRONOM Un
 ### Policy Examples
 
 A policy for Audio/Video Interleaved Format (avi) that need to be transcoded to MPEG-4 Media File
-(Codec: AVC/H.264, Audio: AAC) looks like this
+(Codec: AVC/H.264, Audio: AAC) looks like this:
 
 ```json
 {
@@ -216,7 +216,7 @@ A policy for Audio/Video Interleaved Format (avi) that need to be transcoded to 
 }
 ```
 
-A policy for Portable Network Graphics that is accepted as it is, but gets tested
+A policy for Portable Network Graphics that is accepted as it is, but gets tested:
 
 ```json
 {
@@ -230,22 +230,23 @@ A policy for Portable Network Graphics that is accepted as it is, but gets teste
 
 **Policy Testing:**
 
-You can test the outcome of the conversion policies (given that the path is path/to/directory_policies.json,
-otherwise pass the path to the file with -p) with
+You can test the outcome of the conversion policies with
 
 `uv run identify.py path/to/directory -t`
 
 The script takes the smallest file for each conversion policy and converts it.
 The converted files are located in _TMP/_TEST.
 
-If you just want to test a specific policy, append f and the puid
+If you just want to test a specific policy, append `f` and the puid:
 
 `uv run identify.py path/to/directory -tf fmt/XXX`
+
+If the policies file is not located at path/to/directory_policies.json, pass the path to it with the `-p` flag.
 
 
 ## Modifying Default Settings
 
-In the .env file you can customise some default path: e.g. DEFAULTPOLICIES the paths to the default policies, 
+In the `.env` file you can customise some default paths: e.g. DEFAULTPOLICIES the paths to the default policies, 
 set custom default tmp dir location.
 
 Other default params such as PDF/A export settings for LibreOffice or other strings are in 
@@ -254,45 +255,45 @@ Other default params such as PDF/A export settings for LibreOffice or other stri
 
 ## Options
 
-`-i`
-[`--inspect`] probe the files on errors
+`-i` | `--inspect`  
+Probe the files on errors
 
-`-v`
-[`--verbose`] catch more warnings on video and image files during the tests.
-this can take a significantly longer based on what files you have. As an addition,
+`-v` | `--verbose`  
+Catch more warnings on video and image files during the tests.
+This can take a significantly longer time based on what files you have.
 
-`-a`
-[`--apply`] apply the policies
+`-a` | `--apply`  
+Apply the policies
 
-`-r`
-[`--remove-tmp`] remove all temporary items and add the converted files next to their parents.
+`-r` | `--remove-tmp`  
+Remove all temporary items and add the converted files next to their parents.
 
-`-x`
-[`--remove-original`] this overwrites the remove_original value in the policies and sets it to true when removing
-the tmp files. the original files are moved to the TMP/_REMOVED folder.
-When used in generating policies, it sets remove_original in the policies to true (default false).
+`-x` | `--remove-original`  
+This overwrites the `remove_original` value in the policies and sets it to true when removing the tmp files.
+The original files are moved to the TMP/_REMOVED folder.
+When used in generating policies, it sets `remove_original` in the policies to true (default false).
 
-`-p`
-[`--policies-path`] load a custom policies JSON file instead of the default policies
+`-p` | `--policies-path`  
+Load a custom policies JSON file instead of the default policies
 
-`-e`
-[`--extend-policies`] append filetypes found in the directory to the given policies if they are missing in it.
+`-e` | `--extend-policies`  
+Append filetypes found in the directory to the given policies if they are missing in it.
 
-`-s`
-[`--strict`] move the files that are not listed in policies.json to the folder _REMOVED (instead of throwing a warning).
+`-s` | `--strict`  
+Move the files that are not listed in policies.json to the folder _REMOVED (instead of emitting a warning).
 When used in generating policies, do not add blank policies for formats that are not mentioned in DEFAULTPOLICIES.
 
-`-b`
-[`--blank`] create a blank policies based on the file types encountered in the given directory.
+`-b` | `--blank`  
+Create a blank policies based on the file types encountered in the given directory.
 
-`-q`
-[`--quiet`] just print errors and warnings
+`-q` | `--quiet`  
+Just print errors and warnings
 
-`--csv`
-get an additional output as csv aside from the log.json
+`--csv`  
+Get output as CSV, in addition to the log.json
 
-`--convert`
-re-convert the files that failed during file conversion
+`--convert`  
+Re-convert the files that failed during file conversion
 
 
 ## Updating Signatures
@@ -317,9 +318,10 @@ Preservation recommendations
 [kost](https://kost-ceco.ch/cms/de.html)
 [bundesarchiv](https://www.bar.admin.ch/dam/bar/de/dokumente/konzepte_und_weisungen/archivtaugliche_dateiformate.1.pdf.download.pdf/archivtaugliche_dateiformate.pdf)
 
-**NOTE**
-if you want to convert to pdf/A, you need LibreOffice version 7.4+
+**NOTE**:
 
-when you convert svg, you might run into errors as the default library of imagemagick is not that good.
-easiest workaround is installing inkscape ( `brew install --cask inkscape` ), make sure that you reinstall imagemagick,
-so its uses inkscape as default for converting svg ( `brew remove imagemagick` , `brew install imagemagick`)
+If you want to convert to PDF/A, you need LibreOffice version 7.4+.
+
+When you convert SVG, you might run into errors, as the default library of ImageMagick is not that good.
+The easiest workaround is installing Inkscape ( `brew install --cask inkscape` ), and then reinstalling ImageMagick,
+so that it uses Inkscape as default for converting SVG ( `brew remove imagemagick; brew install imagemagick`).
