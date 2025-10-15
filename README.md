@@ -23,7 +23,8 @@ It features:
 
 ### Docker-based
 
-Build the image, make the bash script executable and link it, where it is included in PATH (e.g. $HOME/.lcoal/bin)
+Build the image, make the bash script executable,
+and link it to a bin directory that appears in PATH (e.g. $HOME/.local/bin):
 
 ```bash
 docker build -t fileidentification .
