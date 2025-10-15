@@ -1,25 +1,29 @@
 # Fileidentification
 
-A python CLI to identify file formats and bulk convert files. It is designed for digital preservation workflows
-and is basically a python wrapper around several programs. It uses [pygfried](https://pypi.org/project/pygfried/)
-(a CPython extension for [siegfried](https://www.itforarchivists.com/siegfried)), ffmpeg, imagemagick (optionally inkscape) and
-LibreOffice, so it's recommended to have those installed. If you are not using fileidentification a lot and don't want
-to install these programs, you can run the script in a docker container. There is a dockerfile ready, the current docker
-image is still heavy though (1.1 G).
+A python CLI to identify file formats and bulk convert files.
+It is designed for digital preservation workflows and is basically a python wrapper around several programs.
+It uses [pygfried](https://pypi.org/project/pygfried/)
+(a CPython extension for [siegfried](https://www.itforarchivists.com/siegfried)),
+ffmpeg, imagemagick (optionally inkscape) and LibreOffice, so it's recommended to have those installed.
+If you are not using fileidentification a lot and don't want to install these programs,
+you can run the script in a docker container.
+There is a dockerfile ready, the current docker image is still heavy though (1.1 G).
 
-Most probable use case might be when you need to test and possibly convert a huge amount of files and you
-don't know in advance what file types you are dealing with. It features:
+Most probable use case might be when you need to test and possibly convert a huge amount of files
+and you don't know in advance what file types you are dealing with.
+It features:
 
 - file format identification and extraction of technical metadata with pygfried, ffprobe and imagemagick
 - file probing with ffmpeg and imagemagick
-- file conversion with ffmpeg, imagemagick and LibreOffice using a json file as a protocol
+- file conversion with ffmpeg, imagemagick and LibreOffice using a JSON file as a protocol
 - detailed logging
+
 
 ## Installation
 
-## Docker
+### Docker-based
 
-build the image, make the bash script executable and link it, where it is included in PATH (e.g. $HOME/.lcoal/bin)
+Build the image, make the bash script executable and link it, where it is included in PATH (e.g. $HOME/.lcoal/bin)
 
 ```bash
 docker build -t fileidentification .
@@ -27,7 +31,7 @@ chmod +x ./fidr.sh
 ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 ```
 
-### Quickstart
+#### Quickstart for Docker-based Installation
 
 - **Generate policies for your files:**
 
@@ -35,8 +39,8 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 
   - **Review generated policies:**
 
-      Edit `path/to/directory_policies.json` to customize conversion rules. Optional test the outcome of the edited 
-      policies:
+      Edit `path/to/directory_policies.json` to customize conversion rules.
+      Optionally, test the outcome of the edited policies:
 
       `fidr path/to/directory -t`
 
@@ -46,26 +50,27 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 
 - **Logfile**: see `path/to/directory_log.json`
 
-    If you wish a simpler csv output, run `fidr path/to/directory --csv` to get a csv
+    If you wish a simpler CSV output, run `fidr path/to/directory --csv` to get a CSV.
 
-A more complex example:
-load an external policies json, expand it only with file types defined in the default policies (strict mode), probe the
-files verbose, apply the policies (in strict mode, i.e. remove the files whose file type is not listed in the generated
-policies), remove temporary files and get a simpler csv output:
+A more complex example: The following command will:
+
+- load an external policies JSON
+- expand it only with file types defined in the default policies (strict mode)
+- probe the files in verbose mode
+- apply the policies (in strict mode, i.e. remove the files whose file type is not listed in the generated policies)
+- remove temporary files and get a simpler CSV output:
 
 `fidr path/to/directory -esivar -p path/to/external_policies.json --csv`
 
-the first argument has to be the root folder of your files to process, otherwise combine flags / arguments to your need
+The first argument has to be the root folder of your files to process, otherwise combine flags / arguments as you wish.
+See **Options** below for more available flags.
 
--> see **Options** below for more available flags
 
-## Manual installation
+### Manual Installation on Your System
 
-### Dependencies
+Install ffmpeg, imagemagick and LibreOffice, if not already installed:
 
-Install ffmpeg, imagemagick and LibreOffice if not already installed
-
-#### MacOS (using homebrew)
+#### MacOS (using Homebrew)
 
 ```bash
 brew install ffmpeg
@@ -82,14 +87,14 @@ Depending on your distribution:
 - [imagemagick](https://imagemagick.org/script/download.php#linux)
 - [LibreOffice](https://www.libreoffice.org/download/download-libreoffice)
 
-On Debian/Ubuntu
+On Debian/Ubuntu:
 
 ```bash
 sudo apt-get update
 sudo apt-get install ffmpeg imagemagick ghostscript libreoffice
 ```
 
-### Python Dependencies
+#### Python Dependencies
 
 If you don't have [uv](https://docs.astral.sh/uv/) installed, install it with
 
@@ -104,13 +109,14 @@ This creates a venv and installs all necessary python dependencies:
 uv run identify.py --help
 ```
 
+
 ## Single Execution Steps Explained
 
 ### Detect File Formats - Generate Conversion Policies
 
 `uv run identify.py path/to/directory`
 
-Generate two json files:
+Generate two JSON files:
 
 **path/to/directory_log.json** : The technical metadata of all the files in the folder
 
@@ -157,6 +163,7 @@ Iterations of file conversions such as A -> B, B -> C, ... are logged in the sam
 
 If you wish a simpler csv output, you can add the flag `--csv` anytime when you run the script,
 which converts the `log.json` of the actual status of the directory to a csv.
+
 
 ## Advanced Usage
 
@@ -234,6 +241,7 @@ If you just want to test a specific policy, append f and the puid
 
 `uv run identify.py path/to/directory -tf fmt/XXX`
 
+
 ## Modifying Default Settings
 
 In the .env file you can customise some default path: e.g. DEFAULTPOLICIES the paths to the default policies, 
@@ -241,6 +249,7 @@ set custom default tmp dir location.
 
 Other default params such as PDF/A export settings for LibreOffice or other strings are in 
 `fileidentification/definitions/constants.py`.
+
 
 ## Options
 
@@ -263,7 +272,7 @@ the tmp files. the original files are moved to the TMP/_REMOVED folder.
 When used in generating policies, it sets remove_original in the policies to true (default false).
 
 `-p`
-[`--policies-path`] load a custom policies json file instead of the default policies
+[`--policies-path`] load a custom policies JSON file instead of the default policies
 
 `-e`
 [`--extend-policies`] append filetypes found in the directory to the given policies if they are missing in it.
@@ -290,6 +299,7 @@ re-convert the files that failed during file conversion
 ```bash
 uv sync --extra update_fmt && uv run update.py
 ```
+
 
 ## Useful Links
 
