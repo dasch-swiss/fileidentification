@@ -3,11 +3,11 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 import pygfried
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from typer import colors, secho
-from typing import Any
 
 from fileidentification.definitions.constants import CSVFIELDS, FMT2EXT
 from fileidentification.definitions.models import (

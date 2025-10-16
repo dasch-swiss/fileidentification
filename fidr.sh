@@ -21,9 +21,10 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-# run it with or without policies_path
+add_volumes=()
 if [[ -f $policies_path ]]; then
-  docker run --rm -v "$parent_dir":"$parent_dir" -v "$policies_path":"$policies_path" -t fileidentification "$input_dir" "${params[@]}"
-else
-  docker run --rm -v "$parent_dir":"$parent_dir" -t fileidentification "$input_dir" "${params[@]}"
+  add_volumes+=("-v")
+  add_volumes+=("$policies_path:$policies_path")
 fi
+
+docker run -v "$parent_dir":"$parent_dir" "${add_volumes[@]}" -t fileidentification "$input_dir" "${params[@]}"

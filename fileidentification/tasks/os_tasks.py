@@ -1,8 +1,8 @@
 import shutil
 from pathlib import Path
+from typing import Any
 
 from typer import colors, secho
-from typing import Any
 
 from fileidentification.definitions.constants import RMV_DIR
 from fileidentification.definitions.models import FilePaths, LogMsg, LogTables, Policies, SfInfo

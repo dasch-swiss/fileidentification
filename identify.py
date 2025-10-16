@@ -1,8 +1,8 @@
 from pathlib import Path
 from typing import Annotated
 
-import typer
 import toml
+import typer
 
 from fileidentification.filehandling import FileHandler
 
