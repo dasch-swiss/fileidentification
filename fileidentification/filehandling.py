@@ -5,9 +5,9 @@ import sys
 from pathlib import Path
 
 import pygfried
-from dotenv import load_dotenv
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from typer import colors, secho
+from typing import Any
 
 from fileidentification.definitions.constants import CSVFIELDS, FMT2EXT
 from fileidentification.definitions.models import (
@@ -36,8 +36,6 @@ from fileidentification.tasks.inspection import inspect_file
 from fileidentification.tasks.os_tasks import move_tmp, set_filepaths
 from fileidentification.tasks.policies import apply_policy
 
-load_dotenv()
-
 
 class FileHandler:
     """Main class. It can create, verify and apply policies, test the files on errors, convert and move them."""
@@ -49,6 +47,7 @@ class FileHandler:
         self.ba = BasicAnalytics()
         self.stack: list[SfInfo] = []
         self.fp: FilePaths = FilePaths()
+        self.config: dict[str, Any] = {}
 
     def _load_sfinfos(self, root_folder: Path) -> None:
         """
@@ -127,7 +126,7 @@ class FileHandler:
             return
 
         # default values
-        default_path = os.getenv("DEFAULTPOLICIES", "fileidentification/definitions/default_policies.json")
+        default_path = self.config["policies"]["DEFAULTPOLICIES"]
         default_policies = self._load_policies(Path(default_path))
         jsonfile.comment += f" using default policies {default_path}"
         jsonfile.comment += " in strict mode" if self.mode.STRICT else ""
@@ -294,7 +293,7 @@ class FileHandler:
     ) -> None:
         root_folder = Path(root_folder)
         # set dirs / paths
-        set_filepaths(self.fp, root_folder)
+        set_filepaths(self.fp, self.config, root_folder)
         # set the mode
         self.mode.REMOVEORIGINAL = remove_original
         self.mode.VERBOSE = mode_verbose
