@@ -13,7 +13,7 @@ class DroidSigURL(StrEnum):
 
 
 # dict that resolves the puid to possible ext and file format name
-FMTJSN: Path = Path("fileidentification/definitions/fmt2ext.json")
+FMTJSN: Path = Path(__file__).parent / "fmt2ext.json"
 FMT2EXT: dict[str, Any] = json.loads(FMTJSN.read_text())
 
 
