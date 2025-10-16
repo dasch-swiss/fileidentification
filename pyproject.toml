@@ -33,6 +33,10 @@ dev = [
 strict = true
 enable_error_code = ["possibly-undefined"]
 
+[[tool.mypy.overrides]]
+module = "toml.*"
+ignore_missing_imports = true
+
 [tool.ruff]
 line-length = 120
 
