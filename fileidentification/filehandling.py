@@ -167,7 +167,7 @@ class FileHandler:
             self._gen_policies(policies_path, blank=blank)
         # load the external passed policies with option -p or default location
         else:
-            print_msg(f"... loading policies form {policies_path}", self.mode.QUIET)
+            print_msg(f"... loading policies from {policies_path}", self.mode.QUIET)
             self._load_policies(policies_path)
 
         # expand a passed policies with the filetypes found in root_folder that are not yet in the policies
@@ -188,7 +188,6 @@ class FileHandler:
         if not puids:
             print_msg("no files found that should be converted with given policies", self.mode.QUIET)
         else:
-            print_fmts(puids, self.ba, self.policies, self.mode)
             print_msg("\n --- testing policies with a sample from the directory ---", self.mode.QUIET)
 
             for puid in puids:  # noqa: PLR1704
