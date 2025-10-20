@@ -246,8 +246,8 @@ If the policies file is not located at path/to/directory_policies.json, pass the
 
 ## Modifying Default Settings
 
-In the `appconfig.toml` file you can customise some default paths: e.g. DEFAULTPOLICIES the paths to the default policies, 
-set custom default tmp dir location.
+In the `appconfig.toml` file you can customise some default values: e.g. the path to the default policies file or the
+location of the tmp dir.
 
 Other default params such as PDF/A export settings for LibreOffice or other strings are in 
 `fileidentification/definitions/constants.py`.
