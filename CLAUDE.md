@@ -76,7 +76,7 @@ If the user edited auto-generated policies, the outcome of the policies can be t
 
 ## Configuration
 
-### Environment Variables (`.env`)
+### App Config (`appconfig.toml`)
 
 - `DEFAULTPOLICIES`: Path to default policies JSON
 - `TMP_DIR`: Temporary directory suffix (default: `_TMP`)

@@ -246,7 +246,7 @@ If the policies file is not located at path/to/directory_policies.json, pass the
 
 ## Modifying Default Settings
 
-In the `.env` file you can customise some default paths: e.g. DEFAULTPOLICIES the paths to the default policies, 
+In the `appconfig.toml` file you can customise some default paths: e.g. DEFAULTPOLICIES the paths to the default policies, 
 set custom default tmp dir location.
 
 Other default params such as PDF/A export settings for LibreOffice or other strings are in 
