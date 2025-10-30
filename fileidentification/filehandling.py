@@ -8,7 +8,6 @@ import pygfried
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from typer import colors, secho
 
-from fileidentification.definitions.settings import CSVFIELDS, FMT2EXT, DEFAULTPOLICIES
 from fileidentification.definitions.models import (
     BasicAnalytics,
     FilePaths,
@@ -22,6 +21,7 @@ from fileidentification.definitions.models import (
     SfInfo,
     sfinfo2csv,
 )
+from fileidentification.definitions.settings import CSVFIELDS, DEFAULTPOLICIES, FMT2EXT
 from fileidentification.tasks.console_output import (
     print_diagnostic,
     print_duplicates,
@@ -286,7 +286,7 @@ class FileHandler:
         mode_verbose: bool = True,
         mode_quiet: bool = True,
         to_csv: bool = False,
-        tmp_dir: Path | None = None
+        tmp_dir: Path | None = None,
     ) -> None:
         root_folder = Path(root_folder)
         # set dirs / paths

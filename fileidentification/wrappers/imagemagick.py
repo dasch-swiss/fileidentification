@@ -2,8 +2,8 @@ import shlex
 import subprocess
 from pathlib import Path
 
-from fileidentification.definitions.settings import ErrMsgIM
 from fileidentification.definitions.models import SfInfo
+from fileidentification.definitions.settings import ErrMsgIM
 
 
 def imagemagick_inspect(sfinfo: SfInfo, verbose: bool) -> tuple[bool, str, str]:

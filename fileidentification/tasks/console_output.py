@@ -2,8 +2,8 @@ import math
 
 from typer import colors, secho
 
-from fileidentification.definitions.settings import FMT2EXT, FDMsg
 from fileidentification.definitions.models import BasicAnalytics, LogMsg, LogTables, Mode, Policies
+from fileidentification.definitions.settings import FMT2EXT, FDMsg
 
 
 def print_siegfried_errors(ba: BasicAnalytics) -> None:

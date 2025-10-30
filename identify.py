@@ -113,7 +113,7 @@ def main(
         mode_verbose=mode_verbose,
         mode_quiet=mode_quiet,
         to_csv=to_csv,
-        tmp_dir=tmp_dir
+        tmp_dir=tmp_dir,
     )
 
 

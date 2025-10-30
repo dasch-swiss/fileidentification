@@ -1,11 +1,10 @@
 import shutil
 from pathlib import Path
-from typing import Any
 
 from typer import colors, secho
 
-from fileidentification.definitions.settings import POLJSON, LOGJSON, RMV_DIR, TMP_DIR
 from fileidentification.definitions.models import FilePaths, LogMsg, LogTables, Policies, SfInfo
+from fileidentification.definitions.settings import LOGJSON, POLJSON, RMV_DIR, TMP_DIR
 
 
 def remove(sfinfo: SfInfo, log_tables: LogTables) -> None:
@@ -66,4 +65,3 @@ def set_filepaths(fp: FilePaths, root_folder: Path, tmp_dir: Path | None = None)
 
     fp.LOGJSON = fp.TMP_DIR / LOGJSON
     fp.POLJSON = fp.TMP_DIR / POLJSON
-

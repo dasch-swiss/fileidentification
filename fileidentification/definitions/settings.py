@@ -3,7 +3,6 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
-
 # default policies
 DEFAULTPOLICIES: Path = Path(__file__).parent / "default_policies.json"
 

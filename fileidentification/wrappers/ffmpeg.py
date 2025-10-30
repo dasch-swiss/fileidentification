@@ -4,8 +4,8 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from fileidentification.definitions.settings import ErrMsgFF
 from fileidentification.definitions.models import SfInfo
+from fileidentification.definitions.settings import ErrMsgFF
 
 
 def ffmpeg_inspect(sfinfo: SfInfo, verbose: bool) -> tuple[bool, str, dict[str, Any] | None]:
