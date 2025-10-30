@@ -2,7 +2,7 @@ import json
 
 from typer import colors, secho
 
-from fileidentification.definitions.constants import FMT2EXT, Bin, ErrMsgRE, FDMsg, FPMsg
+from fileidentification.definitions.settings import FMT2EXT, Bin, ErrMsgRE, FDMsg, FPMsg
 from fileidentification.definitions.models import LogMsg, LogTables, Policies, SfInfo
 from fileidentification.tasks.os_tasks import remove
 from fileidentification.wrappers.ffmpeg import ffmpeg_inspect

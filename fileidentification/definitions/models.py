@@ -6,7 +6,7 @@ from typing import Any, Self
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from fileidentification.definitions.constants import Bin, FDMsg, PCMsg, PVErr
+from fileidentification.definitions.settings import Bin, FDMsg, PCMsg, PVErr
 
 
 class LogMsg(BaseModel):
@@ -193,8 +193,8 @@ class Mode(BaseModel):
 
 class FilePaths(BaseModel, validate_assignment=True):
     TMP_DIR: Path = Field(default_factory=Path)
-    POLICIES_J: Path = Field(default_factory=Path)
-    LOG_J: Path = Field(default_factory=Path)
+    POLJSON: Path = Field(default_factory=Path)
+    LOGJSON: Path = Field(default_factory=Path)
 
 
 def get_md5(path: str | Path) -> str:

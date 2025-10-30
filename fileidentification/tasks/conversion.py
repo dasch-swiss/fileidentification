@@ -4,7 +4,7 @@ from pathlib import Path
 import pygfried
 from typer import colors, secho
 
-from fileidentification.definitions.constants import Bin, FPMsg
+from fileidentification.definitions.settings import Bin, FPMsg
 from fileidentification.definitions.models import LogMsg, Policies, PolicyParams, SfInfo
 from fileidentification.wrappers.converter import convert
 from fileidentification.wrappers.ffmpeg import ffmpeg_media_info

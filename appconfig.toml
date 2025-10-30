@@ -1,8 +1,0 @@
-[policies]
-DEFAULTPOLICIES="fileidentification/definitions/default_policies.json"
-
-# string attached to target folder, set absolute path to change path
-[paths]
-TMP_DIR="_TMP"
-POLICIES_J="_policies.json"
-LOG_J="_log.json"

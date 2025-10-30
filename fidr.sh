@@ -2,29 +2,33 @@
 
 # get variables for mounting the volume in docker
 input_dir=$(realpath "$1")
-parent_dir=${input_dir%/*}
+mnt_dir="$input_dir"
 
-# if it is a file, mount the parent from the parent
+# if it is a file, mount the parent
 if [[ -f $1 ]]; then
-  parent_dir="${parent_dir%/*}"
+  mnt_dir="${mnt_dir%/*}"
 fi
 
 # store the params
 params=("${@:2}")
 
 # check if external policies are passed and store the path
+add_volumes=()
 while [ $# -gt 0 ]; do
     if [[ $1 == "-p"* ]] || [[ $1 == "-ep"* ]] || [[ $1 == "--policies-path"* ]]; then
         policies_path=$(realpath "$2")
+        add_volumes+=("-v")
+        add_volumes+=("$policies_path:$policies_path")
+        shift
+    fi
+    if [[ $1 == "--tmp-dir"* ]]; then
+        tmp_dir=$(realpath "$2")
+        add_volumes+=("-v")
+        add_volumes+=("$tmp_dir:$tmp_dir")
         shift
     fi
     shift
 done
 
-add_volumes=()
-if [[ -f $policies_path ]]; then
-  add_volumes+=("-v")
-  add_volumes+=("$policies_path:$policies_path")
-fi
-
-docker run -v "$parent_dir":"$parent_dir" "${add_volumes[@]}" -t fileidentification "$input_dir" "${params[@]}"
+# run the command
+docker run -v "$mnt_dir":"$mnt_dir" "${add_volumes[@]}" -t fileidentification "$input_dir" "${params[@]}"

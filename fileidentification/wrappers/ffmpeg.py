@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 from typing import Any
 
-from fileidentification.definitions.constants import ErrMsgFF
+from fileidentification.definitions.settings import ErrMsgFF
 from fileidentification.definitions.models import SfInfo
 
 

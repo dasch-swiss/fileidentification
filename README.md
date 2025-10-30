@@ -38,30 +38,35 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 
     `fidr path/to/directory`
 
-  - **Review generated policies:**
+    - **Review generated policies:**
 
-      Edit `path/to/directory_policies.json` to customize conversion rules.
-      Optionally, test the outcome of the edited policies:
+        Edit `path/to/directory/_fileIdentification/_policies.json` to customize conversion rules.
+        Optionally, test the outcome of the edited policies:
 
-      `fidr path/to/directory -t`
+        `fidr path/to/directory -t`
 
 - **Test the files on errors and apply the policies:**
 
     `fidr path/to/directory -iar`
 
-- **Logfile**: see `path/to/directory_log.json`
+- **Logfile**: see `path/to/directory/_fileIdentification/_log.json`
 
     If you wish a simpler CSV output, run `fidr path/to/directory --csv` to get a CSV.
 
-A more complex example: The following command will:
+Advanced Examples:
+
+`fidr path/to/directory -ivasr -p path/to/external_policies.json --csv`
 
 - load an external policies JSON
-- expand it only with file types defined in the default policies (strict mode)
 - probe the files in verbose mode
-- apply the policies (in strict mode, i.e. remove the files whose file type is not listed in the generated policies)
+- apply the policies (in strict mode, i.e. remove the files whose file type are not listed in the policies)
 - remove temporary files and get a simpler CSV output:
 
-`fidr path/to/directory -esivar -p path/to/external_policies.json --csv`
+`fidr path/to/directory --tmp-dir path/to/tmp_dir -ivarx`
+
+- use a custom tmp_dir to write files to (instead of the default `path/to/directory/_fileIdentification`)
+- probe the files in verbose mode and apply the policies
+- remove temporary files and the original files that got converted
 
 The first argument has to be the root folder of your files to process, otherwise combine flags / arguments as you wish.
 See **Options** below for more available flags.
@@ -117,18 +122,18 @@ uv run identify.py --help
 
 `uv run identify.py path/to/directory`
 
-Generate two JSON files:
+This generates a folder `_fileIdentification` inside the directory with two JSON files:
 
-**path/to/directory_log.json** : The technical metadata of all the files in the folder
+**_log.json** : The technical metadata of all the files in the folder
 
-**path/to/directory_policies.json** : A file conversion protocol for each file format
+**_policies.json** : A file conversion protocol for each file format
 that was encountered in the folder according to the default policies. Edit it to customize conversion rules.
 
 ### Inspect The Files (`-i` | `--inspect`)
 
 `uv run identify.py path/to/directory -i`
 
-Probes the files on errors and move corrupted files to the folder in `path/to/directory_TMP/_REMOVED`.
+Probes the files on errors and move corrupted files to the folder in `_fileIdentification/_REMOVED`.
 
 You can also add the flag `-v` (`--verbose`) for more detailed inspection (see **Options** below).
 
@@ -138,8 +143,9 @@ NOTE: Currently only audio/video and image files are inspected.
 
 `uv run identify.py path/to/directory -a`
 
-Apply the policies defined in `path/to/directory_policies.json` and convert files into their target file format.
-The converted files are temporarily stored in `path/to/directory_TMP` (default) with the log output
+Apply the policies defined in `_fileIdentification/_policies.json` and convert
+files into their target file format.
+The converted files are temporarily stored in `_fileIdentification` with the log output
 of the program used as log.txt next to it.
 
 ### Clean Up Temporary Files (`-r` | `--remove-tmp`)
@@ -151,25 +157,25 @@ Delete all temporary files and folders and move the converted files next to thei
 ### Combining Steps - Custom Policies and Working Directory
 
 If you don't need these intermediary steps, you can run the desired steps at once by combining their flags.
-Here is an example how to do verbose testing, applying a custom policy
+Here is an example how to do verbose testing, applying a custom policy and use a custom tmp directory
 (see **Options** below for more information about the flags):
 
-`uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json`
+`uv run identify.py path/to/directory -ariv -p path/to/custom_policies.json --tmp-dir path/to/tmp_dir`
 
 ### Log
 
-The **path/to/directory_log.json** takes track of all modifications in the target folder.  
+The **_log.json** takes track of all modifications in the target folder.  
 Since with each execution of the script it checks whether such a log exists and read/appends to that file.  
 Iterations of file conversions such as A -> B, B -> C, ... are logged in the same file.
 
 If you wish a simpler csv output, you can add the flag `--csv` anytime when you run the script,
-which converts the `log.json` of the actual status of the directory to a csv.
+which converts the `_log.json` of the actual status of the directory to a csv.
 
 
 ## Advanced Usage
 
-You can also create your own policies file, and with that, customise the file conversion output.
-Simply edit the generated default file `path/to/directory_policies.json` before applying.
+You can also create your own policies, and with that, customise the file conversion output.
+Simply edit the generated default file `_fileIdentification/_policies.json` before applying.
 If you want to start from scratch, run `uv run indentify.py path/to/directory -b` to create a
 blank policies template with all the file formats encountered in the folder.
 
@@ -244,15 +250,6 @@ If you just want to test a specific policy, append `f` and the puid:
 If the policies file is not located at path/to/directory_policies.json, pass the path to it with the `-p` flag.
 
 
-## Modifying Default Settings
-
-In the `appconfig.toml` file you can customise some default values: e.g. the path to the default policies file or the
-location of the tmp dir.
-
-Other default params such as PDF/A export settings for LibreOffice or other strings are in 
-`fileidentification/definitions/constants.py`.
-
-
 ## Options
 
 `-i` | `--inspect`  
@@ -294,6 +291,9 @@ Get output as CSV, in addition to the log.json
 
 `--convert`  
 Re-convert the files that failed during file conversion
+
+`--tmp-dir`
+use a custom tmp directory
 
 
 ## Updating Signatures

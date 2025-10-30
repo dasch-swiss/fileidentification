@@ -2,7 +2,7 @@ import shlex
 import subprocess
 from pathlib import Path
 
-from fileidentification.definitions.constants import ErrMsgIM
+from fileidentification.definitions.settings import ErrMsgIM
 from fileidentification.definitions.models import SfInfo
 
 
