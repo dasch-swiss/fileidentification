@@ -312,11 +312,3 @@ List of File Signatures on
 Preservation recommendations
 [kost](https://kost-ceco.ch/cms/de.html)
 [bundesarchiv](https://www.bar.admin.ch/dam/bar/de/dokumente/konzepte_und_weisungen/archivtaugliche_dateiformate.1.pdf.download.pdf/archivtaugliche_dateiformate.pdf)
-
-**NOTE**:
-
-If you want to convert to PDF/A, you need LibreOffice version 7.4+.
-
-When you convert SVG, you might run into errors, as the default library of ImageMagick is not that good.
-The easiest workaround is installing Inkscape ( `brew install --cask inkscape` ), and then reinstalling ImageMagick,
-so that it uses Inkscape as default for converting SVG ( `brew remove imagemagick; brew install imagemagick`).
