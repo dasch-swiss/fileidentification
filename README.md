@@ -289,7 +289,7 @@ use a custom tmp directory instead of the default `_fileIdentification`
 
 ## Updating the PUIDs
 
-Update the file format names and extensions of the PUIDs according to nationalarchives.gov.uk
+Update the file format names and extensions of the PUIDs according to <https://www.nationalarchives.gov.uk/>.
 
 ```bash
 uv sync --extra update_fmt && uv run update.py
