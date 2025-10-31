@@ -269,7 +269,7 @@ Get output as CSV, in addition to the log.json
 Re-convert the files that failed during file conversion
 
 `--tmp-dir`
-use a custom tmp directory instead of the default `_fileIdentification`
+Use a custom tmp directory instead of the default `_fileIdentification`
 
 ### Examples
 
