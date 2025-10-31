@@ -277,7 +277,7 @@ Use a custom tmp directory instead of the default `_fileIdentification`
 
 - load an external policies JSON
 - probe the files in verbose mode
-- apply the policies (in strict mode, i.e. remove the files whose file type are not listed in the policies)
+- apply the policies (in strict mode, i.e. remove the files whose file type is not listed in the policies)
 - remove temporary files and get a simpler CSV output
 
 `fidr path/to/directory --tmp-dir path/to/tmp_dir -ivarx`
