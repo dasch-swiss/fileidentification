@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from lxml import etree, objectify  # type: ignore[import-untyped]
 from typer import colors, secho
 
-from fileidentification.definitions.constants import FMTJSN, DroidSigURL
+from fileidentification.definitions.settings import FMTJSN, DroidSigURL
 
 
 def write_fmt2ext(link: str) -> None:

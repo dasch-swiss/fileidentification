@@ -3,8 +3,8 @@ import shlex
 import subprocess
 from pathlib import Path
 
-from fileidentification.definitions.constants import PDFSETTINGS, Bin, LOPath
 from fileidentification.definitions.models import PolicyParams, SfInfo
+from fileidentification.definitions.settings import PDFSETTINGS, Bin, LOPath
 
 SOFFICE = LOPath.Linux if platform.system() == LOPath.Linux.name else LOPath.Darwin
 

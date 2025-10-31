@@ -3,6 +3,15 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
+# default policies
+DEFAULTPOLICIES: Path = Path(__file__).parent / "default_policies.json"
+
+# paths tmp dir, logs
+TMP_DIR = "_fileIdentification"  # added to root folder
+LOGJSON = "_log.json"
+POLJSON = "_policies.json"
+RMV_DIR = "_REMOVED"
+
 
 # application settings
 class DroidSigURL(StrEnum):
@@ -30,10 +39,6 @@ class LOPath(StrEnum):
 
     Darwin = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
     Linux = "libreoffice"
-
-
-# foldername for removed files (is in TMP_DIR)
-RMV_DIR = "_REMOVED"
 
 
 # it needs libreoffice v7.4 + for this to work, set to pdf/A version 2

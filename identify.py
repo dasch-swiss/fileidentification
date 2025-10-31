@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Annotated
 
-import toml
 import typer
 
 from fileidentification.filehandling import FileHandler
@@ -95,9 +94,9 @@ def main(
     ] = False,
     mode_quiet: Annotated[bool, typer.Option("--quiet", "-q", help="just print errors and warnings")] = False,
     to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False,
+    tmp_dir: Annotated[Path | None, typer.Option("--tmp-dir", help="set a custom tmp directory")] = None,
 ) -> None:
     fh = FileHandler()
-    fh.config = toml.load("appconfig.toml")
     fh.run(
         root_folder=root_folder,
         inspect=inspect,
@@ -114,6 +113,7 @@ def main(
         mode_verbose=mode_verbose,
         mode_quiet=mode_quiet,
         to_csv=to_csv,
+        tmp_dir=tmp_dir,
     )
 
 

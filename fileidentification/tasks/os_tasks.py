@@ -1,11 +1,10 @@
 import shutil
 from pathlib import Path
-from typing import Any
 
 from typer import colors, secho
 
-from fileidentification.definitions.constants import RMV_DIR
 from fileidentification.definitions.models import FilePaths, LogMsg, LogTables, Policies, SfInfo
+from fileidentification.definitions.settings import LOGJSON, POLJSON, RMV_DIR, TMP_DIR
 
 
 def remove(sfinfo: SfInfo, log_tables: LogTables) -> None:
@@ -54,15 +53,15 @@ def move_tmp(stack: list[SfInfo], policies: Policies, log_tables: LogTables, rem
     return write_logs
 
 
-def set_filepaths(fp: FilePaths, config: dict[str, Any], root_folder: Path) -> None:
+def set_filepaths(fp: FilePaths, root_folder: Path, tmp_dir: Path | None = None) -> None:
     if root_folder.is_file():
         root_folder = Path(f"{root_folder.parent}_{root_folder.stem}")
-    fp.TMP_DIR = Path(config["paths"]["TMP_DIR"])
-    if not fp.TMP_DIR.is_absolute():
-        fp.TMP_DIR = Path(f"{root_folder}{fp.TMP_DIR}")
-    fp.LOG_J = Path(config["paths"]["LOG_J"])
-    if not fp.LOG_J.is_absolute():
-        fp.LOG_J = Path(f"{root_folder}{fp.LOG_J}")
-    fp.POLICIES_J = Path(config["paths"]["POLICIES_J"])
-    if not fp.POLICIES_J.is_absolute():
-        fp.POLICIES_J = Path(f"{root_folder}{fp.POLICIES_J}")
+
+    fp.TMP_DIR = root_folder / TMP_DIR
+    if tmp_dir:
+        fp.TMP_DIR = tmp_dir
+    if not fp.TMP_DIR.is_dir():
+        fp.TMP_DIR.mkdir(parents=True)
+
+    fp.LOGJSON = fp.TMP_DIR / LOGJSON
+    fp.POLJSON = fp.TMP_DIR / POLJSON

@@ -3,13 +3,11 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Any
 
 import pygfried
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from typer import colors, secho
 
-from fileidentification.definitions.constants import CSVFIELDS, FMT2EXT
 from fileidentification.definitions.models import (
     BasicAnalytics,
     FilePaths,
@@ -23,6 +21,7 @@ from fileidentification.definitions.models import (
     SfInfo,
     sfinfo2csv,
 )
+from fileidentification.definitions.settings import CSVFIELDS, DEFAULTPOLICIES, FMT2EXT
 from fileidentification.tasks.console_output import (
     print_diagnostic,
     print_duplicates,
@@ -47,7 +46,6 @@ class FileHandler:
         self.ba = BasicAnalytics()
         self.stack: list[SfInfo] = []
         self.fp: FilePaths = FilePaths()
-        self.config: dict[str, Any] = {}
 
     def _load_sfinfos(self, root_folder: Path) -> None:
         """
@@ -57,9 +55,9 @@ class FileHandler:
         """
         initial = True
         # if there is a log, try to read from there
-        if self.fp.LOG_J.is_file():
+        if self.fp.LOGJSON.is_file():
             initial = False
-            self.stack.extend([SfInfo(**metadata) for metadata in json.loads(self.fp.LOG_J.read_text())["files"]])
+            self.stack.extend([SfInfo(**metadata) for metadata in json.loads(self.fp.LOGJSON.read_text())["files"]])
 
         # else scan the root_folder with pygfried
         if not self.stack:
@@ -70,7 +68,7 @@ class FileHandler:
                 self.stack.extend(
                     [
                         SfInfo(**pygfried.identify(f"{f}", detailed=True)["files"][0])  # type: ignore[arg-type]
-                        for f in root_folder.rglob("*")
+                        for f in root_folder.glob("**/*")
                         if f.is_file()
                     ]
                 )
@@ -126,9 +124,8 @@ class FileHandler:
             return
 
         # default values
-        default_path = self.config["policies"]["DEFAULTPOLICIES"]
-        default_policies = self._load_policies(Path(default_path))
-        jsonfile.comment += f" using default policies {default_path}"
+        default_policies = self._load_policies(DEFAULTPOLICIES)
+        jsonfile.comment += f" using default policies {DEFAULTPOLICIES}"
         jsonfile.comment += " in strict mode" if self.mode.STRICT else ""
         jsonfile.comment += f" updating from {outpath}" if extend else ""
         self.ba.blank = []
@@ -156,13 +153,13 @@ class FileHandler:
         blank.
         """
         # default policies found and no external policies are passed
-        if not policies_path and self.fp.POLICIES_J.is_file():
+        if not policies_path and self.fp.POLJSON.is_file():
             # set default location
-            policies_path = self.fp.POLICIES_J
+            policies_path = self.fp.POLJSON
         # no default policies found or the blank option is given:
         # fallback: generate the policies with optional flag blank
         if not policies_path or blank:
-            policies_path = self.fp.POLICIES_J
+            policies_path = self.fp.POLJSON
             print_msg("... generating policies", self.mode.QUIET)
             self._gen_policies(policies_path, blank=blank)
         # load the external passed policies with option -p or default location
@@ -172,8 +169,8 @@ class FileHandler:
 
         # expand a passed policies with the filetypes found in root_folder that are not yet in the policies
         if extend and policies_path:
-            print_msg(f"... updating the filetypes in policies {self.fp.POLICIES_J}", self.mode.QUIET)
-            self._gen_policies(self.fp.POLICIES_J, extend=extend)
+            print_msg(f"... updating the filetypes in policies {self.fp.POLJSON}", self.mode.QUIET)
+            self._gen_policies(self.fp.POLJSON, extend=extend)
 
         print_fmts(list(self.ba.puid_unique), self.ba, self.policies, self.mode)
 
@@ -259,12 +256,12 @@ class FileHandler:
 
     def write_logs(self, to_csv: bool = False) -> None:
         logoutput = LogOutput(files=self.stack, errors=self.log_tables.dump_errors())
-        self.fp.LOG_J.write_text(logoutput.model_dump_json(indent=4, exclude_none=True))
+        self.fp.LOGJSON.write_text(logoutput.model_dump_json(indent=4, exclude_none=True))
 
         print_processing_errors(log_tables=self.log_tables)
 
         if to_csv:
-            with open(f"{self.fp.LOG_J}.csv", "w") as f:  # noqa: PTH123
+            with open(f"{self.fp.LOGJSON}.csv", "w") as f:  # noqa: PTH123
                 w = csv.DictWriter(f, CSVFIELDS)
                 w.writeheader()
                 [w.writerow(sfinfo2csv(el)) for el in self.stack]
@@ -289,10 +286,11 @@ class FileHandler:
         mode_verbose: bool = True,
         mode_quiet: bool = True,
         to_csv: bool = False,
+        tmp_dir: Path | None = None,
     ) -> None:
         root_folder = Path(root_folder)
         # set dirs / paths
-        set_filepaths(self.fp, self.config, root_folder)
+        set_filepaths(self.fp, root_folder, tmp_dir)
         # set the mode
         self.mode.REMOVEORIGINAL = remove_original
         self.mode.VERBOSE = mode_verbose
