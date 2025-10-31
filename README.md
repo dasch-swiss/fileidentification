@@ -252,7 +252,7 @@ Append filetypes found in the directory to the custom policies if they are missi
 new policies json.
 
 `-s` | `--strict`  
-Move the files whose file format are not listed in the policies file to the folder _REMOVED
+Move the files whose format is not listed in the policies file to the folder _REMOVED
 (instead of emitting a warning).
 When used in generating policies, do not add blank policies for formats that are not mentioned in DEFAULTPOLICIES.
 
