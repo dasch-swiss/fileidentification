@@ -74,14 +74,6 @@ If the user edited auto-generated policies, the outcome of the policies can be t
 - **Log JSON**: Tracks all file operations and modifications
 - **Default Policies**: Located in `fileidentification/definitions/default_policies.json`
 
-## Configuration
-
-### App Config (`appconfig.toml`)
-
-- `DEFAULTPOLICIES`: Path to default policies JSON
-- `TMP_DIR`: Temporary directory suffix (default: `_TMP`)
-- `POLICIES_J`: Policies JSON file suffix (default: `_policies.json`)
-- `LOG_J`: Log JSON file suffix (default: `_log.json`)
 
 ### External Dependencies
 

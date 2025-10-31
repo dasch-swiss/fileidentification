@@ -12,7 +12,7 @@ fi
 # store the params
 params=("${@:2}")
 
-# check if external policies are passed and store the path
+# parse the args and store potential paths for volumes to mount in docker
 add_volumes=()
 while [ $# -gt 0 ]; do
     if [[ $1 == "-p"* ]] || [[ $1 == "-ep"* ]] || [[ $1 == "--policies-path"* ]]; then
@@ -22,6 +22,7 @@ while [ $# -gt 0 ]; do
         shift
     fi
     if [[ $1 == "--tmp-dir"* ]]; then
+        mkdir -p "$2"
         tmp_dir=$(realpath "$2")
         add_volumes+=("-v")
         add_volumes+=("$tmp_dir:$tmp_dir")

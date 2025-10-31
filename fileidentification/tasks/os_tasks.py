@@ -58,7 +58,7 @@ def set_filepaths(fp: FilePaths, root_folder: Path, tmp_dir: Path | None = None)
         root_folder = Path(f"{root_folder.parent}_{root_folder.stem}")
 
     fp.TMP_DIR = root_folder / TMP_DIR
-    if tmp_dir and tmp_dir.is_dir():
+    if tmp_dir:
         fp.TMP_DIR = tmp_dir
     if not fp.TMP_DIR.is_dir():
         fp.TMP_DIR.mkdir(parents=True)
