@@ -1,9 +1,10 @@
 import math
 
-from typer import colors, secho
 from rich import box
 from rich.console import Console
-from rich.table import Table, Style
+from rich.style import Style
+from rich.table import Table
+from typer import colors, secho
 
 from fileidentification.definitions.models import BasicAnalytics, LogMsg, LogTables, Mode, Policies
 from fileidentification.definitions.settings import FMT2EXT, FDMsg
