@@ -13,7 +13,7 @@ def remove(sfinfo: SfInfo, log_tables: LogTables) -> None:
     if not dest.parent.exists():
         dest.parent.mkdir(parents=True)
     try:
-        sfinfo.path.rename(dest)
+        shutil.move(sfinfo.path, dest)
         sfinfo.status.removed = True
     except OSError as e:
         secho(f"{e}", fg=colors.RED)
@@ -39,7 +39,7 @@ def move_tmp(stack: list[SfInfo], policies: Policies, log_tables: LogTables, rem
                 abs_dest = Path(abs_dest.parent, f"{sfinfo.filename.stem}_{sfinfo.md5[:6]}{sfinfo.filename.suffix}")
             # move the file
             try:
-                sfinfo.filename.rename(abs_dest)
+                shutil.move(sfinfo.filename, abs_dest)
                 if sfinfo.filename.parent.is_dir():
                     shutil.rmtree(sfinfo.filename.parent)
                 # set relative path in sfinfo.filename, set flags
