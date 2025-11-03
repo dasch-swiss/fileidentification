@@ -1,5 +1,9 @@
 import math
 
+from rich import box
+from rich.console import Console
+from rich.style import Style
+from rich.table import Table
 from typer import colors, secho
 
 from fileidentification.definitions.models import BasicAnalytics, LogMsg, LogTables, Mode, Policies
@@ -16,31 +20,31 @@ def print_siegfried_errors(ba: BasicAnalytics) -> None:
 def print_fmts(puids: list[str], ba: BasicAnalytics, policies: Policies, mode: Mode) -> None:
     if mode.QUIET:
         return
-    secho("\n----------- file formats -----------\n", bold=True)
-    secho(
-        f"{'no. of files': <13} | {'combined size': <14} | {'fmt type': <10} | {'policy': <10} | {'convert': <10} | {'format name'}",
-        bold=True,
-    )
+    table = Table(title="", box=box.SIMPLE)
+    table.add_column("PUID")
+    table.add_column("Format Name")
+    table.add_column("File Count")
+    table.add_column("Combined Size")
+    table.add_column("Policy")
+
     for puid in puids:
         bytes_size: int = 0
         for sfinfo in ba.puid_unique[puid]:
             bytes_size += sfinfo.filesize
-        ba.total_size[puid] = bytes_size
         size = _format_bite_size(bytes_size)
-        nbr, fmtname = len(ba.puid_unique[puid]), f"{FMT2EXT[puid]['name']}"
+        po = ""
+        style = Style(color=colors.WHITE)
         if puid not in policies:
-            pn = "missing"
-            rm = "remove" if mode.STRICT else ""
-            secho(f"{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {rm: <10} | {fmtname}", fg=colors.RED)
+            po = "missing"
+            style = Style(color=colors.RED)
         if puid in policies and not policies[puid].accepted:
-            ubin = policies[puid].bin
-            pn = ""
-            secho(f"{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {ubin: <10} | {fmtname}", fg=colors.YELLOW)
-        if puid in policies and policies[puid].accepted:
-            pn = ""
-            if ba.blank and puid in ba.blank:
-                pn = "blank"
-            secho(f"{nbr: <13} | {size: <14} | {puid: <10} | {pn: <10} | {'': <10} | {fmtname}")
+            po = policies[puid].bin
+            style = Style(color=colors.YELLOW)
+        if ba.blank and puid in ba.blank:
+            po = "blank"
+        table.add_row(puid, f"{FMT2EXT[puid]['name']}", f"{len(ba.puid_unique[puid])}", size, po, style=style)
+    console = Console()
+    console.print(table)
 
 
 def print_diagnostic(log_tables: LogTables, mode: Mode) -> None:

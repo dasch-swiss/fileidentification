@@ -112,7 +112,6 @@ class BasicAnalytics(BaseModel):
     filehashes: dict[str, list[Path]] = Field(default_factory=dict)
     puid_unique: dict[str, list[SfInfo]] = Field(default_factory=dict)
     siegfried_errors: list[SfInfo] = Field(default_factory=list)
-    total_size: dict[str, int] = Field(default_factory=dict)
     blank: list[str] | None = None
 
     def append(self, sfinfo: SfInfo) -> None:
