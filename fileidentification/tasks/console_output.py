@@ -39,9 +39,9 @@ def print_fmts(puids: list[str], ba: BasicAnalytics, policies: Policies, mode: M
             style = Style(color=colors.RED)
         if puid in policies and not policies[puid].accepted:
             po = policies[puid].bin
-            style = Style(color=colors.YELLOW)
         if ba.blank and puid in ba.blank:
             po = "blank"
+            style = Style(color=colors.YELLOW)
         table.add_row(puid, f"{FMT2EXT[puid]['name']}", f"{len(ba.puid_unique[puid])}", size, po, style=style)
     console = Console()
     console.print(table)
