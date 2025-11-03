@@ -252,7 +252,7 @@ Append filetypes found in the directory to the custom policies if they are missi
 new policies json.
 
 `-s` | `--strict`  
-Move the files whose file format are not listed in the policies file to the folder _REMOVED
+Move the files whose format is not listed in the policies file to the folder _REMOVED
 (instead of emitting a warning).
 When used in generating policies, do not add blank policies for formats that are not mentioned in DEFAULTPOLICIES.
 
@@ -269,7 +269,7 @@ Get output as CSV, in addition to the log.json
 Re-convert the files that failed during file conversion
 
 `--tmp-dir`
-use a custom tmp directory instead of the default `_fileIdentification`
+Use a custom tmp directory instead of the default `_fileIdentification`
 
 ### Examples
 
@@ -277,7 +277,7 @@ use a custom tmp directory instead of the default `_fileIdentification`
 
 - load an external policies JSON
 - probe the files in verbose mode
-- apply the policies (in strict mode, i.e. remove the files whose file type are not listed in the policies)
+- apply the policies (in strict mode, i.e. remove the files whose file type is not listed in the policies)
 - remove temporary files and get a simpler CSV output
 
 `fidr path/to/directory --tmp-dir path/to/tmp_dir -ivarx`
@@ -289,14 +289,14 @@ use a custom tmp directory instead of the default `_fileIdentification`
 
 ## Updating the PUIDs
 
-Update the file format names and extensions of the PUIDs according to nationalarchives.gov.uk
+Update the file format names and extensions of the PUIDs according to <https://www.nationalarchives.gov.uk/>.
 
 ```bash
 uv sync --extra update_fmt && uv run update.py
 ```
 
 creates an updated version of `fileidentification/definitions/fmt2ext.json`.
-rebuild the docker image when using the docker based version
+If you use the Docker-based version, don't forget to rebuild the Docker image after updating the PUIDs.
 
 ## Useful Links
 
