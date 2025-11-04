@@ -37,7 +37,7 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 - **Generate policies for your files:**
 
     `fidr path/to/directory`
-
+    
     this creates a folder `_fileIdentification` inside the target directory with a `_log.json` and a `_policies.json`
 
     Optionally review and edit `_policies.json` to customize conversion rules. If edited, optionally test the outcome
@@ -108,7 +108,6 @@ This generates a folder `_fileIdentification` inside the target directory with t
 that was encountered in the folder according to the default policies. Edit it to customize conversion rules.
 
 ### Inspect The Files
-
 (`-i` | `--inspect`)
 
 `uv run identify.py path/to/directory -i`
@@ -120,7 +119,6 @@ Optionally add the flag `-v` (`--verbose`) for more detailed inspection (see **O
 NOTE: Currently only audio/video and image files are inspected.
 
 ### Convert The Files According to the Policies
-
 (`-a` | `--apply`)
 
 `uv run identify.py path/to/directory -a`
@@ -131,7 +129,6 @@ The converted files are temporarily stored in `_fileIdentification` with the log
 of the program used as log.txt next to it.
 
 ### Clean Up Temporary Files
-
 (`-r` | `--remove-tmp`)
 
 `uv run identify.py path/to/directory -r`
@@ -270,7 +267,7 @@ Get output as CSV, in addition to the log.json
 `--convert`  
 Re-convert the files that failed during file conversion
 
-`--tmp-dir`  
+`--tmp-dir` 
 Use a custom tmp directory instead of the default `_fileIdentification`
 
 ### Examples
@@ -284,8 +281,7 @@ is not listed in the external policies
 - apply the policies (in strict mode, i.e. remove the files whose file type is not listed in the policies)
 - remove temporary files
 
-Use case: your files are on a external storage drive and you might limited diskspace left
-and want to only keep the converted files
+Use case: your files are on a external storage drive and you want to 
 
 `fidr path/to/directory --tmp-dir path/to/tmp_dir -ivarx`
 
