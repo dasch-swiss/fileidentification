@@ -36,7 +36,9 @@ def print_fmts(puids: list[str], ba: BasicAnalytics, policies: Policies, mode: M
         style = Style(color=colors.WHITE)
         if puid not in policies:
             po = "missing"
-            style = Style(color=colors.RED)
+            style = Style(color=colors.YELLOW)
+            if mode.STRICT:
+                style = Style(color=colors.RED)
         if puid in policies and not policies[puid].accepted:
             po = policies[puid].bin
         if ba.blank and puid in ba.blank:

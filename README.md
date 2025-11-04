@@ -40,11 +40,8 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
     
     this creates a folder `_fileIdentification` inside the target directory with a `_log.json` and a `_policies.json`
 
-    - **Review generated policies:**
-
-        Edit `_policies.json` to customize conversion rules. Optionally, test the outcome of the edited policies:
-
-        `fidr path/to/directory -t`
+    Optionally review and edit `_policies.json` to customize conversion rules. If edited, optionally test the outcome
+    with: `fidr path/to/directory -t`
 
 - **Test the files on errors and apply the policies:**
 
@@ -110,7 +107,8 @@ This generates a folder `_fileIdentification` inside the target directory with t
 **_policies.json** : A file conversion protocol for each file format
 that was encountered in the folder according to the default policies. Edit it to customize conversion rules.
 
-### Inspect The Files (`-i` | `--inspect`)
+### Inspect The Files
+(`-i` | `--inspect`)
 
 `uv run identify.py path/to/directory -i`
 
@@ -120,7 +118,8 @@ Optionally add the flag `-v` (`--verbose`) for more detailed inspection (see **O
 
 NOTE: Currently only audio/video and image files are inspected.
 
-### Convert The Files According to the Policies (`-a` | `--apply`)
+### Convert The Files According to the Policies
+(`-a` | `--apply`)
 
 `uv run identify.py path/to/directory -a`
 
@@ -129,7 +128,8 @@ files into their target file format.
 The converted files are temporarily stored in `_fileIdentification` with the log output
 of the program used as log.txt next to it.
 
-### Clean Up Temporary Files (`-r` | `--remove-tmp`)
+### Clean Up Temporary Files
+(`-r` | `--remove-tmp`)
 
 `uv run identify.py path/to/directory -r`
 
@@ -268,17 +268,21 @@ Get output as CSV, in addition to the log.json
 `--convert`  
 Re-convert the files that failed during file conversion
 
-`--tmp-dir`
+`--tmp-dir` 
 Use a custom tmp directory instead of the default `_fileIdentification`
 
 ### Examples
 
-`fidr path/to/directory -ivasr -p path/to/external_policies.json --csv`
+Use case: you have defined a set of rules in an external policies file and want to remove files of any format that
+is not listed in the external policies
+
+`fidr path/to/directory -asr -p path/to/external_policies.json`
 
 - load an external policies JSON
-- probe the files in verbose mode
 - apply the policies (in strict mode, i.e. remove the files whose file type is not listed in the policies)
-- remove temporary files and get a simpler CSV output
+- remove temporary files
+
+Use case: your files are on a external storage drive and you want to 
 
 `fidr path/to/directory --tmp-dir path/to/tmp_dir -ivarx`
 
