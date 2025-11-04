@@ -135,7 +135,6 @@ of the program used as log.txt next to it.
 
 Delete all temporary files and folders and move the converted files next to their parents.
 
-
 ### Log
 
 The **_log.json** takes track of all modifications in the target folder.  
@@ -289,7 +288,6 @@ Use case: your files are on a external storage drive and you want to
 - use a custom tmp_dir to write files to (instead of the default `path/to/directory/_fileIdentification`)
 - probe the files in verbose mode and apply the policies
 - remove temporary files and the parents of the converted files
-
 
 ## Updating the PUIDs
 
