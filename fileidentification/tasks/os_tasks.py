@@ -54,12 +54,15 @@ def move_tmp(stack: list[SfInfo], policies: Policies, log_tables: LogTables, rem
 
 
 def set_filepaths(fp: FilePaths, root_folder: Path, tmp_dir: Path | None = None) -> None:
-    if root_folder.is_file():
-        root_folder = Path(f"{root_folder.parent}_{root_folder.stem}")
 
     fp.TMP_DIR = root_folder / TMP_DIR
+    # if its a file, use stem as tmp dir
+    if root_folder.is_file():
+        fp.TMP_DIR = root_folder.parent / root_folder.stem
+    # if tmp dir is passed externally
     if tmp_dir:
         fp.TMP_DIR = tmp_dir
+
     if not fp.TMP_DIR.is_dir():
         fp.TMP_DIR.mkdir(parents=True)
 
