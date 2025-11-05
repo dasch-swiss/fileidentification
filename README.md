@@ -4,12 +4,12 @@ A python CLI to identify file formats and bulk convert files.
 It is designed for digital preservation workflows and is basically a python wrapper around several programs.
 It uses [pygfried](https://pypi.org/project/pygfried/)
 (a CPython extension for [siegfried](https://www.itforarchivists.com/siegfried)),
-ffmpeg, imagemagick (optionally inkscape) and LibreOffice, so it's recommended to have those installed.
+ffmpeg, imagemagick (optionally inkscape) and LibreOffice.
 If you are not using fileidentification a lot and don't want to install these programs,
 you can run the script in a docker container.
 There is a dockerfile ready, the current docker image is still heavy though (1.1 G).
 
-Most probable use case might be when you need to test and possibly convert a huge amount of files
+Most probable use case might be when you need to test and possibly convert a huge number of files
 and you don't know in advance what file types you are dealing with.
 It features:
 
@@ -52,7 +52,10 @@ See **Options**, **Examples** below for more available flags.
 
 ### Manual Installation on Your System
 
-Install ffmpeg, imagemagick and LibreOffice, if not already installed:
+Install ffmpeg (used to check/convert video and audio files),
+imagemagick (used to check/convert images),
+LibreOffice (used to convert Office documents and PDFs),
+and ghostscript (used by imagemagick when dealing with PDFs):
 
 #### MacOS (using Homebrew)
 
@@ -107,8 +110,7 @@ This generates a folder `_fileIdentification` inside the target directory with t
 **_policies.json** : A file conversion protocol for each file format
 that was encountered in the folder according to the default policies. Edit it to customize conversion rules.
 
-### Inspect The Files
-(`-i` | `--inspect`)
+### Inspect The Files (`-i` | `--inspect`)
 
 `uv run identify.py path/to/directory -i`
 
@@ -118,8 +120,7 @@ Optionally add the flag `-v` (`--verbose`) for more detailed inspection (see **O
 
 NOTE: Currently only audio/video and image files are inspected.
 
-### Convert The Files According to the Policies
-(`-a` | `--apply`)
+### Convert The Files According to the Policies (`-a` | `--apply`)
 
 `uv run identify.py path/to/directory -a`
 
@@ -128,8 +129,7 @@ files into their target file format.
 The converted files are temporarily stored in `_fileIdentification` with the log output
 of the program used as log.txt next to it.
 
-### Clean Up Temporary Files
-(`-r` | `--remove-tmp`)
+### Clean Up Temporary Files (`-r` | `--remove-tmp`)
 
 `uv run identify.py path/to/directory -r`
 
@@ -219,6 +219,22 @@ The script takes the smallest file for each conversion policy and converts it.
 If you just want to test a specific policy, append `f` and the puid:
 
 `uv run identify.py path/to/directory -tf fmt/XXX`
+
+### Overview table
+
+The basic command without flags generates a table with an overview of the encountered file types.
+The rows are colored according to this color code:
+
+- White: Policy taken over from default policies
+- Yellow: Blank policy template created for that filetype (you might want to edit this policy)
+  or policy missing (files of that format are skipped during processing)
+- Red: Files of that format are being removed when running with flag `-s`, `--strict`
+
+Possible values of the "Policy" column:
+
+- `ffmpeg|magick|soffice`: Files of this format are going to be converted with the indicated program
+- blank: Generated a blank policy (template)
+- missing: No policy for this file type
 
 
 ## Options
