@@ -64,7 +64,7 @@ class FileHandler:
             with Progress(
                 SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True
             ) as prog:
-                prog.add_task(description="analysing files with pygfried...", total=None)
+                prog.add_task(description="Analysing files with pygfried...", total=None)
                 self.stack.extend(
                     [
                         SfInfo(**pygfried.identify(f"{f}", detailed=True)["files"][0])  # type: ignore[arg-type]
@@ -160,16 +160,16 @@ class FileHandler:
         # fallback: generate the policies with optional flag blank
         if not policies_path or blank:
             policies_path = self.fp.POLJSON
-            print_msg("... generating policies", self.mode.QUIET)
+            print_msg("Generating policies", self.mode.QUIET)
             self._gen_policies(policies_path, blank=blank)
         # load the external passed policies with option -p or default location
         else:
-            print_msg(f"... loading policies from {policies_path}", self.mode.QUIET)
+            print_msg(f"Loading policies from {policies_path}", self.mode.QUIET)
             self._load_policies(policies_path)
 
         # expand a passed policies with the filetypes found in root_folder that are not yet in the policies
         if extend and policies_path:
-            print_msg(f"... updating the filetypes in policies {self.fp.POLJSON}", self.mode.QUIET)
+            print_msg(f"Updating the filetypes in policies {self.fp.POLJSON}", self.mode.QUIET)
             self._gen_policies(self.fp.POLJSON, extend=extend)
 
         print_fmts(list(self.ba.puid_unique), self.ba, self.policies, self.mode)
@@ -183,9 +183,9 @@ class FileHandler:
         puids = [puid] if puid else [puid for puid in self.ba.puid_unique if not self.policies[puid].accepted]
 
         if not puids:
-            print_msg("no files found that should be converted with given policies", self.mode.QUIET)
+            print_msg("No files found that should be converted with given policies", self.mode.QUIET)
         else:
-            print_msg("\n --- testing policies with a sample from the directory ---", self.mode.QUIET)
+            print_msg("\n --- Testing policies with a sample from the directory ---", self.mode.QUIET)
 
             for puid in puids:  # noqa: PLR1704
                 # we want the smallest file first for running the test
@@ -198,7 +198,7 @@ class FileHandler:
                     secho(f"You find the file with the log in {t_sfinfo.filename.parent}")
 
     def inspect(self) -> None:
-        print_msg("\nprobing the files ...", self.mode.QUIET)
+        print_msg("\nProbing the files ...", self.mode.QUIET)
         with Progress(SpinnerColumn(), transient=True) as prog:
             prog.add_task(description="", total=None)
             for sfinfo in self.stack:
@@ -208,7 +208,7 @@ class FileHandler:
         print_diagnostic(log_tables=self.log_tables, mode=self.mode)
 
     def apply_policies(self) -> None:
-        print_msg("\napplying policies ...", self.mode.QUIET)
+        print_msg("\nApplying policies ...", self.mode.QUIET)
         with Progress(SpinnerColumn(), transient=True) as prog:
             prog.add_task(description="")
             for sfinfo in self.stack:
@@ -221,10 +221,10 @@ class FileHandler:
         pending: list[SfInfo] = [sfinfo for sfinfo in self.stack if sfinfo.status.pending]
 
         if not pending:
-            print_msg("there was nothing to convert", self.mode.QUIET)
+            print_msg("There was nothing to convert", self.mode.QUIET)
             return
 
-        print_msg("\nconverting ...", self.mode.QUIET)
+        print_msg("\nConverting ...", self.mode.QUIET)
         with Progress(SpinnerColumn(), transient=True) as prog:
             prog.add_task(description="", total=None)
             for sfinfo in pending:
@@ -251,7 +251,7 @@ class FileHandler:
                 if len(os.listdir(path)) == 0:  # noqa: PTH208
                     Path(path).rmdir()
         if write_logs:
-            print_msg(f"\nmoved the files from {self.fp.TMP_DIR.stem} to {root_folder.stem} ...", self.mode.QUIET)
+            print_msg(f"\nMoved the files from {self.fp.TMP_DIR.stem} to {root_folder.stem} ...", self.mode.QUIET)
             self.write_logs(to_csv=to_csv)
 
     def write_logs(self, to_csv: bool = False) -> None:
