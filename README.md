@@ -298,8 +298,8 @@ To apply it directly:
 - apply the policies (in strict mode, i.e. remove the files whose file type is not listed in the policies)
 - remove temporary files  
 
-Use case: your files are on an external storage drive and you might have limited diskspace left
-and want to only keep the converted files
+Use case: Your files are on an external storage drive and you might have limited diskspace left
+and want to only keep the converted files.
 
 `fidr path/to/directory --tmp-dir path/to/tmp_dir -ivarx`
 
