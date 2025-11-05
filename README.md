@@ -54,8 +54,8 @@ See **Options**, **Examples** below for more available flags.
 
 Install ffmpeg (used to check/convert video and audio files),
 imagemagick (used to check/convert images),
-LibreOffice (used to check/convert MS Office documents and PDFs),
-and ghostscript (used to convert PDFs):
+LibreOffice (used to convert Office documents and PDFs),
+and ghostscript (used by imagemagick when dealing with PDFs):
 
 #### MacOS (using Homebrew)
 
