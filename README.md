@@ -4,12 +4,12 @@ A python CLI to identify file formats and bulk convert files.
 It is designed for digital preservation workflows and is basically a python wrapper around several programs.
 It uses [pygfried](https://pypi.org/project/pygfried/)
 (a CPython extension for [siegfried](https://www.itforarchivists.com/siegfried)),
-ffmpeg, imagemagick (optionally inkscape) and LibreOffice, so it's recommended to have those installed.
+ffmpeg, imagemagick (optionally inkscape) and LibreOffice.
 If you are not using fileidentification a lot and don't want to install these programs,
 you can run the script in a docker container.
 There is a dockerfile ready, the current docker image is still heavy though (1.1 G).
 
-Most probable use case might be when you need to test and possibly convert a huge amount of files
+Most probable use case might be when you need to test and possibly convert a huge number of files
 and you don't know in advance what file types you are dealing with.
 It features:
 
@@ -52,7 +52,10 @@ See **Options**, **Examples** below for more available flags.
 
 ### Manual Installation on Your System
 
-Install ffmpeg, imagemagick and LibreOffice, if not already installed:
+Install ffmpeg (used to check/convert video and audio files),
+imagemagick (used to check/convert images),
+LibreOffice (used to check/convert MS Office documents and PDFs),
+and ghostscript (used to convert PDFs):
 
 #### MacOS (using Homebrew)
 
