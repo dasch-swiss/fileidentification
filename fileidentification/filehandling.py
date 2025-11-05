@@ -300,12 +300,6 @@ class FileHandler:
         self._load_sfinfos(root_folder)
         # generate policies
         self._manage_policies(policies_path, blank, extend)
-        # convert caveat
-        if convert:
-            self.convert()
-        # remove tmp caveat
-        if remove_tmp:
-            self.remove_tmp(root_folder, to_csv)
         # probing the files
         if inspect:
             self.inspect()
@@ -317,6 +311,8 @@ class FileHandler:
         # apply policies
         if apply:
             self.apply_policies()
+            self.convert()
+        if convert:
             self.convert()
         # remove tmp files
         if remove_tmp:
