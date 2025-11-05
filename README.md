@@ -45,7 +45,7 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
     `fidr path/to/directory -iar`
 
 The first argument has to be the root folder of your files to process, otherwise combine flags / arguments as you wish.  
--> See **Options**, **Examples** below for more available flags.
+See **Options** and **Examples** below for more available flags.
 
 ### Manual Installation on Your System
 
