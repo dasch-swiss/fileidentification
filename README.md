@@ -18,7 +18,6 @@ It features:
 - file conversion with ffmpeg, imagemagick and LibreOffice using a JSON file as a protocol
 - detailed logging
 
-
 ## Installation
 
 ### Docker-based
@@ -34,21 +33,19 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 
 #### Quickstart for Docker-based Installation
 
-- **Generate policies for your files:**
+1. **Generate policies for your files:**
 
     `fidr path/to/directory`
-    
-    this creates a folder `_fileIdentification` inside the target directory with a `_log.json` and a `_policies.json`
 
-    Optionally review and edit `_policies.json` to customize conversion rules. If edited, optionally test the outcome
-    with: `fidr path/to/directory -t`
+    this creates a folder `_fileIdentification` inside the target directory with a `_policies.json` file. Optionally review
+    and edit it to customize conversion rules.
 
-- **Test the files on errors and apply the policies:**
+2. **Test the files on errors and apply the policies:**
 
     `fidr path/to/directory -iar`
 
-The first argument has to be the root folder of your files to process, otherwise combine flags / arguments as you wish.
-See **Options**, **Examples** below for more available flags.
+The first argument has to be the root folder of your files to process, otherwise combine flags / arguments as you wish.  
+-> See **Options**, **Examples** below for more available flags.
 
 ### Manual Installation on Your System
 
@@ -96,8 +93,7 @@ This creates a venv and installs all necessary python dependencies:
 uv run identify.py --help
 ```
 
-
-## Single Execution Steps Explained
+## Main Tasks Explained
 
 ### Detect File Formats - Generate Conversion Policies
 
@@ -110,7 +106,24 @@ This generates a folder `_fileIdentification` inside the target directory with t
 **_policies.json** : A file conversion protocol for each file format
 that was encountered in the folder according to the default policies. Edit it to customize conversion rules.
 
-### Inspect The Files (`-i` | `--inspect`)
+#### Overview table
+
+A console output prints a table with an overview of the encountered file formats.
+The rows are colored according to this color code:
+
+- White: Files of that format are processed according to the given policy
+- Yellow: Files of that format are skipped (either blank policy or policy is missing)
+- Red: Files of that format are being removed (when run with flag `-s`, `--strict`)
+
+Possible values of the "Policy" column:
+
+- `ffmpeg|magick|soffice`: Files of this format are going to be converted with the indicated program
+- blank: Generated a blank policy (template)
+- missing: No policy for this file type
+
+### Inspect The Files
+
+(`-i` | `--inspect`)
 
 `uv run identify.py path/to/directory -i`
 
@@ -120,16 +133,20 @@ Optionally add the flag `-v` (`--verbose`) for more detailed inspection (see **O
 
 NOTE: Currently only audio/video and image files are inspected.
 
-### Convert The Files According to the Policies (`-a` | `--apply`)
+### Convert The Files According to the Policies
+
+(`-a` | `--apply`)
 
 `uv run identify.py path/to/directory -a`
 
-Apply the policies defined in `_fileIdentification/_policies.json` and convert
+Apply the policies defined in `_fileIdentification/_policies.json` (or in the policies passed with `-p`) and convert
 files into their target file format.
 The converted files are temporarily stored in `_fileIdentification` with the log output
 of the program used as log.txt next to it.
 
-### Clean Up Temporary Files (`-r` | `--remove-tmp`)
+### Clean Up Temporary Files
+
+(`-r` | `--remove-tmp`)
 
 `uv run identify.py path/to/directory -r`
 
@@ -143,7 +160,6 @@ Iterations of file conversions such as A -> B, B -> C, ... are logged in the sam
 
 If you wish a simpler csv output, you can add the flag `--csv` anytime when you run the script,
 which maps the `_log.json` to a csv.
-
 
 ## Advanced Usage
 
@@ -220,23 +236,6 @@ If you just want to test a specific policy, append `f` and the puid:
 
 `uv run identify.py path/to/directory -tf fmt/XXX`
 
-### Overview table
-
-The basic command without flags generates a table with an overview of the encountered file types.
-The rows are colored according to this color code:
-
-- White: Policy taken over from default policies
-- Yellow: Blank policy template created for that filetype (you might want to edit this policy)
-  or policy missing (files of that format are skipped during processing)
-- Red: Files of that format are being removed when running with flag `-s`, `--strict`
-
-Possible values of the "Policy" column:
-
-- `ffmpeg|magick|soffice`: Files of this format are going to be converted with the indicated program
-- blank: Generated a blank policy (template)
-- missing: No policy for this file type
-
-
 ## Options
 
 `-i` | `--inspect`  
@@ -263,7 +262,7 @@ Load a custom policies JSON file instead of generating one out of the default po
 `-e` | `--extend-policies`  
 Use with `-p`:
 
-Append filetypes found in the directory to the custom policies if they are missing in it and generate a 
+Append filetypes found in the directory to the custom policies if they are missing in it and generate a
 new policies json.
 
 `-s` | `--strict`  
@@ -283,21 +282,24 @@ Get output as CSV, in addition to the log.json
 `--convert`  
 Re-convert the files that failed during file conversion
 
-`--tmp-dir` 
+`--tmp-dir`  
 Use a custom tmp directory instead of the default `_fileIdentification`
 
 ### Examples
 
 Use case: you have defined a set of rules in an external policies file and want to remove files of any format that
-is not listed in the external policies
+is not listed in the external policies.  
+To get an overview: `fidr path/to/directory -s -p path/to/external_policies.json`  
+To apply it directly:
 
 `fidr path/to/directory -asr -p path/to/external_policies.json`
 
 - load an external policies JSON
 - apply the policies (in strict mode, i.e. remove the files whose file type is not listed in the policies)
-- remove temporary files
+- remove temporary files  
 
-Use case: your files are on a external storage drive and you want to 
+Use case: your files are on an external storage drive and you might have limited diskspace left
+and want to only keep the converted files
 
 `fidr path/to/directory --tmp-dir path/to/tmp_dir -ivarx`
 
