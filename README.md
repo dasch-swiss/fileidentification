@@ -37,8 +37,8 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 
     `fidr path/to/directory`
 
-    this creates a folder `_fileIdentification` inside the target directory with a `_policies.json` file. Optionally review
-    and edit it to customize conversion rules.
+    This creates a folder `_fileIdentification` inside the target directory with a `_policies.json` file. 
+    Optionally review and edit it to customize conversion rules.
 
 2. **Test the files on errors and apply the policies:**
 
