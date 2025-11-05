@@ -108,7 +108,7 @@ that was encountered in the folder according to the default policies. Edit it to
 
 #### Overview table
 
-A console output prints a table with an overview of the encountered file formats.
+In the console output there is a table with an overview of the encountered file formats.
 The rows are colored according to this color code:
 
 - White: Files of that format are processed according to the given policy
