@@ -69,9 +69,7 @@ def update_signatures() -> None:
 
     soup = BeautifulSoup(res.content, "html.parser")
     versions = [
-        el.get("href")
-        for el in soup.find_all("a")
-        if el.get("href") and el.get("href").startswith(DroidSigURL.CDN)
+        el.get("href") for el in soup.find_all("a") if el.get("href") and el.get("href").startswith(DroidSigURL.CDN)
     ]
 
     link = sorted(versions)[-1]
