@@ -203,6 +203,9 @@ class FileHandler:
                 report_only(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
 
         print_diagnostic(log_tables=self.log_tables, mode=self.mode)
+        self.fp.POLJSON.unlink()
+        self.fp.TMP_DIR.rmdir()
+        sys.exit(0)
 
     def inspect(self) -> None:
         print_msg("\nProbing the files ...", self.mode.QUIET)

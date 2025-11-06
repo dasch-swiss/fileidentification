@@ -95,7 +95,7 @@ def main(
     mode_quiet: Annotated[bool, typer.Option("--quiet", "-q", help="just print errors and warnings")] = False,
     to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False,
     tmp_dir: Annotated[Path | None, typer.Option("--tmp-dir", help="set a custom tmp directory")] = None,
-    report_only: Annotated[bool, typer.Option("--report-only", help="just get an report about the files")] = False,
+    report_only: Annotated[bool, typer.Option("--report-only", help="just print out a report about the files")] = False,
 ) -> None:
     fh = FileHandler()
     fh.run(
