@@ -75,7 +75,7 @@ class PCMsg(StrEnum):
     """policy log messages"""
 
     FALLBACK = "fmt not detected, falling back on ext"
-    NOTINPOLICIES = "file format is not in policies. running strict mode: file removed"
+    NOTINPOLICIES = "file format is not in policies. running strict mode"
     SKIPPED = "file format is not in policies, skipped"
 
 
@@ -83,7 +83,7 @@ class FDMsg(StrEnum):
     """file diagnostic message"""
 
     EMPTYSOURCE = "empty source"
-    ERROR = "file is corrupt: removed"
+    ERROR = "file is corrupt"
     WARNING = "file has warnings"
     EXTMISMATCH = "extension mismatch"
 

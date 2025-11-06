@@ -15,6 +15,7 @@ def remove(sfinfo: SfInfo, log_tables: LogTables) -> None:
     try:
         shutil.move(sfinfo.path, dest)
         sfinfo.status.removed = True
+        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg="file removed"))
     except OSError as e:
         secho(f"{e}", fg=colors.RED)
         log_tables.errors.append((LogMsg(name="filehandler", msg=str(e)), sfinfo))

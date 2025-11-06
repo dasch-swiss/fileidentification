@@ -31,7 +31,7 @@ from fileidentification.tasks.console_output import (
     print_siegfried_errors,
 )
 from fileidentification.tasks.conversion import convert_file
-from fileidentification.tasks.inspection import inspect_file
+from fileidentification.tasks.inspection import inspect_file, report_only
 from fileidentification.tasks.os_tasks import move_tmp, set_filepaths
 from fileidentification.tasks.policies import apply_policy
 
@@ -197,6 +197,13 @@ class FileHandler:
                     secho(f"{cmd}", fg=colors.GREEN, bold=True)
                     secho(f"You find the file with the log in {t_sfinfo.filename.parent}")
 
+    def report(self) -> None:
+        for sfinfo in self.stack:
+            if not (sfinfo.status.removed or sfinfo.dest):
+                report_only(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
+
+        print_diagnostic(log_tables=self.log_tables, mode=self.mode)
+
     def inspect(self) -> None:
         print_msg("\nProbing the files ...", self.mode.QUIET)
         with Progress(SpinnerColumn(), transient=True) as prog:
@@ -287,6 +294,7 @@ class FileHandler:
         mode_quiet: bool = True,
         to_csv: bool = False,
         tmp_dir: Path | None = None,
+        report_only: bool = False,
     ) -> None:
         root_folder = Path(root_folder)
         # set dirs / paths
@@ -301,6 +309,9 @@ class FileHandler:
         # generate policies
         self._manage_policies(policies_path, blank, extend)
         # probing the files
+        if report_only:
+            self.mode.VERBOSE = True
+            self.report()
         if inspect:
             self.inspect()
         # policies testing

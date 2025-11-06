@@ -10,36 +10,17 @@ from fileidentification.wrappers.imagemagick import imagemagick_inspect
 
 
 def inspect_file(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, verbose: bool) -> None:
-    puid = sfinfo.processed_as
-    if not puid:
-        remove(sfinfo, log_tables)
-        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg="file removed"))
-        msg = LogMsg(name="filehandler", msg=f"{FPMsg.PUIDFAIL} for {sfinfo.filename}")
-        log_tables.errors.append((msg, sfinfo))
-        return
 
-    if sfinfo.errors == FDMsg.EMPTYSOURCE:
+    resp: FDMsg | None = report_only(sfinfo, policies, log_tables, verbose)
+    if resp == FDMsg.ERROR:
         remove(sfinfo, log_tables)
-        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=f"{FDMsg.ERROR}"))
-        log_tables.diagnostics_add(sfinfo, FDMsg.EMPTYSOURCE)
-        return
-
-    # case where there is an extension missmatch, rename the file if there is a unique ext
-    if sfinfo.matches[0]["warning"] == FDMsg.EXTMISMATCH:
-        if len(FMT2EXT[puid]["file_extensions"]) == 1:
-            ext = "." + FMT2EXT[puid]["file_extensions"][-1]
+    if resp == FDMsg.EXTMISMATCH:
+        if len(FMT2EXT[sfinfo.processed_as]["file_extensions"]) == 1:  # type: ignore[index]
+            ext = "." + FMT2EXT[sfinfo.processed_as]["file_extensions"][-1]  # type: ignore[index]
             _rename(sfinfo, ext, log_tables)
         else:
-            msg_txt = f"expecting one of the following ext: {list(FMT2EXT[puid]['file_extensions'])}"
-            sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msg_txt))
-            secho(f"\nWARNING: you should manually rename {sfinfo.filename}\n{msg_txt}", fg=colors.YELLOW)
-        log_tables.diagnostics_add(sfinfo, FDMsg.EXTMISMATCH)
-
-    # check if the file throws any errors while open/processing it with the respective bin
-    if _content_errors(sfinfo, policies, log_tables, verbose):
-        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=f"{FDMsg.ERROR}"))
-        remove(sfinfo, log_tables)
-        return
+            secho(f"\nWARNING: you should manually rename {sfinfo.filename}", fg=colors.YELLOW)
+            secho(f"{sfinfo.processing_logs[0].msg}", fg=colors.YELLOW)
 
 
 def _rename(sfinfo: SfInfo, ext: str, log_tables: LogTables) -> None:
@@ -109,3 +90,28 @@ def _content_errors(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, v
         log_tables.diagnostics_add(sfinfo, FDMsg.WARNING)
         return False
     return False
+
+
+def report_only(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, verbose: bool) -> FDMsg | None:
+    puid = sfinfo.processed_as
+    if not puid:
+        msg = LogMsg(name="filehandler", msg=f"{FPMsg.PUIDFAIL} for {sfinfo.filename}")
+        log_tables.errors.append((msg, sfinfo))
+        return None
+
+    if sfinfo.errors == FDMsg.EMPTYSOURCE:
+        log_tables.diagnostics_add(sfinfo, FDMsg.ERROR)
+        return FDMsg.ERROR
+
+    # case where there is an extension missmatch, rename the file if there is a unique ext
+    if sfinfo.matches[0]["warning"] == FDMsg.EXTMISMATCH:
+        msg_txt = f"expecting one of the following ext: {list(FMT2EXT[puid]['file_extensions'])}"
+        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msg_txt))
+        log_tables.diagnostics_add(sfinfo, FDMsg.EXTMISMATCH)
+        return FDMsg.EXTMISMATCH
+
+    # check if the file throws any errors while open/processing it with the respective bin
+    if _content_errors(sfinfo, policies, log_tables, verbose):
+        return FDMsg.ERROR
+
+    return None

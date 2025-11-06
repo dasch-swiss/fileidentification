@@ -64,7 +64,7 @@ def print_diagnostic(log_tables: LogTables, mode: Mode) -> None:
                     secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                     _print_logs(sfinfo.processing_logs)
             if FDMsg.EXTMISMATCH.name in log_tables.diagnostics:
-                secho("\n----------- Extension missmatch -----------", bold=True)
+                secho("\n----------- Extension mismatch -----------", bold=True)
                 for sfinfo in log_tables.diagnostics[FDMsg.EXTMISMATCH.name]:
                     secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                     _print_logs(sfinfo.processing_logs)
