@@ -49,7 +49,7 @@ def print_fmts(puids: list[str], ba: BasicAnalytics, policies: Policies, mode: M
     console.print(table)
 
 
-def print_diagnostic(log_tables: LogTables, mode: Mode) -> None:
+def print_diagnostic(log_tables: LogTables, mode: Mode) -> None:  # noqa: C901
     # lists all corrupt files with the respective errors thrown
     if log_tables.diagnostics:
         if FDMsg.ERROR.name in log_tables.diagnostics:
@@ -57,13 +57,13 @@ def print_diagnostic(log_tables: LogTables, mode: Mode) -> None:
             for sfinfo in log_tables.diagnostics[FDMsg.ERROR.name]:
                 secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                 _print_logs(sfinfo.processing_logs)
-        if mode.VERBOSE and not mode.QUIET:
+        if mode.VERBOSE and not mode.QUIET:  # noqa: SIM102
             if FDMsg.WARNING.name in log_tables.diagnostics:
                 secho("\n----------- Warnings -----------", bold=True)
                 for sfinfo in log_tables.diagnostics[FDMsg.WARNING.name]:
                     secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                     _print_logs(sfinfo.processing_logs)
-        if not mode.QUIET:
+        if not mode.QUIET:  # noqa: SIM102
             if FDMsg.EXTMISMATCH.name in log_tables.diagnostics:
                 secho("\n----------- Extension missmatch -----------", bold=True)
                 for sfinfo in log_tables.diagnostics[FDMsg.EXTMISMATCH.name]:
