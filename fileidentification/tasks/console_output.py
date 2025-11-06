@@ -49,7 +49,7 @@ def print_fmts(puids: list[str], ba: BasicAnalytics, policies: Policies, mode: M
     console.print(table)
 
 
-def print_diagnostic(log_tables: LogTables, mode: Mode) -> None:  # noqa: C901
+def print_diagnostic(log_tables: LogTables, mode: Mode) -> None:
     # lists all corrupt files with the respective errors thrown
     if log_tables.diagnostics:
         if FDMsg.ERROR.name in log_tables.diagnostics:
@@ -57,19 +57,17 @@ def print_diagnostic(log_tables: LogTables, mode: Mode) -> None:  # noqa: C901
             for sfinfo in log_tables.diagnostics[FDMsg.ERROR.name]:
                 secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                 _print_logs(sfinfo.processing_logs)
-        if mode.VERBOSE and not mode.QUIET:  # noqa: SIM102
+        if mode.VERBOSE and not mode.QUIET:
             if FDMsg.WARNING.name in log_tables.diagnostics:
                 secho("\n----------- Warnings -----------", bold=True)
                 for sfinfo in log_tables.diagnostics[FDMsg.WARNING.name]:
                     secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                     _print_logs(sfinfo.processing_logs)
-        if not mode.QUIET:  # noqa: SIM102
             if FDMsg.EXTMISMATCH.name in log_tables.diagnostics:
                 secho("\n----------- Extension mismatch -----------", bold=True)
                 for sfinfo in log_tables.diagnostics[FDMsg.EXTMISMATCH.name]:
                     secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
-                    if mode.VERBOSE:
-                        _print_logs(sfinfo.processing_logs)
+                    _print_logs(sfinfo.processing_logs)
 
 
 def print_duplicates(ba: BasicAnalytics, mode: Mode) -> None:
