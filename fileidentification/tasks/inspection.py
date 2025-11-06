@@ -10,7 +10,6 @@ from fileidentification.wrappers.imagemagick import imagemagick_inspect
 
 
 def inspect_file(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, verbose: bool) -> None:
-
     resp: FDMsg | None = report_only(sfinfo, policies, log_tables, verbose)
     if resp == FDMsg.ERROR:
         remove(sfinfo, log_tables)
