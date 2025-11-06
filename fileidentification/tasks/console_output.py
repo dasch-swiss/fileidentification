@@ -63,11 +63,13 @@ def print_diagnostic(log_tables: LogTables, mode: Mode) -> None:
                 for sfinfo in log_tables.diagnostics[FDMsg.WARNING.name]:
                     secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
                     _print_logs(sfinfo.processing_logs)
+        if not mode.QUIET:
             if FDMsg.EXTMISMATCH.name in log_tables.diagnostics:
                 secho("\n----------- Extension missmatch -----------", bold=True)
                 for sfinfo in log_tables.diagnostics[FDMsg.EXTMISMATCH.name]:
                     secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}")
-                    _print_logs(sfinfo.processing_logs)
+                    if mode.VERBOSE:
+                        _print_logs(sfinfo.processing_logs)
 
 
 def print_duplicates(ba: BasicAnalytics, mode: Mode) -> None:

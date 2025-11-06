@@ -24,15 +24,15 @@ def inspect_file(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, verb
         log_tables.diagnostics_add(sfinfo, FDMsg.EMPTYSOURCE)
         return
 
-    # case where there is an extension missmatch, rename the file if there is a unique ext
+    # case where there is an extension mismatch, warn the user
     if sfinfo.matches[0]["warning"] == FDMsg.EXTMISMATCH:
         if len(FMT2EXT[puid]["file_extensions"]) == 1:
-            ext = "." + FMT2EXT[puid]["file_extensions"][-1]
-            _rename(sfinfo, ext, log_tables)
+            ext = FMT2EXT[puid]["file_extensions"][-1]
+            msg_txt = f"expecting extension: .{ext}"
         else:
             msg_txt = f"expecting one of the following ext: {list(FMT2EXT[puid]['file_extensions'])}"
-            sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msg_txt))
-            secho(f"\nWARNING: you should manually rename {sfinfo.filename}\n{msg_txt}", fg=colors.YELLOW)
+        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msg_txt))
+        secho(f"\nWARNING: extension mismatch for {sfinfo.filename}\n{msg_txt}", fg=colors.YELLOW)
         log_tables.diagnostics_add(sfinfo, FDMsg.EXTMISMATCH)
 
     # check if the file throws any errors while open/processing it with the respective bin
