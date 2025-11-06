@@ -3,7 +3,7 @@ from pathlib import Path
 
 import requests  # type: ignore[import-untyped]
 import typer
-from bs4 import BeautifulSoup  # type: ignore[import-not-found]
+from bs4 import BeautifulSoup
 from lxml import etree, objectify  # type: ignore[import-untyped]
 from typer import colors, secho
 
@@ -69,15 +69,17 @@ def update_signatures() -> None:
 
     soup = BeautifulSoup(res.content, "html.parser")
     versions = [
-        el.get("href") for el in soup.find_all("a") if el.get("href") and el.get("href").startswith(DroidSigURL.CDN)
+        el.get("href")
+        for el in soup.find_all("a")
+        if el.get("href") and el.get("href").startswith(DroidSigURL.CDN)  # type: ignore[union-attr]
     ]
 
-    link = sorted(versions)[-1]
+    link = sorted(versions)[-1]  # type: ignore[type-var]
     if not link:
         secho(f"could not parse links out of {url}", fg=colors.RED)
         raise typer.Exit(1)
     # update fm
-    write_fmt2ext(link=link)
+    write_fmt2ext(link=link)  # type: ignore[arg-type]
 
 
 if __name__ == "__main__":
