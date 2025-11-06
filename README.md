@@ -127,11 +127,12 @@ Possible values of the "Policy" column:
 
 `uv run identify.py path/to/directory -i`
 
-Probe the files on errors and move corrupted files to the folder in `_fileIdentification/_REMOVED`.
+Probe the files on errors, warn about extension mismatches,
+and move corrupted files to the folder in `_fileIdentification/_REMOVED`.
 
 Optionally add the flag `-v` (`--verbose`) for more detailed inspection (see **Options** below).
 
-NOTE: Currently only audio/video and image files are inspected.
+NOTE: Currently only audio/video and image files are inspected for content errors.
 
 ### Convert The Files According to the Policies
 
@@ -238,8 +239,8 @@ If you just want to test a specific policy, append `f` and the puid:
 
 ## Options
 
-`-i` | `--inspect`  
-Probe the files on errors
+`-i` | `--inspect`
+Probe the files on errors and warn about extension mismatches (without modifying files)
 
 `-v` | `--verbose`  
 Catch more warnings on video and image files during the tests.
