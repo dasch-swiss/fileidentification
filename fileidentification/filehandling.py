@@ -2,6 +2,7 @@ import csv
 import json
 import os
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pygfried
@@ -31,7 +32,7 @@ from fileidentification.tasks.console_output import (
     print_siegfried_errors,
 )
 from fileidentification.tasks.conversion import convert_file
-from fileidentification.tasks.inspection import inspect_file, report_only
+from fileidentification.tasks.inspection import assert_file_integrity, inspect_file
 from fileidentification.tasks.os_tasks import move_tmp, set_filepaths
 from fileidentification.tasks.policies import apply_policy
 
@@ -197,23 +198,21 @@ class FileHandler:
                     secho(f"{cmd}", fg=colors.GREEN, bold=True)
                     secho(f"You find the file with the log in {t_sfinfo.filename.parent}")
 
-    def report(self) -> None:
+    def inspect(self) -> None:
+        self.fp.LOGJSON = self.fp.TMP_DIR / f"{datetime.now(UTC).strftime('%y%m%d')}_report.json"
+        self.fp.POLJSON.unlink(missing_ok=True)
         for sfinfo in self.stack:
             if not (sfinfo.status.removed or sfinfo.dest):
-                report_only(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
-
+                inspect_file(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
         print_diagnostic(log_tables=self.log_tables, mode=self.mode)
-        self.fp.POLJSON.unlink()
-        self.fp.TMP_DIR.rmdir()
-        sys.exit(0)
 
-    def inspect(self) -> None:
+    def assert_integrity(self) -> None:
         print_msg("\nProbing the files ...", self.mode.QUIET)
         with Progress(SpinnerColumn(), transient=True) as prog:
             prog.add_task(description="", total=None)
             for sfinfo in self.stack:
                 if not (sfinfo.status.removed or sfinfo.dest):
-                    inspect_file(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
+                    assert_file_integrity(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
 
         print_diagnostic(log_tables=self.log_tables, mode=self.mode)
 
@@ -282,7 +281,7 @@ class FileHandler:
     def run(
         self,
         root_folder: Path | str,
-        inspect: bool = True,
+        assert_integrity: bool = True,
         apply: bool = True,
         remove_tmp: bool = True,
         convert: bool = False,
@@ -297,7 +296,7 @@ class FileHandler:
         mode_quiet: bool = True,
         to_csv: bool = False,
         tmp_dir: Path | None = None,
-        report_only: bool = False,
+        inspect: bool = False,
     ) -> None:
         root_folder = Path(root_folder)
         # set dirs / paths
@@ -312,11 +311,10 @@ class FileHandler:
         # generate policies
         self._manage_policies(policies_path, blank, extend)
         # probing the files
-        if report_only:
-            self.mode.VERBOSE = True
-            self.report()
         if inspect:
             self.inspect()
+        if assert_integrity:
+            self.assert_integrity()
         # policies testing
         if test_puid:
             self._test_policies(puid=test_puid)

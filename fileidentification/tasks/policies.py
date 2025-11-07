@@ -38,7 +38,7 @@ def _has_invalid_streams(sfinfo: SfInfo, puid: str) -> bool:
     """Return true if video and audio codec differ from archival standards"""
     streams = ffmpeg_media_info(sfinfo.path)
     if not streams:
-        secho(f"\t{sfinfo.filename} throwing errors. consider inspection", fg=colors.RED, bold=True)
+        secho(f"\t{sfinfo.filename} throwing errors. consider file", fg=colors.RED, bold=True)
         return False
     if puid in ["fmt/569"]:
         # only the video codec has to be ffv1 -> return false as soon as any stream is ffv1

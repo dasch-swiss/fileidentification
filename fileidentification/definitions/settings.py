@@ -96,12 +96,10 @@ class FPMsg(StrEnum):
     NOTEXPECTEDFMT = "converted file does not match the expected fmt."
 
 
-# file corrupt errors to parse from wrappers.wrappers.Ffmpeg when in verbose mode
 class ErrMsgFF(StrEnum):
     """text in log of ffmpeg that indicate the file is corrupt"""
 
     ffmpeg1 = "Error opening input files"
-    # ffmpeg2 = "A non-intra slice in an IDR NAL unit"
 
 
 class ErrMsgRE(StrEnum):
@@ -110,8 +108,6 @@ class ErrMsgRE(StrEnum):
     ffmpeg1 = "A non-intra slice in an IDR NAL unit"
 
 
-# file corrupt errors to parse form wrappers.wrappers.ImageMagick
-# there must be more... add them when encountered
 class ErrMsgIM(StrEnum):
     """text in log that indicate that the file is corrupt"""
 
