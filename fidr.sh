@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# assert path
+if [[ !  $(realpath "$1") ]]; then
+  exit 1
+fi
+
 # get variables for mounting the volume in docker
 input_dir=$(realpath "$1")
 mnt_dir="$input_dir"
@@ -37,4 +42,4 @@ while [ $# -gt 0 ]; do
 done
 
 # run the command
-docker run --rm -v "$mnt_dir":"$mnt_dir" "${add_volumes[@]}" -t fileidentification "$input_dir" "${params[@]}"
+docker run -v "$mnt_dir":"$mnt_dir" "${add_volumes[@]}" -t fileidentification "$input_dir" "${params[@]}"

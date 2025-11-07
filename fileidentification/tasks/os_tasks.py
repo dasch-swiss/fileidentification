@@ -1,4 +1,5 @@
 import shutil
+import sys
 from pathlib import Path
 
 from typer import colors, secho
@@ -55,6 +56,10 @@ def move_tmp(stack: list[SfInfo], policies: Policies, log_tables: LogTables, rem
 
 
 def set_filepaths(fp: FilePaths, root_folder: Path, tmp_dir: Path | None = None) -> None:
+    # assert rootfolder
+    if root_folder.__fspath__() == "." or not root_folder.exists():
+        secho("root folder not found", fg=colors.RED)
+        sys.exit(1)
     fp.TMP_DIR = root_folder / TMP_DIR
     # if its a file, use stem as tmp dir
     if root_folder.is_file():
