@@ -27,8 +27,9 @@ def inspect_file(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, verb
         return None
 
     if sfinfo.errors == FDMsg.EMPTYSOURCE:
-        log_tables.diagnostics_add(sfinfo, FDMsg.ERROR)
-        return FDMsg.ERROR
+        sfinfo.processing_logs.append(LogMsg(name="siegfried", msg=FDMsg.EMPTYSOURCE))
+        log_tables.diagnostics_add(sfinfo, FDMsg.WARNING)
+        return None
 
     # select bin out of mimetype if not specified in policies
     pbin = policies[sfinfo.processed_as].bin if sfinfo.processed_as in policies else ""

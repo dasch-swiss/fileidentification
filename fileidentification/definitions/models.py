@@ -122,7 +122,7 @@ class BasicAnalytics(BaseModel):
             if sfinfo.processed_as not in self.puid_unique:
                 self.puid_unique[sfinfo.processed_as] = []
             self.puid_unique[sfinfo.processed_as].append(sfinfo)
-        if sfinfo.errors:
+        if sfinfo.errors and sfinfo.errors != FDMsg.EMPTYSOURCE:
             self.siegfried_errors.append(sfinfo)
 
     def sort_puid_unique_by_size(self, puid: str) -> None:
