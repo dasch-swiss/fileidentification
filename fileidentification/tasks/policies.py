@@ -1,7 +1,7 @@
 from typer import colors, secho
 
 from fileidentification.definitions.models import LogMsg, LogTables, Policies, SfInfo
-from fileidentification.definitions.settings import PCMsg
+from fileidentification.definitions.settings import PLMsg
 from fileidentification.tasks.os_tasks import remove
 from fileidentification.wrappers.ffmpeg import ffmpeg_media_info
 
@@ -16,11 +16,11 @@ def apply_policy(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, stri
     if puid not in policies:
         # in strict mode, move file
         if strict:
-            sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=f"{PCMsg.NOTINPOLICIES}"))
+            sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=f"{PLMsg.NOTINPOLICIES}"))
             remove(sfinfo, log_tables)
             return
         # just flag it as skipped
-        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=f"{PCMsg.SKIPPED}"))
+        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=f"{PLMsg.SKIPPED}"))
         return
 
     # case where file needs to be converted

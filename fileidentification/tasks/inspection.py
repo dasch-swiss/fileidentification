@@ -1,7 +1,7 @@
 from typer import colors, secho
 
 from fileidentification.definitions.models import LogMsg, LogTables, Policies, SfInfo
-from fileidentification.definitions.settings import FMT2EXT, Bin, ErrMsgRE, FDMsg, FPMsg
+from fileidentification.definitions.settings import FMT2EXT, Bin, FDMsg, FPMsg, REencMsg
 from fileidentification.tasks.os_tasks import remove
 from fileidentification.wrappers.ffmpeg import ffmpeg_collect_warnings
 from fileidentification.wrappers.imagemagick import imagemagick_collect_warnings
@@ -26,11 +26,6 @@ def inspect_file(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, verb
         log_tables.errors.append((msg, sfinfo))
         return None
 
-    if sfinfo.errors == FDMsg.EMPTYSOURCE:
-        sfinfo.processing_logs.append(LogMsg(name="siegfried", msg=FDMsg.EMPTYSOURCE))
-        log_tables.diagnostics_add(sfinfo, FDMsg.WARNING)
-        return None
-
     # select bin out of mimetype if not specified in policies
     pbin = policies[sfinfo.processed_as].bin if sfinfo.processed_as in policies else ""
     if pbin == "" and sfinfo.matches[0]["mime"] != "":  # noqa: SIM102
@@ -42,6 +37,10 @@ def inspect_file(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, verb
     # check if the file throws any error, warnings while open/processing it with the respective bin
     if _has_error(sfinfo, pbin, log_tables, verbose):
         return FDMsg.ERROR
+
+    if sfinfo.errors == FDMsg.EMPTYSOURCE:
+        sfinfo.processing_logs.append(LogMsg(name="siegfried", msg=FDMsg.EMPTYSOURCE))
+        log_tables.diagnostics_add(sfinfo, FDMsg.WARNING)
 
     # extension mismatch
     if sfinfo.matches[0]["warning"] == FDMsg.EXTMISMATCH:
@@ -83,7 +82,7 @@ def _has_error(sfinfo: SfInfo, pbin: str, log_tables: LogTables, verbose: bool) 
         case Bin.FFMPEG:
             error, stdout, specs = ffmpeg_collect_warnings(sfinfo.path, verbose=verbose)
             # see if warning needs file to be re-encoded
-            if any(msg in stdout for msg in ErrMsgRE):
+            if any(msg in stdout for msg in REencMsg):
                 sfinfo.processing_logs.append(LogMsg(name="filehandler", msg="file flagged for reencoding"))
                 sfinfo.status.pending = True
         case Bin.MAGICK:

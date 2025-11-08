@@ -6,7 +6,7 @@ from typing import Any, Self
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from fileidentification.definitions.settings import Bin, FDMsg, PCMsg, PVErr
+from fileidentification.definitions.settings import Bin, FDMsg, PLMsg, PVErr
 
 
 class LogMsg(BaseModel):
@@ -66,7 +66,7 @@ class SfInfo(BaseModel):
                 fmts = re.findall(r"(fmt|x-fmt)/([\d]+)", self.matches[0]["warning"])
                 fmts_s: list[str] = [f"{el[0]}/{el[1]}" for el in fmts]
                 if fmts:
-                    self.processing_logs.append(LogMsg(name="filehandler", msg=PCMsg.FALLBACK))
+                    self.processing_logs.append(LogMsg(name="filehandler", msg=PLMsg.FALLBACK))
                     return fmts_s[0]
                 return None
             puid: str = self.matches[0]["id"]

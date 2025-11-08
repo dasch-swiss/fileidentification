@@ -1,10 +1,7 @@
 import json
-import shlex
 import subprocess
 from pathlib import Path
 from typing import Any
-
-from fileidentification.definitions.settings import ErrMsgFF
 
 
 def ffmpeg_collect_warnings(file: Path, verbose: bool) -> tuple[bool, str, str]:
@@ -13,23 +10,21 @@ def ffmpeg_collect_warnings(file: Path, verbose: bool) -> tuple[bool, str, str]:
     Returns True if file is corrupt, stdout, technical metadata of the video
     """
 
-    cmd = f"ffprobe -hide_banner -show_error {shlex.quote(str(file))}"
-    if verbose:
-        cmd = f"ffmpeg -v error -i {shlex.quote(str(file))} -f null -"
-    res = subprocess.run(cmd, check=False, shell=True, capture_output=True, text=True)
-    if verbose:
-        # ffmpeg catches errors in stderr, map the errors to stdout
-        res.stdout = res.stderr
-
+    cmd = ["ffprobe", "-hide_banner", "-show_error", str(file)]
+    res = subprocess.run(cmd, check=False, capture_output=True, text=True)
     std_out = res.stdout.replace(f"{file.parent}/", "")
+
+    if verbose:
+        cmd_verbose = ["ffmpeg", "-v", "error", "-i", str(file), "-f", "null", "-"]
+        res_verbose = subprocess.run(cmd_verbose, check=False, capture_output=True, text=True)
+        # ffmpeg catches errors in stderr, map the errors to stdout
+        std_out = res_verbose.stderr.replace(f"{file.parent}/", "")
+
     streams = ffmpeg_media_info(file)
     specs = json.dumps(streams) if streams else ""
 
-    if verbose:
-        if any(msg in std_out for msg in ErrMsgFF):
-            return True, std_out, specs
-        return False, std_out, specs
-    if std_out:
+    # rely on ffprobe whether file is corrupt
+    if res.stdout:
         return True, std_out, specs
     return False, std_out, specs
 
@@ -46,7 +41,7 @@ def ffmpeg_media_info(file: Path) -> dict[str, Any] | None:
         "-output_format",
         "json",
     ]
-    res = subprocess.run(cmd, check=False, capture_output=True)  # noqa: S603
+    res = subprocess.run(cmd, check=False, capture_output=True)
     if res.returncode == 0:
         streams: dict[str, Any] = json.loads(res.stdout)["streams"]
         return streams

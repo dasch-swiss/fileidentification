@@ -71,7 +71,7 @@ class PVErr(StrEnum):
     MISS_BIN = "your missing bin in policy"
 
 
-class PCMsg(StrEnum):
+class PLMsg(StrEnum):
     """policy log messages"""
 
     FALLBACK = "fmt not detected, falling back on ext"
@@ -96,22 +96,7 @@ class FPMsg(StrEnum):
     NOTEXPECTEDFMT = "converted file does not match the expected fmt."
 
 
-class ErrMsgFF(StrEnum):
-    """text in log of ffmpeg that indicate the file is corrupt"""
-
-    ffmpeg1 = "Error opening input files"
-
-
-class ErrMsgRE(StrEnum):
+class REencMsg(StrEnum):
     """text in log for smaller errors that can be solved with re encoding the file"""
 
     ffmpeg1 = "A non-intra slice in an IDR NAL unit"
-
-
-class ErrMsgIM(StrEnum):
-    """text in log that indicate that the file is corrupt"""
-
-    magic1 = "identify: Cannot read"
-    magic2 = "identify: Sanity check on directory count failed"
-    magic3 = "identify: Failed to read directory"
-    magic4 = "data: premature end of data segment"
