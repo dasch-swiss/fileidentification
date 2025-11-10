@@ -1,46 +1,32 @@
 import json
-import shlex
 import subprocess
 from pathlib import Path
 from typing import Any
 
-from fileidentification.definitions.models import SfInfo
-from fileidentification.definitions.settings import ErrMsgFF
 
-
-def ffmpeg_inspect(sfinfo: SfInfo, verbose: bool) -> tuple[bool, str, dict[str, Any] | None]:
+def ffmpeg_collect_warnings(file: Path, verbose: bool) -> tuple[bool, str, str]:
     """
-    Check for errors with ffprobe -show_error -> std.out shows the error, std.err has file information
-    in verbose mode: run the file in ffmpeg dropping frames instead of showing it, returns stderr as string.
-    depending on how many and how long the files are, this slows down the analytics
-    When the file can't be opened by ffmpeg at all, it returns [True, "stderr"]. for minor errors [False, "stderr"].
-    if everithing ok [False, ""]
+    Check for errors with ffprobe -show_error or ffmpeg dropping frames.
+    Returns True if file is corrupt, stdout, technical metadata of the video
     """
 
-    cmd = f"ffprobe -hide_banner -show_error {shlex.quote(str(sfinfo.path))}"
+    cmd = ["ffprobe", "-hide_banner", "-show_error", str(file)]
+    res = subprocess.run(cmd, check=False, capture_output=True, text=True)
+    std_out = res.stdout.replace(f"{file.parent}/", "")
 
-    res = subprocess.run(cmd, check=False, shell=True, capture_output=True, text=True)
     if verbose:
-        cmd_v = f"ffmpeg -v error -i {shlex.quote(str(sfinfo.path))} -f null -"
-        res_v = subprocess.run(cmd_v, check=False, shell=True, capture_output=True, text=True)
-        # replace the stdout of errors with the verbose one
-        res.stdout = res_v.stderr
-    return _parse_output(sfinfo, res.stdout, res.stderr, verbose)
+        cmd_verbose = ["ffmpeg", "-v", "error", "-i", str(file), "-f", "null", "-"]
+        res_verbose = subprocess.run(cmd_verbose, check=False, capture_output=True, text=True)
+        # ffmpeg catches errors in stderr, map the errors to stdout
+        std_out = res_verbose.stderr.replace(f"{file.parent}/", "")
 
+    streams = ffmpeg_media_info(file)
+    specs = json.dumps(streams) if streams else ""
 
-def _parse_output(sfinfo: SfInfo, std_out: str, _: str, verbose: bool) -> tuple[bool, str, dict[str, Any] | None]:
-    std_out = std_out.replace(f"{sfinfo.path.parent}", "")
-    streams = ffmpeg_media_info(sfinfo.path)
-    if verbose:
-        if std_out:
-            if any(msg in std_out for msg in ErrMsgFF):
-                return True, std_out, streams
-            return False, std_out, streams
-        return False, std_out, streams
-
-    if std_out:
-        return True, std_out, streams
-    return False, std_out, streams
+    # rely on ffprobe whether file is corrupt
+    if res.stdout:
+        return True, std_out, specs
+    return False, std_out, specs
 
 
 def ffmpeg_media_info(file: Path) -> dict[str, Any] | None:
@@ -55,7 +41,7 @@ def ffmpeg_media_info(file: Path) -> dict[str, Any] | None:
         "-output_format",
         "json",
     ]
-    res = subprocess.run(cmd, check=False, capture_output=True)  # noqa: S603
+    res = subprocess.run(cmd, check=False, capture_output=True)
     if res.returncode == 0:
         streams: dict[str, Any] = json.loads(res.stdout)["streams"]
         return streams

@@ -8,12 +8,12 @@ from fileidentification.filehandling import FileHandler
 
 def main(
     root_folder: Annotated[Path, typer.Argument(help="path to the directory or file")],
-    inspect: Annotated[
+    assert_integrity: Annotated[
         bool,
         typer.Option(
-            "--inspect",
+            "--assert-file-integrity",
             "-i",
-            help="probing the files in the selected folder",
+            help="probe the files in the selected folder and remove corrupt files",
         ),
     ] = False,
     apply: Annotated[
@@ -30,6 +30,7 @@ def main(
             "[with -x: it replaces the original files with the converted one]",
         ),
     ] = False,
+    tmp_dir: Annotated[Path | None, typer.Option("--tmp-dir", help="set a custom tmp directory")] = None,
     policies_path: Annotated[
         Path | None,
         typer.Option("--policies-path", "-p", help="path to the json file with the policies"),
@@ -94,15 +95,16 @@ def main(
     ] = False,
     mode_quiet: Annotated[bool, typer.Option("--quiet", "-q", help="just print errors and warnings")] = False,
     to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False,
-    tmp_dir: Annotated[Path | None, typer.Option("--tmp-dir", help="set a custom tmp directory")] = None,
+    inspect: Annotated[bool, typer.Option("--inspect", help="inspect the files without any modification")] = False,
 ) -> None:
     fh = FileHandler()
     fh.run(
         root_folder=root_folder,
-        inspect=inspect,
+        assert_integrity=assert_integrity,
         apply=apply,
         convert=convert,
         remove_tmp=remove_tmp,
+        tmp_dir=tmp_dir,
         policies_path=policies_path,
         blank=blank,
         extend=extend,
@@ -113,7 +115,7 @@ def main(
         mode_verbose=mode_verbose,
         mode_quiet=mode_quiet,
         to_csv=to_csv,
-        tmp_dir=tmp_dir,
+        inspect=inspect,
     )
 
 

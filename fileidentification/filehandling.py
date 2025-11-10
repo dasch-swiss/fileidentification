@@ -2,6 +2,7 @@ import csv
 import json
 import os
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pygfried
@@ -31,7 +32,7 @@ from fileidentification.tasks.console_output import (
     print_siegfried_errors,
 )
 from fileidentification.tasks.conversion import convert_file
-from fileidentification.tasks.inspection import inspect_file
+from fileidentification.tasks.inspection import assert_file_integrity, inspect_file
 from fileidentification.tasks.os_tasks import move_tmp, set_filepaths
 from fileidentification.tasks.policies import apply_policy
 
@@ -83,7 +84,7 @@ class FileHandler:
                 self.ba.append(sfinfo)
 
         print_siegfried_errors(ba=self.ba)
-        print_duplicates(ba=self.ba, mode=self.mode)
+        print_duplicates(duplicates=self.ba.duplicates, mode=self.mode)
 
     # policies stuff
     def _load_policies(self, policies_path: Path) -> Policies:
@@ -189,8 +190,7 @@ class FileHandler:
 
             for puid in puids:  # noqa: PLR1704
                 # we want the smallest file first for running the test
-                self.ba.sort_puid_unique_by_size(puid)
-                sample = self.ba.puid_unique[puid][0]
+                sample = self.ba.smallest_file(puid)
                 secho(f"\n{puid}", fg=colors.YELLOW)
                 t_sfinfo, cmd = convert_file(sample, self.policies)
                 if t_sfinfo:
@@ -198,12 +198,20 @@ class FileHandler:
                     secho(f"You find the file with the log in {t_sfinfo.filename.parent}")
 
     def inspect(self) -> None:
+        self.fp.LOGJSON = self.fp.TMP_DIR / f"{datetime.now(UTC).strftime('%y%m%d')}_report.json"
+        self.fp.POLJSON.unlink(missing_ok=True)
+        for sfinfo in self.stack:
+            if not (sfinfo.status.removed or sfinfo.dest):
+                inspect_file(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
+        print_diagnostic(log_tables=self.log_tables, mode=self.mode)
+
+    def assert_integrity(self) -> None:
         print_msg("\nProbing the files ...", self.mode.QUIET)
         with Progress(SpinnerColumn(), transient=True) as prog:
             prog.add_task(description="", total=None)
             for sfinfo in self.stack:
                 if not (sfinfo.status.removed or sfinfo.dest):
-                    inspect_file(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
+                    assert_file_integrity(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
 
         print_diagnostic(log_tables=self.log_tables, mode=self.mode)
 
@@ -237,7 +245,7 @@ class FileHandler:
                 else:
                     lmsg = sfinfo.processing_logs.pop()
                     lmsg.msg += f". cmd={cmd} "
-                    self.log_tables.errors.append((lmsg, sfinfo))
+                    self.log_tables.processing_errors.append((lmsg, sfinfo))
 
     def remove_tmp(self, root_folder: Path, to_csv: bool = False) -> None:
         # move converted files from the working dir to its destination
@@ -255,7 +263,7 @@ class FileHandler:
             self.write_logs(to_csv=to_csv)
 
     def write_logs(self, to_csv: bool = False) -> None:
-        logoutput = LogOutput(files=self.stack, errors=self.log_tables.dump_errors())
+        logoutput = LogOutput(files=self.stack, errors=self.log_tables.dump_errors(), duplicates=self.ba.duplicates)
         self.fp.LOGJSON.write_text(logoutput.model_dump_json(indent=4, exclude_none=True))
 
         print_processing_errors(log_tables=self.log_tables)
@@ -272,7 +280,7 @@ class FileHandler:
     def run(
         self,
         root_folder: Path | str,
-        inspect: bool = True,
+        assert_integrity: bool = True,
         apply: bool = True,
         remove_tmp: bool = True,
         convert: bool = False,
@@ -287,6 +295,7 @@ class FileHandler:
         mode_quiet: bool = True,
         to_csv: bool = False,
         tmp_dir: Path | None = None,
+        inspect: bool = False,
     ) -> None:
         root_folder = Path(root_folder)
         # set dirs / paths
@@ -303,6 +312,8 @@ class FileHandler:
         # probing the files
         if inspect:
             self.inspect()
+        if assert_integrity:
+            self.assert_integrity()
         # policies testing
         if test_puid:
             self._test_policies(puid=test_puid)

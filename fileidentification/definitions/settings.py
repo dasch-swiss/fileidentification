@@ -7,7 +7,7 @@ from typing import Any
 DEFAULTPOLICIES: Path = Path(__file__).parent / "default_policies.json"
 
 # paths tmp dir, logs
-TMP_DIR = "_fileIdentification"  # added to root folder
+TMP_DIR = "__fileidentification"  # added to root folder
 LOGJSON = "_log.json"
 POLJSON = "_policies.json"
 RMV_DIR = "_REMOVED"
@@ -66,16 +66,16 @@ class PVErr(StrEnum):
     """policy validation errors"""
 
     SEMICOLON = "the char ';' is not an allowed in processing_args"
-    MISS_CON = "your missing 'target_container' in policy"
-    MISS_EXP = "your missing 'expected' in policy"
-    MISS_BIN = "your missing bin in policy"
+    MISS_CON = "missing 'target_container' in policy"
+    MISS_EXP = "missing 'expected' in policy"
+    MISS_BIN = "missing bin in policy"
 
 
-class PCMsg(StrEnum):
+class PLMsg(StrEnum):
     """policy log messages"""
 
-    FALLBACK = "fmt not detected, falling back on ext"
-    NOTINPOLICIES = "file format is not in policies. running strict mode: file removed"
+    FALLBACK = "fmt not detected, fall back on ext"
+    NOTINPOLICIES = "file format is not in policies and strict is set to true"
     SKIPPED = "file format is not in policies, skipped"
 
 
@@ -83,7 +83,7 @@ class FDMsg(StrEnum):
     """file diagnostic message"""
 
     EMPTYSOURCE = "empty source"
-    ERROR = "file is corrupt: removed"
+    ERROR = "file is corrupt"
     WARNING = "file has warnings"
     EXTMISMATCH = "extension mismatch"
 
@@ -96,26 +96,7 @@ class FPMsg(StrEnum):
     NOTEXPECTEDFMT = "converted file does not match the expected fmt."
 
 
-# file corrupt errors to parse from wrappers.wrappers.Ffmpeg when in verbose mode
-class ErrMsgFF(StrEnum):
-    """text in log of ffmpeg that indicate the file is corrupt"""
-
-    ffmpeg1 = "Error opening input files"
-    # ffmpeg2 = "A non-intra slice in an IDR NAL unit"
-
-
-class ErrMsgRE(StrEnum):
+class REencMsg(StrEnum):
     """text in log for smaller errors that can be solved with re encoding the file"""
 
     ffmpeg1 = "A non-intra slice in an IDR NAL unit"
-
-
-# file corrupt errors to parse form wrappers.wrappers.ImageMagick
-# there must be more... add them when encountered
-class ErrMsgIM(StrEnum):
-    """text in log that indicate that the file is corrupt"""
-
-    magic1 = "identify: Cannot read"
-    magic2 = "identify: Sanity check on directory count failed"
-    magic3 = "identify: Failed to read directory"
-    magic4 = "data: premature end of data segment"
