@@ -151,7 +151,7 @@ of the program used as log.txt next to it.
 
 `uv run identify.py path/to/directory -r`
 
-Delete all temporary files and folders and move the converted files next to their parents.
+Delete all temporary files and folders and move the converted files next to their original.
 
 ### Log
 
@@ -250,7 +250,7 @@ This can take a significantly longer time based on what files you have.
 Apply the policies
 
 `-r` | `--remove-tmp`  
-Remove all temporary items and add the converted files next to their parents.
+Remove all temporary items and add the converted files next to their original.
 
 `-x` | `--remove-original`  
 This overwrites the `remove_original` value in the policies and sets it to true when removing the tmp files.
@@ -310,7 +310,7 @@ and want to only keep the converted files.
 
 - use a custom tmp_dir to write files to (instead of the default `path/to/directory/__fileidentification`)
 - probe the files in verbose mode and apply the policies
-- remove temporary files and the parents of the converted files
+- remove temporary files and the original of the converted files
 
 ## Updating the PUIDs
 
