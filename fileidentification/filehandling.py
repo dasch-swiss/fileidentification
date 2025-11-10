@@ -215,6 +215,12 @@ class FileHandler:
 
         print_diagnostic(log_tables=self.log_tables, mode=self.mode)
 
+    def _silenty_reencode(self, root_folder: Path) -> None:
+        self.mode.QUIET = True
+        self.mode.REMOVEORIGINAL = True
+        self.convert()
+        self.remove_tmp(root_folder)
+
     def apply_policies(self) -> None:
         print_msg("\nApplying policies ...", self.mode.QUIET)
         with Progress(SpinnerColumn(), transient=True) as prog:
@@ -314,6 +320,9 @@ class FileHandler:
             self.inspect()
         if assert_integrity:
             self.assert_integrity()
+            if not apply:
+                # this triggers -qarx (to catch fixes with reencoding)
+                self._silenty_reencode(root_folder)
         # policies testing
         if test_puid:
             self._test_policies(puid=test_puid)
