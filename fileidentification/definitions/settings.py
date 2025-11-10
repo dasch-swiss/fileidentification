@@ -7,7 +7,7 @@ from typing import Any
 DEFAULTPOLICIES: Path = Path(__file__).parent / "default_policies.json"
 
 # paths tmp dir, logs
-TMP_DIR = "_fileIdentification"  # added to root folder
+TMP_DIR = "__fileidentification"  # added to root folder
 LOGJSON = "_log.json"
 POLJSON = "_policies.json"
 RMV_DIR = "_REMOVED"

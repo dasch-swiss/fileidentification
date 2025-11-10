@@ -37,7 +37,7 @@ ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
 
     `fidr path/to/directory`
 
-    This creates a folder `_fileIdentification` inside the target directory with a `_policies.json` file. 
+    This creates a folder `__fileidentification` inside the target directory with a `_policies.json` file. 
     Optionally review and edit it to customize conversion rules.
 
 2. **Test the files on errors and apply the policies:**
@@ -99,7 +99,7 @@ uv run identify.py --help
 
 `uv run identify.py path/to/directory`
 
-This generates a folder `_fileIdentification` inside the target directory with two JSON files:
+This generates a folder `__fileidentification` inside the target directory with two JSON files:
 
 **_log.json** : The technical metadata of all the files in the folder
 
@@ -127,7 +127,7 @@ Possible values of the "Policy" column:
 
 `uv run identify.py path/to/directory -i`
 
-Probe the files on errors and move corrupted files to the folder in `_fileIdentification/_REMOVED`.
+Probe the files on errors and move corrupted files to the folder in `__fileidentification/_REMOVED`.
 Rename files with extension mismatch.
 
 Optionally add the flag `-v` (`--verbose`) for more detailed inspection (see **Options** below).
@@ -140,9 +140,9 @@ NOTE: Currently only audio/video and image files are inspected.
 
 `uv run identify.py path/to/directory -a`
 
-Apply the policies defined in `_fileIdentification/_policies.json` (or in the policies passed with `-p`) and convert
+Apply the policies defined in `__fileidentification/_policies.json` (or in the policies passed with `-p`) and convert
 files into their target file format.
-The converted files are temporarily stored in `_fileIdentification` with the log output
+The converted files are temporarily stored in `__fileidentification` with the log output
 of the program used as log.txt next to it.
 
 ### Clean Up Temporary Files
@@ -165,7 +165,7 @@ which maps the `_log.json` to a csv.
 ## Advanced Usage
 
 You can also create your own policies, and with that, customise the file conversion output.
-Simply edit the generated default file `_fileIdentification/_policies.json` before applying or pass a customised
+Simply edit the generated default file `__fileidentification/_policies.json` before applying or pass a customised
 policies files with the parameter `-p`.
 If you want to start from scratch, run `uv run indentify.py path/to/directory -b` to create a
 blank policies template with all the file formats encountered in the folder.
@@ -254,11 +254,11 @@ Remove all temporary items and add the converted files next to their parents.
 
 `-x` | `--remove-original`  
 This overwrites the `remove_original` value in the policies and sets it to true when removing the tmp files.
-The original files are moved to the `_fileIdentification/_REMOVED` folder.
+The original files are moved to the `__fileidentification/_REMOVED` folder.
 When used in generating policies, it sets `remove_original` in the policies to true (default false).
 
 `--tmp-dir`  
-Use a custom tmp directory instead of the default `_fileIdentification`
+Use a custom tmp directory instead of the default `__fileidentification`
 
 `-p` | `--policies-path`  
 Load a custom policies JSON file instead of generating one out of the default policies.
@@ -308,7 +308,7 @@ and want to only keep the converted files.
 
 `fidr path/to/directory --tmp-dir path/to/tmp_dir -ivarx`
 
-- use a custom tmp_dir to write files to (instead of the default `path/to/directory/_fileIdentification`)
+- use a custom tmp_dir to write files to (instead of the default `path/to/directory/__fileidentification`)
 - probe the files in verbose mode and apply the policies
 - remove temporary files and the parents of the converted files
 
