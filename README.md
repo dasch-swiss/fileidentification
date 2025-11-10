@@ -121,13 +121,14 @@ Possible values of the "Policy" column:
 - blank: Generated a blank policy (template)
 - missing: No policy for this file type
 
-### Inspect The Files
+### Assert File Integrity
 
-(`-i` | `--inspect`)
+(`-i` | `--assert-file-integrity`)
 
 `uv run identify.py path/to/directory -i`
 
 Probe the files on errors and move corrupted files to the folder in `_fileIdentification/_REMOVED`.
+Rename files with extension mismatch.
 
 Optionally add the flag `-v` (`--verbose`) for more detailed inspection (see **Options** below).
 
@@ -238,7 +239,7 @@ If you just want to test a specific policy, append `f` and the puid:
 
 ## Options
 
-`-i` | `--inspect`  
+`-i` | `--assert-file-integrity`  
 Probe the files on errors
 
 `-v` | `--verbose`  
@@ -255,6 +256,9 @@ Remove all temporary items and add the converted files next to their parents.
 This overwrites the `remove_original` value in the policies and sets it to true when removing the tmp files.
 The original files are moved to the `_fileIdentification/_REMOVED` folder.
 When used in generating policies, it sets `remove_original` in the policies to true (default false).
+
+`--tmp-dir`  
+Use a custom tmp directory instead of the default `_fileIdentification`
 
 `-p` | `--policies-path`  
 Load a custom policies JSON file instead of generating one out of the default policies.
@@ -276,14 +280,15 @@ Create a blank policies based on the file types encountered in the given directo
 `-q` | `--quiet`  
 Just print errors and warnings
 
+`--inspect`  
+Just inspect the target folder without any modification
+
 `--csv`  
 Get output as CSV, in addition to the log.json
 
 `--convert`  
 Re-convert the files that failed during file conversion
 
-`--tmp-dir`  
-Use a custom tmp directory instead of the default `_fileIdentification`
 
 ### Examples
 
