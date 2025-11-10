@@ -39,4 +39,4 @@ while [ $# -gt 0 ]; do
 done
 
 # run the command
-docker run -v "$mnt_dir":"$mnt_dir" "${add_volumes[@]}" -t fileidentification "$input_dir" "${params[@]}"
+docker run --rm -v "$mnt_dir":"$mnt_dir" "${add_volumes[@]}" -t fileidentification "$input_dir" "${params[@]}"

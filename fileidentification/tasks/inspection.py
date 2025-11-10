@@ -40,6 +40,7 @@ def inspect_file(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, verb
 
     if sfinfo.errors == FDMsg.EMPTYSOURCE:
         sfinfo.processing_logs.append(LogMsg(name="siegfried", msg=FDMsg.EMPTYSOURCE))
+        secho(f"\nWARNING: {sfinfo.filename} has empty source", fg=colors.YELLOW)
         log_tables.diagnostics_add(sfinfo, FDMsg.WARNING)
 
     # extension mismatch
