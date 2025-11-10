@@ -84,7 +84,7 @@ class FileHandler:
                 self.ba.append(sfinfo)
 
         print_siegfried_errors(ba=self.ba)
-        print_duplicates(ba=self.ba, mode=self.mode)
+        print_duplicates(duplicates=self.ba.duplicates, mode=self.mode)
 
     # policies stuff
     def _load_policies(self, policies_path: Path) -> Policies:
@@ -190,8 +190,7 @@ class FileHandler:
 
             for puid in puids:  # noqa: PLR1704
                 # we want the smallest file first for running the test
-                self.ba.sort_puid_unique_by_size(puid)
-                sample = self.ba.puid_unique[puid][0]
+                sample = self.ba.smallest_file(puid)
                 secho(f"\n{puid}", fg=colors.YELLOW)
                 t_sfinfo, cmd = convert_file(sample, self.policies)
                 if t_sfinfo:
@@ -246,7 +245,7 @@ class FileHandler:
                 else:
                     lmsg = sfinfo.processing_logs.pop()
                     lmsg.msg += f". cmd={cmd} "
-                    self.log_tables.errors.append((lmsg, sfinfo))
+                    self.log_tables.processing_errors.append((lmsg, sfinfo))
 
     def remove_tmp(self, root_folder: Path, to_csv: bool = False) -> None:
         # move converted files from the working dir to its destination
@@ -264,7 +263,7 @@ class FileHandler:
             self.write_logs(to_csv=to_csv)
 
     def write_logs(self, to_csv: bool = False) -> None:
-        logoutput = LogOutput(files=self.stack, errors=self.log_tables.dump_errors())
+        logoutput = LogOutput(files=self.stack, errors=self.log_tables.dump_errors(), duplicates=self.ba.duplicates)
         self.fp.LOGJSON.write_text(logoutput.model_dump_json(indent=4, exclude_none=True))
 
         print_processing_errors(log_tables=self.log_tables)

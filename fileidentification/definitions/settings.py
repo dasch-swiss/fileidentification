@@ -66,16 +66,16 @@ class PVErr(StrEnum):
     """policy validation errors"""
 
     SEMICOLON = "the char ';' is not an allowed in processing_args"
-    MISS_CON = "your missing 'target_container' in policy"
-    MISS_EXP = "your missing 'expected' in policy"
-    MISS_BIN = "your missing bin in policy"
+    MISS_CON = "missing 'target_container' in policy"
+    MISS_EXP = "missing 'expected' in policy"
+    MISS_BIN = "missing bin in policy"
 
 
 class PLMsg(StrEnum):
     """policy log messages"""
 
-    FALLBACK = "fmt not detected, falling back on ext"
-    NOTINPOLICIES = "file format is not in policies. running strict mode"
+    FALLBACK = "fmt not detected, fall back on ext"
+    NOTINPOLICIES = "file format is not in policies and strict is set to true"
     SKIPPED = "file format is not in policies, skipped"
 
 

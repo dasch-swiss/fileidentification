@@ -85,6 +85,7 @@ class SfInfo(BaseModel):
 
 
 class LogOutput(BaseModel):
+    duplicates: dict[str, list[Path]] | None
     files: list[SfInfo] | None = None
     errors: list[SfInfo] | None = None
 
@@ -93,7 +94,7 @@ class LogTables(BaseModel):
     """table to store errors and warnings"""
 
     diagnostics: dict[str, list[SfInfo]] = Field(default_factory=dict)
-    errors: list[tuple[LogMsg, SfInfo]] = Field(default_factory=list)
+    processing_errors: list[tuple[LogMsg, SfInfo]] = Field(default_factory=list)
 
     def diagnostics_add(self, sfinfo: SfInfo, fdgm: FDMsg) -> None:
         if fdgm.name not in self.diagnostics:
@@ -101,10 +102,10 @@ class LogTables(BaseModel):
         self.diagnostics[fdgm.name].append(sfinfo)
 
     def dump_errors(self) -> list[SfInfo] | None:
-        if self.errors:
-            for el in self.errors:
+        if self.processing_errors:
+            for el in self.processing_errors:
                 el[1].processing_logs.append(el[0])
-            return [el[1] for el in self.errors]
+            return [el[1] for el in self.processing_errors]
         return None
 
 
@@ -125,8 +126,12 @@ class BasicAnalytics(BaseModel):
         if sfinfo.errors and sfinfo.errors != FDMsg.EMPTYSOURCE:
             self.siegfried_errors.append(sfinfo)
 
-    def sort_puid_unique_by_size(self, puid: str) -> None:
-        self.puid_unique[puid] = sorted(self.puid_unique[puid], key=lambda x: x.filesize, reverse=False)
+    def smallest_file(self, puid: str) -> SfInfo:
+        return sorted(self.puid_unique[puid], key=lambda x: x.filesize, reverse=False)[0]
+
+    @property
+    def duplicates(self) -> dict[str, list[Path]]:
+        return {k: v for k, v in self.filehashes.items() if len(v) != 1}
 
 
 # models for policies

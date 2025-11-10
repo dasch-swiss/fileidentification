@@ -19,7 +19,7 @@ def remove(sfinfo: SfInfo, log_tables: LogTables) -> None:
         sfinfo.processing_logs.append(LogMsg(name="filehandler", msg="file removed"))
     except OSError as e:
         secho(f"{e}", fg=colors.RED)
-        log_tables.errors.append((LogMsg(name="filehandler", msg=str(e)), sfinfo))
+        log_tables.processing_errors.append((LogMsg(name="filehandler", msg=str(e)), sfinfo))
 
 
 def move_tmp(stack: list[SfInfo], policies: Policies, log_tables: LogTables, remove_original: bool) -> bool:
@@ -50,7 +50,7 @@ def move_tmp(stack: list[SfInfo], policies: Policies, log_tables: LogTables, rem
                 sfinfo.dest = None
             except OSError as e:
                 secho(f"{e}", fg=colors.RED)
-                log_tables.errors.append((LogMsg(name="filehandler", msg=str(e)), sfinfo))
+                log_tables.processing_errors.append((LogMsg(name="filehandler", msg=str(e)), sfinfo))
 
     return write_logs
 

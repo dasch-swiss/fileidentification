@@ -23,7 +23,7 @@ def assert_file_integrity(sfinfo: SfInfo, policies: Policies, log_tables: LogTab
 def inspect_file(sfinfo: SfInfo, policies: Policies, log_tables: LogTables, verbose: bool) -> FDMsg | None:
     if not sfinfo.processed_as:
         msg = LogMsg(name="filehandler", msg=f"{FPMsg.PUIDFAIL} for {sfinfo.filename}")
-        log_tables.errors.append((msg, sfinfo))
+        log_tables.processing_errors.append((msg, sfinfo))
         return None
 
     # select bin out of mimetype if not specified in policies
@@ -64,7 +64,7 @@ def _rename(sfinfo: SfInfo, ext: str, log_tables: LogTables) -> None:
         sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msg))
     except OSError as e:
         secho(f"{e}", fg=colors.RED)
-        log_tables.errors.append((LogMsg(name="filehandler", msg=str(e)), sfinfo))
+        log_tables.processing_errors.append((LogMsg(name="filehandler", msg=str(e)), sfinfo))
 
 
 def _has_error(sfinfo: SfInfo, pbin: str, log_tables: LogTables, verbose: bool) -> bool:
