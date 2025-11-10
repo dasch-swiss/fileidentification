@@ -240,7 +240,7 @@ If you just want to test a specific policy, append `f` and the puid:
 ## Options
 
 `-i` | `--assert-file-integrity`  
-Probe the files on errors
+Remove corrupt files, and try to fix minor errors
 
 `-v` | `--verbose`  
 Catch more warnings on video and image files during the tests.
