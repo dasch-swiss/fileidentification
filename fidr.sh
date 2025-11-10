@@ -19,9 +19,6 @@ fi
 add_volumes=()
 params=()
 while [ $# -gt 0 ]; do
-    if [[ $(realpath "$1") == $input_dir ]]; then
-        shift
-    fi
     if [[ $1 == "-p" ]] || [[ $1 == "-ep" ]] || [[ $1 == "--policies-path" ]]; then
         policies_path=$(realpath "$2")
         add_volumes+=("-v" "$policies_path:$policies_path")
@@ -35,7 +32,7 @@ while [ $# -gt 0 ]; do
         params+=("$1" "$tmp_dir")
         shift 2
     fi
-    if [[ $1 != "" ]]; then
+    if [[ $1 == "-"* ]]; then
       params+=("$1")
     fi
     shift
