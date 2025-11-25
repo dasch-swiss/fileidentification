@@ -65,7 +65,7 @@ class FileHandler:
             with Progress(
                 SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True
             ) as prog:
-                prog.add_task(description="Analysing files with pygfried...", total=None)
+                prog.add_task(description="Analysing files with pygfried ...", total=None)
                 self.stack.extend(
                     [
                         SfInfo(**pygfried.identify(f"{f}", detailed=True)["files"][0])  # type: ignore[arg-type]
@@ -200,15 +200,17 @@ class FileHandler:
     def inspect(self) -> None:
         self.fp.LOGJSON = self.fp.TMP_DIR / f"{datetime.now(UTC).strftime('%y%m%d')}_report.json"
         self.fp.POLJSON.unlink(missing_ok=True)
-        for sfinfo in self.stack:
-            if not (sfinfo.status.removed or sfinfo.dest):
-                inspect_file(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
+        with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True) as prog:
+            prog.add_task(description="Probing the files ...", total=None)
+            for sfinfo in self.stack:
+                if not (sfinfo.status.removed or sfinfo.dest):
+                    inspect_file(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
+
         print_diagnostic(log_tables=self.log_tables, mode=self.mode)
 
     def assert_integrity(self) -> None:
-        print_msg("\nProbing the files ...", self.mode.QUIET)
-        with Progress(SpinnerColumn(), transient=True) as prog:
-            prog.add_task(description="", total=None)
+        with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True) as prog:
+            prog.add_task(description="Probing the files ...", total=None)
             for sfinfo in self.stack:
                 if not (sfinfo.status.removed or sfinfo.dest):
                     assert_file_integrity(sfinfo, self.policies, self.log_tables, self.mode.VERBOSE)
@@ -222,9 +224,8 @@ class FileHandler:
         self.remove_tmp(root_folder)
 
     def apply_policies(self) -> None:
-        print_msg("\nApplying policies ...", self.mode.QUIET)
-        with Progress(SpinnerColumn(), transient=True) as prog:
-            prog.add_task(description="")
+        with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True) as prog:
+            prog.add_task(description="Applying policies ...")
             for sfinfo in self.stack:
                 if not (sfinfo.status.removed or sfinfo.dest):
                     apply_policy(sfinfo, self.policies, self.log_tables, self.mode.STRICT)
@@ -238,9 +239,8 @@ class FileHandler:
             print_msg("There was nothing to convert", self.mode.QUIET)
             return
 
-        print_msg("\nConverting ...", self.mode.QUIET)
-        with Progress(SpinnerColumn(), transient=True) as prog:
-            prog.add_task(description="", total=None)
+        with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True) as prog:
+            prog.add_task(description="Converting ...", total=None)
             for sfinfo in pending:
                 conv_sfinfo, cmd = convert_file(sfinfo, self.policies)
                 if conv_sfinfo:
@@ -255,8 +255,8 @@ class FileHandler:
 
     def remove_tmp(self, root_folder: Path, to_csv: bool = False) -> None:
         # move converted files from the working dir to its destination
-        with Progress(SpinnerColumn(), transient=True) as prog:
-            prog.add_task(description="", total=None)
+        with Progress(SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True) as prog:
+            prog.add_task(description="Moving files ...", total=None)
             write_logs = move_tmp(self.stack, self.policies, self.log_tables, self.mode.REMOVEORIGINAL)
 
         # remove empty folders in working dir
