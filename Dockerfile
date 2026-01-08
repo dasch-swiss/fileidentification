@@ -15,10 +15,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
 
 # install the programs
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN apt-get update && apt-get install -y \
     ffmpeg \
     imagemagick \
-    ghostscript \
+    ghostscript
+
+RUN apt-get install --no-install-recommends -y \
     libreoffice-nogui \
     && rm -rf /var/lib/apt/lists/*
 
