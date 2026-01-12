@@ -25,7 +25,7 @@ movepolicies:
     mv -f custom_policies/dasch_policies.json fileidentification/definitions/default_policies.json
     
 # dasch docker installation
-install: gitreset movepolicies dockerise
+dasch: gitreset movepolicies dockerise
 
 # Update dependencies
 update:
