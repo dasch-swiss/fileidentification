@@ -13,18 +13,18 @@ gitreset:
     @echo "reset to latest git version"
 
 # create docker image and entry script
-dockerised:
+dockerise:
     docker build -t fileidentification .
     @if [ ! -d $HOME/.local/bin ]; then mkdir $HOME/.local/bin && echo 'export PATH="$HOME/.local/bin:$PATH"' | tee -a $HOME/.{bash,zsh}rc ; fi
     chmod +x ./fidr.sh
-    ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
+    @if [ ! -L $HOME/.local/bin/fidr]; then ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr ; fi
     @echo "created docker image, added fidr to path"
     
 # dasch docker installation
 install:
     gitreset
     mv -f custom_policies/dasch_policies.json fileidentification/definitions/default_policies.json
-    dockerised
+    dockerise
 
 # Update dependencies
 update:
