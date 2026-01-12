@@ -15,7 +15,7 @@ gitreset:
 # create docker image and entry script
 dockerise:
     docker build -t fileidentification .
-    @if [ ! -d $HOME/.local/bin ]; then mkdir $HOME/.local/bin && echo 'export PATH="$HOME/.local/bin:$PATH"' | tee -a $HOME/.{bash,zsh}rc ; fi
+    @if [ ! -d $HOME/.local/bin ]; then mkdir -p $HOME/.local/bin && echo 'export PATH="$HOME/.local/bin:$PATH"' | tee -a $HOME/.{bash,zsh}rc ; fi
     chmod +x ./fidr.sh
     @if [ ! -L $HOME/.local/bin/fidr]; then ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr ; fi
     @echo "created docker image, added fidr to path"
