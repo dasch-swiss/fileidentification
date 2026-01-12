@@ -19,12 +19,13 @@ dockerise:
     chmod +x ./fidr.sh
     @if [ ! -L $HOME/.local/bin/fidr]; then ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr ; fi
     @echo "created docker image, added fidr to path"
+
+# move custom policies
+movepolicies:
+    mv -f custom_policies/dasch_policies.json fileidentification/definitions/default_policies.json
     
 # dasch docker installation
-install:
-    gitreset
-    mv -f custom_policies/dasch_policies.json fileidentification/definitions/default_policies.json
-    dockerise
+install: gitreset movepolicies dockerise
 
 # Update dependencies
 update:
