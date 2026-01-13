@@ -63,7 +63,7 @@ class FileHandler:
         # else scan the root_folder with pygfried
         if not self.stack:
             with Progress(
-                    SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True
+                SpinnerColumn(), TextColumn("[progress.description]{task.description}"), transient=True
             ) as prog:
                 prog.add_task(description="Analysing files with pygfried ...", total=None)
                 self.stack.extend(
@@ -74,8 +74,7 @@ class FileHandler:
                     ]
                 )
                 if root_folder.is_file():
-                    self.stack.append(SfInfo(
-                        **pygfried.identify(f"{root_folder}", detailed=True)["files"][0]))  # type: ignore[arg-type]
+                    self.stack.append(SfInfo(**pygfried.identify(f"{root_folder}", detailed=True)["files"][0]))  # type: ignore[arg-type]
 
         # append path values run basic analytics
         for sfinfo in self.stack:
@@ -287,24 +286,24 @@ class FileHandler:
 
     # default run, has a typer interface for the params in identify.py
     def run(
-            self,
-            root_folder: Path | str,
-            assert_integrity: bool = True,
-            apply: bool = True,
-            remove_tmp: bool = True,
-            convert: bool = False,
-            policies_path: Path | None = None,
-            blank: bool = False,
-            extend: bool = False,
-            test_puid: str | None = None,
-            test_policies: bool = False,
-            remove_original: bool = False,
-            mode_strict: bool = False,
-            mode_verbose: bool = True,
-            mode_quiet: bool = True,
-            to_csv: bool = False,
-            tmp_dir: Path | None = None,
-            inspect: bool = False,
+        self,
+        root_folder: Path | str,
+        assert_integrity: bool = True,
+        apply: bool = True,
+        remove_tmp: bool = True,
+        convert: bool = False,
+        policies_path: Path | None = None,
+        blank: bool = False,
+        extend: bool = False,
+        test_puid: str | None = None,
+        test_policies: bool = False,
+        remove_original: bool = False,
+        mode_strict: bool = False,
+        mode_verbose: bool = True,
+        mode_quiet: bool = True,
+        to_csv: bool = False,
+        tmp_dir: Path | None = None,
+        inspect: bool = False,
     ) -> None:
         root_folder = Path(root_folder)
         # set dirs / paths
