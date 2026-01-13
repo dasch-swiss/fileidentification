@@ -131,15 +131,17 @@ class FileHandler:
         jsonfile.comment += f" updating from {outpath}" if extend else ""
         self.ba.blank = []
         for puid in self.ba.puid_unique:
-            # if it is run in extend mode, add the existing policy if there is any
-            if extend and puid in self.policies:
-                jsonfile.policies.update({puid: self.policies[puid]})
+            if puid in default_policies:
+                jsonfile.policies.update({puid: default_policies[puid]})
             # if there are no default values of this filetype and not run in strict mode
             if not self.mode.STRICT and puid not in default_policies:
                 jsonfile.policies.update({puid: PolicyParams(format_name=FMT2EXT[puid]["name"])})
                 self.ba.blank.append(puid)
-            if puid in default_policies:
-                jsonfile.policies.update({puid: default_policies[puid]})
+            # if it is run in extend mode, add the existing policy if there is any
+            if extend and puid in self.policies:
+                jsonfile.policies.update({puid: self.policies[puid]})
+                if puid in self.ba.blank:
+                    self.ba.blank.remove(puid)
             # set remove original
             if puid in jsonfile.policies and self.mode.REMOVEORIGINAL:
                 jsonfile.policies[puid].remove_original = self.mode.REMOVEORIGINAL

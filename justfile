@@ -21,11 +21,19 @@ dockerise:
     @echo "created docker image, added fidr to path"
 
 # move custom policies
-movepolicies:
-    mv -f custom_policies/dasch_policies.json fileidentification/definitions/default_policies.json
+setdasch:
+    mv -f policies/dasch_policies.json fileidentification/definitions/default_policies.json
     
 # dasch docker installation
-dasch: gitreset movepolicies dockerise
+dasch: gitreset setdasch dockerise
+
+# generic docker installation
+docker: gitreset dockerise
+
+# manual istallation
+install:
+    uv sync --no-group dev
+    brew install ffmpeg imagemagick ghostscript --cask libreoffice
 
 # Update dependencies
 update:
