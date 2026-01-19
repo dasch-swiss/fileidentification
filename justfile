@@ -12,7 +12,7 @@ gitreset:
     git merge '@{u}'
     @echo "reset to latest git version"
 
-# create docker image and entry script
+# create docker image and link entry script
 dockerise:
     docker build -t fileidentification .
     @if [ ! -d $HOME/.local/bin ]; then mkdir -p $HOME/.local/bin && echo "export PATH=\"${HOME}/.local/bin:\$PATH\"" | tee -a $HOME/.{bash,zsh}rc ; fi
@@ -20,20 +20,21 @@ dockerise:
     @if [ ! -L $HOME/.local/bin/fidr ]; then ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr ; fi
     @echo "created docker image, added fidr to path"
 
-# move custom policies
+# set DaSCH policies as default
 setdasch:
     mv -f policies/dasch_policies.json fileidentification/definitions/default_policies.json
     
-# dasch docker installation
+# DaSCH docker installation
 dasch: gitreset setdasch dockerise
 
 # generic docker installation
 docker: gitreset dockerise
 
-# manual istallation
+# manual installation macOS
 install:
     uv sync --no-group dev
-    brew install ffmpeg imagemagick ghostscript --cask libreoffice
+    brew install ffmpeg imagemagick ghostscript
+    brew install --cask libreoffice
 
 # Update dependencies
 update:
