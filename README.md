@@ -7,7 +7,7 @@ It uses [pygfried](https://pypi.org/project/pygfried/)
 ffmpeg, imagemagick (optionally inkscape) and LibreOffice.
 If you are not using fileidentification a lot and don't want to install these programs,
 you can run the script in a docker container.
-There is a dockerfile ready, the current docker image is still heavy though (1.1 G).
+There is a dockerfile ready, the current docker image is still heavy though (1.3 G).
 
 Most probable use case might be when you need to test and possibly convert a huge number of files
 and you don't know in advance what file types you are dealing with.
@@ -94,6 +94,8 @@ uv run identify.py --help
 ```
 
 ## Main Tasks Explained
+
+`uv run identify.py` is equivalent to `fidr` -> the entry script depending on your installation.
 
 ### Detect File Formats - Generate Conversion Policies
 
