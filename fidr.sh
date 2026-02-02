@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# help
+if [[ $1 == "--help" ]]; then
+      docker run --rm -t fileidentification --help
+      exit 0
+fi
+
 # assert path
 if [[ !  $(realpath "$1") ]]; then
   exit 1
