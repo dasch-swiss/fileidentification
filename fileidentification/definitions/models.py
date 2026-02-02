@@ -228,7 +228,7 @@ def sfinfo2csv(sfinfo: SfInfo) -> dict[str, str | int]:
     if sfinfo.media_info:
         res["media_info"] = sfinfo.media_info[0].msg
     if sfinfo.processing_logs:
-        res["processing_logs"] = " ; ".join([el.msg for el in sfinfo.processing_logs if el.name == "filehandler"])
+        res["processing_logs"] = " ; ".join([el.msg for el in sfinfo.processing_logs])
     if sfinfo.derived_from:
         res["derived_from"] = f"{sfinfo.derived_from.filename}"
     return res
