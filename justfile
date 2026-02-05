@@ -17,7 +17,8 @@ dockerise:
     docker build -t fileidentification .
     @if [ ! -d $HOME/.local/bin ]; then mkdir -p $HOME/.local/bin && echo "export PATH=\"${HOME}/.local/bin:\$PATH\"" | tee -a $HOME/.{bash,zsh}rc ; fi
     chmod +x ./fidr.sh
-    @if [ ! -L $HOME/.local/bin/fidr ]; then ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr ; fi
+    @if [ -L $HOME/.local/bin/fidr ]; then rm $HOME/.local/bin/fidr ; fi
+    ln -s `pwd`/fidr.sh $HOME/.local/bin/fidr
     @echo "created docker image, added fidr to path"
 
 # set DaSCH policies as default
