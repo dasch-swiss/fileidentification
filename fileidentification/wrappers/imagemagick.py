@@ -19,7 +19,7 @@ def imagemagick_collect_warnings(file: Path, verbose: bool) -> tuple[bool, str, 
     std_err = res.stderr.replace(f"{file.parent}/", "")
 
     # check if the warnings have an error that the file is not or only partially readable
-    if res.stderr and any(msg in std_err for msg in ErrMsgIM):
+    if std_err and any(msg in std_err for msg in ErrMsgIM):
         return True, std_err, specs
     return False, std_err, specs
 

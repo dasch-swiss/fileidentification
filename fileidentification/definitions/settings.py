@@ -46,15 +46,16 @@ PDFSETTINGS = ':writer_pdf_Export:{"SelectPdfVersion":{"type":"long","value":"2"
 
 
 CSVFIELDS = [
+    "status",
     "filename",
     "filesize",
     "md5",
     "modified",
     "errors",
     "processed_as",
+    "warnings",
     "media_info",
     "processing_logs",
-    "status",
     "derived_from",
 ]
 

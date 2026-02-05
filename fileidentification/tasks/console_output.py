@@ -57,13 +57,13 @@ def print_diagnostic(log_tables: LogTables, mode: Mode) -> None:
             secho("\n----------- Errors -----------", bold=True)
             for sfinfo in log_tables.diagnostics[FDMsg.ERROR.name]:
                 secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}", bold=True)
-                _print_logs(sfinfo.processing_logs)
+                _print_logs(sfinfo.warnings)
         if mode.VERBOSE and not mode.QUIET:
             if FDMsg.WARNING.name in log_tables.diagnostics:
                 secho("\n----------- Warnings -----------", bold=True)
                 for sfinfo in log_tables.diagnostics[FDMsg.WARNING.name]:
                     secho(f"\n{_format_bite_size(sfinfo.filesize): >10}    {sfinfo.filename}", bold=True)
-                    _print_logs(sfinfo.processing_logs)
+                    _print_logs(sfinfo.warnings)
             if FDMsg.EXTMISMATCH.name in log_tables.diagnostics:
                 secho("\n----------- Extension mismatch -----------", bold=True)
                 for sfinfo in log_tables.diagnostics[FDMsg.EXTMISMATCH.name]:

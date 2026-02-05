@@ -42,6 +42,7 @@ class SfInfo(BaseModel):
     status: Status = Field(default_factory=Status)
     processed_as: str | None = None
     media_info: list[LogMsg] = Field(default_factory=list[LogMsg])
+    warnings: list[LogMsg] = Field(default_factory=list[LogMsg])
     processing_logs: list[LogMsg] = Field(default_factory=list[LogMsg])
     # if converted
     derived_from: Self | None = None
@@ -227,6 +228,8 @@ def sfinfo2csv(sfinfo: SfInfo) -> dict[str, str | int]:
         res["processed_as"] = sfinfo.processed_as
     if sfinfo.media_info:
         res["media_info"] = sfinfo.media_info[0].msg
+    if sfinfo.warnings:
+        res["warnings"] = " ; ".join([el.msg for el in sfinfo.warnings])
     if sfinfo.processing_logs:
         res["processing_logs"] = " ; ".join([el.msg for el in sfinfo.processing_logs])
     if sfinfo.derived_from:
