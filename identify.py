@@ -13,7 +13,7 @@ def main(
         typer.Option(
             "--assert-file-integrity",
             "-i",
-            help="probe the files in the selected folder and remove corrupt files",
+            help="probe the files in the selected root_folder and remove corrupt files",
         ),
     ] = False,
     apply: Annotated[
@@ -26,8 +26,8 @@ def main(
         typer.Option(
             "--remove-tmp",
             "-r",
-            help="removes all temporary items and moves the converted files to the folder of its original file"
-            "[with -x: it replaces the original files with the converted one]",
+            help="remove all temporary items and move the converted files to the folder of its original file"
+            "with -x: it replace the original files with the converted one",
         ),
     ] = False,
     tmp_dir: Annotated[Path | None, typer.Option("--tmp-dir", help="set a custom tmp directory")] = None,
@@ -48,7 +48,7 @@ def main(
         typer.Option(
             "--extend-policies",
             "-e",
-            help="append filetypes found in root_folder to the given policies if they are missing in it",
+            help="append filetypes found in the selected root_folder to the given policies if they are missing in it",
         ),
     ] = False,
     test_puid: Annotated[
@@ -56,7 +56,7 @@ def main(
         typer.Option(
             "--test-filetype",
             "-tf",
-            help="test a puid from the policies with a respective sample of the directory",
+            help="test a puid from the policies with a respective sample of the selected root_folder",
         ),
     ] = None,
     test_policies: Annotated[
@@ -64,7 +64,7 @@ def main(
         typer.Option(
             "--test",
             "-t",
-            help="test all file conversions from the policies with a respective sample of the directory",
+            help="test all file conversions from the policies with a respective sample of the selected root_folder",
         ),
     ] = False,
     remove_original: Annotated[
@@ -73,7 +73,7 @@ def main(
             "--remove-original",
             "-x",
             help="when generating policies: it sets the remove_original flag to true (default false)."
-            "[with -r: the the remove_original flag in the policies is ignored and originals are removed]",
+            "with -r: the the remove_original flag in the policies is ignored and originals are removed",
         ),
     ] = False,
     mode_strict: Annotated[

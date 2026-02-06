@@ -75,7 +75,7 @@ class PVErr(StrEnum):
 class PLMsg(StrEnum):
     """policy log messages"""
 
-    FALLBACK = "fmt not detected, fall back on ext"
+    FALLBACK = "fmt not detected, fallback on extension"
     NOTINPOLICIES = "file format is not in policies and strict is set to true"
     SKIPPED = "file format is not in policies, skipped"
 

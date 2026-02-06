@@ -1,12 +1,5 @@
 #!/bin/bash
-
-# help
-if [[ $1 == "--help" ]]; then
-      docker run --rm -t fileidentification --help
-      exit 0
-fi
-
-# parse the args and store potential paths for volumes to mount in docker
+# parse the args and options and store potential paths for volumes to mount in docker
 # set relative path to absolute
 add_volumes=()
 params=()
