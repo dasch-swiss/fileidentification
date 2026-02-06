@@ -13,34 +13,34 @@ def main(
         typer.Option(
             "--assert-file-integrity",
             "-i",
-            help="probe the files in the selected root_folder and remove corrupt files",
+            help="probe the files in the selected root_folder and remove corrupt files.",
         ),
     ] = False,
     apply: Annotated[
         bool,
-        typer.Option("--apply", "-a", help="apply the policies and convert the pending files"),
+        typer.Option("--apply", "-a", help="apply the policies and convert the pending files."),
     ] = False,
-    convert: Annotated[bool, typer.Option("--convert", help="re-convert failed pending files")] = False,
+    convert: Annotated[bool, typer.Option("--convert", help="re-convert failed pending files.")] = False,
     remove_tmp: Annotated[
         bool,
         typer.Option(
             "--remove-tmp",
             "-r",
-            help="remove all temporary items and move the converted files to the folder of its original file"
-            "with -x: it replace the original files with the converted one",
+            help="remove all temporary items and move the converted files to the folder of its original file. "
+            "when run with -x: replace the original files with the converted ones.",
         ),
     ] = False,
-    tmp_dir: Annotated[Path | None, typer.Option("--tmp-dir", help="set a custom tmp directory")] = None,
+    tmp_dir: Annotated[Path | None, typer.Option("--tmp-dir", help="set a custom tmp directory.")] = None,
     policies_path: Annotated[
         Path | None,
-        typer.Option("--policies-path", "-p", help="path to the json file with the policies"),
+        typer.Option("--policies-path", "-p", help="path to the json file with the policies."),
     ] = None,
     blank: Annotated[
         bool,
         typer.Option(
             "--blank",
             "-b",
-            help="create a blank policies.json based on the files in the dir",
+            help="create a blank _policies.json based on the files in the dir.",
         ),
     ] = False,
     extend: Annotated[
@@ -48,7 +48,7 @@ def main(
         typer.Option(
             "--extend-policies",
             "-e",
-            help="append filetypes found in the selected root_folder to the given policies if they are missing in it",
+            help="append filetypes found in the selected root_folder to the given policies if they are missing in it.",
         ),
     ] = False,
     test_puid: Annotated[
@@ -56,7 +56,7 @@ def main(
         typer.Option(
             "--test-filetype",
             "-tf",
-            help="test a puid from the policies with a respective sample of the selected root_folder",
+            help="test a puid from the policies with a respective sample of the selected root_folder.",
         ),
     ] = None,
     test_policies: Annotated[
@@ -64,7 +64,7 @@ def main(
         typer.Option(
             "--test",
             "-t",
-            help="test all file conversions from the policies with a respective sample of the selected root_folder",
+            help="test all file conversions from the policies with a respective sample of the selected root_folder.",
         ),
     ] = False,
     remove_original: Annotated[
@@ -72,8 +72,8 @@ def main(
         typer.Option(
             "--remove-original",
             "-x",
-            help="when generating policies: it sets the remove_original flag to true (default false)."
-            "with -r: the the remove_original flag in the policies is ignored and originals are removed",
+            help="when generating policies: it sets the remove_original flag to true (default false). "
+            "when run with -r: the remove_original flag in the policies is ignored and originals are replaced.",
         ),
     ] = False,
     mode_strict: Annotated[
@@ -81,8 +81,8 @@ def main(
         typer.Option(
             "--strict",
             "-s",
-            help="when generating policies: non default filetypes are not added as blank policies."
-            "when applying policies: moves the files that are not listed in the policies to folder _REMOVED.",
+            help="when generating policies: non default filetypes are not added as blank policies. "
+            "when run with -a: move the files that are not listed in the policies to folder _REMOVED.",
         ),
     ] = False,
     mode_verbose: Annotated[
@@ -90,12 +90,12 @@ def main(
         typer.Option(
             "--verbose",
             "-v",
-            help="catches more warnings on video and image files during the tests",
+            help="verbose probing on video, audio and image files.",
         ),
     ] = False,
-    mode_quiet: Annotated[bool, typer.Option("--quiet", "-q", help="just print errors and warnings")] = False,
-    to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json")] = False,
-    inspect: Annotated[bool, typer.Option("--inspect", help="inspect the files without any modification")] = False,
+    mode_quiet: Annotated[bool, typer.Option("--quiet", "-q", help="just print errors and warnings.")] = False,
+    to_csv: Annotated[bool, typer.Option("--csv", help="get a csv out of the log.json.")] = False,
+    inspect: Annotated[bool, typer.Option("--inspect", help="inspect the files without any modification.")] = False,
 ) -> None:
     fh = FileHandler()
     fh.run(
