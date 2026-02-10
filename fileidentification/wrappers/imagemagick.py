@@ -1,6 +1,8 @@
 import subprocess
 from pathlib import Path
 
+from fileidentification.definitions.settings import ErrMsgIM
+
 
 def imagemagick_collect_warnings(file: Path, verbose: bool) -> tuple[bool, str, str]:
     """
@@ -9,22 +11,20 @@ def imagemagick_collect_warnings(file: Path, verbose: bool) -> tuple[bool, str, 
     """
 
     cmd = ["identify", "-format", "%m %wx%h %g %z-bit %[channels]", str(file)]
+    if verbose:
+        cmd = ["identify", "-verbose", "-regard-warnings", "-format", "%m %wx%h %g %z-bit %[channels]", str(file)]
+
     res = subprocess.run(cmd, check=False, capture_output=True, text=True)
     specs = res.stdout.replace(f"{file.parent}/", "")
     std_err = res.stderr.replace(f"{file.parent}/", "")
 
-    if verbose:
-        cmd_verbose = ["identify", "-verbose", "-regard-warnings", str(file)]
-        res_verbose = subprocess.run(cmd_verbose, check=False, capture_output=True, text=True)
-        std_err = res_verbose.stderr.replace(f"{file.parent}/", "")
-
-    # rely on identify without -regard-warnings whether file is corrupt, but collect warnings
-    if res.stderr:
+    # check if the warnings have an error that the file is not or only partially readable
+    if std_err and any(msg in std_err for msg in ErrMsgIM):
         return True, std_err, specs
     return False, std_err, specs
 
 
 def imagemagick_media_info(file: Path) -> str:
-    cmd = ["identify", "-format", "%m %wx%h %g %z-bit %[channels]", str(file)]
+    cmd = ["identify", "-ping", "-format", "%m %wx%h %g %z-bit %[channels]", str(file)]
     res = subprocess.run(cmd, check=False, capture_output=True, text=True)
     return res.stdout.replace(f"{file}/", "")

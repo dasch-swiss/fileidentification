@@ -46,15 +46,16 @@ PDFSETTINGS = ':writer_pdf_Export:{"SelectPdfVersion":{"type":"long","value":"2"
 
 
 CSVFIELDS = [
+    "status",
     "filename",
     "filesize",
     "md5",
     "modified",
     "errors",
     "processed_as",
+    "warnings",
     "media_info",
     "processing_logs",
-    "status",
     "derived_from",
 ]
 
@@ -74,7 +75,7 @@ class PVErr(StrEnum):
 class PLMsg(StrEnum):
     """policy log messages"""
 
-    FALLBACK = "fmt not detected, fall back on ext"
+    FALLBACK = "fmt not detected, fallback on extension"
     NOTINPOLICIES = "file format is not in policies and strict is set to true"
     SKIPPED = "file format is not in policies, skipped"
 
@@ -100,3 +101,13 @@ class REencMsg(StrEnum):
     """text in log for smaller errors that can be solved with re encoding the file"""
 
     ffmpeg1 = "A non-intra slice in an IDR NAL unit"
+
+
+class ErrMsgIM(StrEnum):
+    """text in warnings that indicate that the file is not or only partially readable"""
+
+    magic1 = "identify: Cannot read"
+    magic2 = "identify: Sanity check on directory count failed"
+    magic3 = "identify: Failed to read directory"
+    magic4 = "identify: insufficient image data in file "
+    magic5 = "premature end of data segment"

@@ -81,13 +81,13 @@ def _has_error(sfinfo: SfInfo, pbin: str, log_tables: LogTables, verbose: bool) 
     # get the specs and errors
     match pbin:
         case Bin.FFMPEG:
-            error, stdout, specs = ffmpeg_collect_warnings(sfinfo.path, verbose=verbose)
+            error, stderr, specs = ffmpeg_collect_warnings(sfinfo.path, verbose=verbose)
             # see if warning needs file to be re-encoded
-            if any(msg in stdout for msg in REencMsg):
+            if any(msg in stderr for msg in REencMsg):
                 sfinfo.processing_logs.append(LogMsg(name="filehandler", msg="file flagged for reencoding"))
                 sfinfo.status.pending = True
         case Bin.MAGICK:
-            error, stdout, specs = imagemagick_collect_warnings(sfinfo.path, verbose=verbose)
+            error, stderr, specs = imagemagick_collect_warnings(sfinfo.path, verbose=verbose)
         case _:
             # returns False if bin is soffice or empty string (means no tests)
             # TODO: inspection for other files than Audio/Video/IMAGE
@@ -96,11 +96,11 @@ def _has_error(sfinfo: SfInfo, pbin: str, log_tables: LogTables, verbose: bool) 
     if specs and not sfinfo.media_info:
         sfinfo.media_info.append(LogMsg(name=pbin, msg=specs))
     if error:
-        sfinfo.processing_logs.append(LogMsg(name=pbin, msg=stdout))
+        sfinfo.warnings.append(LogMsg(name=pbin, msg=stderr))
         log_tables.diagnostics_add(sfinfo, FDMsg.ERROR)
         return True
     # if warnings but file is readable
-    if stdout:
-        sfinfo.processing_logs.append(LogMsg(name=pbin, msg=stdout))
+    if stderr:
+        sfinfo.warnings.append(LogMsg(name=pbin, msg=stderr))
         log_tables.diagnostics_add(sfinfo, FDMsg.WARNING)
     return False
