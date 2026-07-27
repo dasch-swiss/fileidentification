@@ -118,9 +118,11 @@ def print_processing_errors(journal: RunJournal) -> None:
 
 def _print_file_header(filename: Path, filesize: int, s: FDMsg | str) -> None:
     """Print a file's name (in the section color) with its size dimmed alongside."""
-    style = "red" if s in  [FDMsg.ERROR, "processing error", "siegfried error"] else "yellow"
+    style = "red" if s in [FDMsg.ERROR, "processing error", "siegfried error"] else "yellow"
     console.print(
-        Text.assemble((f"[{s}] ", f"bold {style}"), (f"{filename}", f"bold"), (f"  ({_format_bite_size(filesize)})", "dim")),
+        Text.assemble(
+            (f"[{s}] ", f"bold {style}"), (f"{filename}", "bold"), (f"  ({_format_bite_size(filesize)})", "dim")
+        ),
         soft_wrap=True,
     )
 
