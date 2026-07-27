@@ -156,11 +156,11 @@ def apply_policy(sfinfo: SfInfo, policies: Policies, ws: Workspace, journal: Run
     if puid not in policies:
         # in strict mode, move file
         if strict:
-            sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=f"{PLMsg.NOTINPOLICIES}"))
+            sfinfo.processing_logs.append(LogMsg(name="fidr", msg=f"{PLMsg.NOTINPOLICIES}"))
             remove(sfinfo, ws, journal)
             return
         # just flag it as skipped
-        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=f"{PLMsg.SKIPPED}"))
+        sfinfo.processing_logs.append(LogMsg(name="fidr", msg=f"{PLMsg.SKIPPED}"))
         return
 
     # case where file needs to be converted

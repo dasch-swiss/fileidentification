@@ -23,7 +23,7 @@ def remove(sfinfo: SfInfo, ws: Workspace, journal: RunJournal) -> None:
         shutil.move(ws.abs_path(sfinfo.filename), dest)
         sfinfo.status.removed = True
     except OSError as e:
-        journal.record_error(LogMsg(name="filehandler", msg=str(e)), sfinfo)
+        journal.record_error(LogMsg(name="fidr", msg=str(e)), sfinfo)
 
 
 def move_tmp(
@@ -62,7 +62,7 @@ def move_tmp(
             sfinfo.status.added = True
             sfinfo.dest = None
         except OSError as e:
-            journal.record_error(LogMsg(name="filehandler", msg=str(e)), sfinfo)
+            journal.record_error(LogMsg(name="fidr", msg=str(e)), sfinfo)
 
     prune_empty_dirs(ws.tmp_dir)
 

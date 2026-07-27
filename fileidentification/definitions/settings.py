@@ -105,8 +105,8 @@ class FDMsg(StrEnum):
     """file diagnostic message"""
 
     EMPTYSOURCE = "empty source"
-    ERROR = "file is corrupt"
-    WARNING = "file has warnings"
+    ERROR = "error"
+    WARNING = "warning"
     EXTMISMATCH = "extension mismatch"
 
 

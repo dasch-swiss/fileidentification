@@ -22,9 +22,9 @@ def print_siegfried_errors(ba: BasicAnalytics) -> None:
     if not ba.siegfried_errors:
         return
     console.line()
-    console.rule("[bold red]siegfried read errors", style="red", align="left")
     for sfinfo in ba.siegfried_errors:
-        console.print(Text(f"{sfinfo.filename}\n{sfinfo.errors}", style="red"), soft_wrap=True)
+        _print_file_header(sfinfo.filename, sfinfo.filesize, "siegfried error")
+        _print_logs([LogMsg(name="siegfried", msg=sfinfo.errors)])
         console.line()
     console.line()
 
@@ -68,17 +68,14 @@ def print_fmts(puids: list[str], ba: BasicAnalytics, policies: Policies, mode: M
     console.print(table)
 
 
-def _print_bucket(journal: RunJournal, severity: FDMsg, title: str) -> None:
+def _print_bucket(journal: RunJournal, diagnostics: FDMsg) -> None:
     """Print one diagnostics bucket: each file, then its processing logs for context."""
-    sfinfos = journal.diagnostics.get(severity.name)
+    sfinfos = journal.diagnostics.get(diagnostics.name)
     if not sfinfos:
         return
-    style = "red" if severity == FDMsg.ERROR else "yellow"
-    console.line()
-    console.rule(f"[bold {style}]{title}", style=style, align="left")
     console.line()
     for sfinfo in sfinfos:
-        _print_file_header(sfinfo.filename, sfinfo.filesize, style)
+        _print_file_header(sfinfo.filename, sfinfo.filesize, diagnostics)
         _print_logs(sfinfo.processing_logs)
         console.line()
     console.line()
@@ -87,9 +84,9 @@ def _print_bucket(journal: RunJournal, severity: FDMsg, title: str) -> None:
 def print_diagnostic(journal: RunJournal, mode: Mode) -> None:
     """Print corruption errors always, and (unless quiet) warnings and extension mismatches."""
     if not mode.QUIET:
-        _print_bucket(journal, FDMsg.EXTMISMATCH, "Extension Mismatch")
-        _print_bucket(journal, FDMsg.WARNING, "Warnings")
-    _print_bucket(journal, FDMsg.ERROR, "Errors")
+        _print_bucket(journal, FDMsg.EXTMISMATCH)
+        _print_bucket(journal, FDMsg.WARNING)
+    _print_bucket(journal, FDMsg.ERROR)
 
 
 def print_duplicates(duplicates: dict[str, list[Path]], mode: Mode) -> None:
@@ -102,7 +99,7 @@ def print_duplicates(duplicates: dict[str, list[Path]], mode: Mode) -> None:
     for md5, paths in duplicates.items():
         tree = Tree(Text(f"MD5 {md5}"))
         for path in paths:
-            tree.add(Text(f"{path}"))
+            tree.add(Text(f"{path}"), style="bold")
         console.print(tree)
         console.line()
     console.line()
@@ -113,18 +110,17 @@ def print_processing_errors(journal: RunJournal) -> None:
     if not journal.processing_errors:
         return
     console.line()
-    console.rule("[bold red]Processing Errors", style="red", align="left")
-    console.line()
     for msg, sfinfo, _ in journal.processing_errors:
-        _print_file_header(sfinfo.filename, sfinfo.filesize, "red")
+        _print_file_header(sfinfo.filename, sfinfo.filesize, "processing error")
         _print_logs([msg])
     console.line()
 
 
-def _print_file_header(filename: Path, filesize: int, style: str) -> None:
+def _print_file_header(filename: Path, filesize: int, s: FDMsg | str) -> None:
     """Print a file's name (in the section color) with its size dimmed alongside."""
+    style = "red" if s in  [FDMsg.ERROR, "processing error", "siegfried error"] else "yellow"
     console.print(
-        Text.assemble((f"{filename}", f"bold {style}"), (f"  ({_format_bite_size(filesize)})", "dim")),
+        Text.assemble((f"[{s}] ", f"bold {style}"), (f"{filename}", f"bold"), (f"  ({_format_bite_size(filesize)})", "dim")),
         soft_wrap=True,
     )
 

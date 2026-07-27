@@ -22,7 +22,7 @@ def assert_file_integrity(
             ext = "." + FMT_INFO[sfinfo.processed_as].file_extensions[-1]  # type: ignore[index]
             _rename(sfinfo, ext, ws, journal)
         else:
-            sfinfo.processing_logs.append(LogMsg(name="filehandler", msg="you should manually rename the file"))
+            sfinfo.processing_logs.append(LogMsg(name="fidr", msg="you should manually rename the file"))
 
 
 def inspect_file(sfinfo: SfInfo, policies: Policies, ws: Workspace, journal: RunJournal, verbose: bool) -> FDMsg | None:
@@ -32,7 +32,7 @@ def inspect_file(sfinfo: SfInfo, policies: Policies, ws: Workspace, journal: Run
     Populates sfinfo.media_info and records any warnings / errors in the journal (which also logs them on the file).
     """
     if not sfinfo.processed_as:
-        msg = LogMsg(name="filehandler", msg=f"{FPMsg.PUIDFAIL} for {sfinfo.filename}", level=LogLevel.ERROR)
+        msg = LogMsg(name="fidr", msg=f"{FPMsg.PUIDFAIL} for {sfinfo.filename}", level=LogLevel.ERROR)
         sfinfo.processing_logs.append(msg)  # make it persistent in _log.json
         journal.record_error(msg, sfinfo)
         return None
@@ -44,7 +44,7 @@ def inspect_file(sfinfo: SfInfo, policies: Policies, ws: Workspace, journal: Run
             tool = tool_from_mime(mime)
             if tool:
                 msgm = f"bin not specified in policies, using {tool.bin} according to the file mimetype for probing"
-                sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msgm))
+                sfinfo.processing_logs.append(LogMsg(name="fidr", msg=msgm))
                 break
     # check if the file throws any error, warnings while open/processing it with the respective tool
     if _has_error(sfinfo, tool, ws, journal, verbose):
@@ -57,7 +57,7 @@ def inspect_file(sfinfo: SfInfo, policies: Policies, ws: Workspace, journal: Run
     # extension mismatch
     if sfinfo.matches[0]["warning"] == FDMsg.EXTMISMATCH:
         msg_txt = f"expecting one of the following ext: {list(FMT_INFO[sfinfo.processed_as].file_extensions)}"
-        journal.diagnose(sfinfo, FDMsg.EXTMISMATCH, LogMsg(name="filehandler", msg=msg_txt))
+        journal.diagnose(sfinfo, FDMsg.EXTMISMATCH, LogMsg(name="fidr", msg=msg_txt))
         return FDMsg.EXTMISMATCH
 
     return None
@@ -77,9 +77,9 @@ def _rename(sfinfo: SfInfo, ext: str, ws: Workspace, journal: RunJournal) -> Non
         source.rename(dest)
         msg = f"did rename {source.name} -> {dest.name}"
         sfinfo.filename = ws.relativize(dest)
-        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=msg))
+        sfinfo.processing_logs.append(LogMsg(name="fidr", msg=msg))
     except OSError as e:
-        journal.record_error(LogMsg(name="filehandler", msg=str(e)), sfinfo)
+        journal.record_error(LogMsg(name="fidr", msg=str(e)), sfinfo)
 
 
 def _has_error(sfinfo: SfInfo, tool: MediaTool | None, ws: Workspace, journal: RunJournal, verbose: bool) -> bool:
@@ -99,7 +99,7 @@ def _has_error(sfinfo: SfInfo, tool: MediaTool | None, ws: Workspace, journal: R
 
     # see if a warning needs the file to be re-encoded
     if result.needs_reencode:
-        sfinfo.processing_logs.append(LogMsg(name="filehandler", msg="file flagged for reencoding"))
+        sfinfo.processing_logs.append(LogMsg(name="fidr", msg="file flagged for reencoding"))
         sfinfo.status.pending = True
 
     if result.specs and not sfinfo.media_info:

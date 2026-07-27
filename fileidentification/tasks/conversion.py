@@ -49,19 +49,19 @@ def _verify(target: Path, sfinfo: SfInfo, expected: list[str], ws: Workspace) ->
     """
     if not target.is_file():
         # conversion error, nothing to analyse
-        return None, LogMsg(name="filehandler", msg=f"{FPMsg.CONVFAILED}", level=LogLevel.ERROR)
+        return None, LogMsg(name="fidr", msg=f"{FPMsg.CONVFAILED}", level=LogLevel.ERROR)
 
     target_sfinfo = SfInfo(**pygfried.identify(f"{target}", detailed=True)["files"][0])  # type: ignore[arg-type]
     if target_sfinfo.processed_as not in expected:
         p_error = f" did expect {expected}, got {target_sfinfo.processed_as} instead"
-        return None, LogMsg(name="filehandler", msg=f"{FPMsg.NOTEXPECTEDFMT}{p_error}", level=LogLevel.ERROR)
+        return None, LogMsg(name="fidr", msg=f"{FPMsg.NOTEXPECTEDFMT}{p_error}", level=LogLevel.ERROR)
 
     # success: dest holds the future home next to the original. move_tmp relocates it and rewrites filename.
     target_sfinfo.filename = target.relative_to(ws.tmp_dir)
     target_sfinfo.dest = sfinfo.filename.parent
     target_sfinfo.derived_from = sfinfo
     sfinfo.status.pending = False
-    sfinfo.processing_logs.append(LogMsg(name="filehandler", msg=f"converted -> {target_sfinfo.filename}"))
+    sfinfo.processing_logs.append(LogMsg(name="fidr", msg=f"converted -> {target_sfinfo.filename}"))
     return target_sfinfo, None
 
 
