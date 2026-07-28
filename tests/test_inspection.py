@@ -279,9 +279,9 @@ class TestSipiGuard:
     def test_helper_flags_and_diagnoses_on_sipi_failure(self, monkeypatch: pytest.MonkeyPatch) -> None:
         fake = SimpleNamespace(probe=lambda path, verbose: ProbeResult(is_corrupt=True, warnings="sipi boom", specs=""))
         monkeypatch.setattr(insp, "tool_for", lambda _bin: fake)
-        s = make_sfinfo("i.gif", puid="fmt/4")
+        s = make_sfinfo("i.gif", puid="fmt/4")  # not in policies -> kept -> guarded
         journal = RunJournal()
-        assert _sipi_guard(s, make_ws(), journal) is True
+        assert _sipi_guard(s, make_ws(), journal, {}) is True
         assert FDMsg.ERROR.name in journal.diagnostics  # bucketed for the report
         assert any("sipi boom" in log.msg for log in s.processing_logs)
 
@@ -289,4 +289,13 @@ class TestSipiGuard:
         fake = SimpleNamespace(probe=lambda path, verbose: ProbeResult(is_corrupt=False, warnings="", specs=""))
         monkeypatch.setattr(insp, "tool_for", lambda _bin: fake)
         s = make_sfinfo("i.jp2", puid="x-fmt/392")
-        assert _sipi_guard(s, make_ws(), RunJournal()) is False
+        assert _sipi_guard(s, make_ws(), RunJournal(), {}) is False
+
+    def test_helper_skips_files_that_will_be_converted(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # sipi would flag it, but a to-be-converted file (accepted=False) is excluded: sipi gets the output,
+        # and quarantining it here would remove it before the conversion runs (e.g. Canon CRW fmt/592 -> tif)
+        fake = SimpleNamespace(probe=lambda path, verbose: ProbeResult(is_corrupt=True, warnings="x", specs=""))
+        monkeypatch.setattr(insp, "tool_for", lambda _bin: fake)
+        s = make_sfinfo("raw.crw", puid="fmt/592")
+        convert = {"fmt/592": PolicyParams(accepted=False, bin="magick", target_container="tif", expected=["fmt/353"])}
+        assert _sipi_guard(s, make_ws(), RunJournal(), convert) is False

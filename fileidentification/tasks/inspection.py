@@ -64,14 +64,16 @@ def inspect_file(
         return FDMsg.EXTMISMATCH
 
     # DaSCH sipi guard: an image magick considers fine is only kept if sipi can decode it too
-    if sipi_guard and tool is not None and tool.bin == Bin.MAGICK and _sipi_guard(sfinfo, ws, journal):
+    if sipi_guard and tool is not None and tool.bin == Bin.MAGICK and _sipi_guard(sfinfo, ws, journal, policies):
         return FDMsg.ERROR
 
     return None
 
 
-def _sipi_guard(sfinfo: SfInfo, ws: Workspace, journal: RunJournal) -> bool:
-    """DaSCH guard: return True (file treated as corrupt) if sipi cannot decode it. Probes via the sipi MediaTool."""
+def _sipi_guard(sfinfo: SfInfo, ws: Workspace, journal: RunJournal, policies: Policies) -> bool:
+    """Return True if sipi cannot decode it. Return False if the file needs to be converted."""
+    if sfinfo.processed_as in policies and not policies[sfinfo.processed_as].accepted:
+        return False
     tool = tool_for(Bin.SIPI)
     result = tool.probe(ws.abs_path(sfinfo.filename), verbose=False) if tool else None
     if result and result.is_corrupt:
