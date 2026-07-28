@@ -6,7 +6,7 @@ import pytest
 
 from fileidentification.definitions.models import PolicyParams, RunJournal, SfInfo
 from fileidentification.definitions.settings import RMV_DIR
-from fileidentification.tasks.os_tasks import move_tmp, remove
+from fileidentification.tasks.os_tasks import move_tmp, prune_empty_dirs, remove
 from fileidentification.workspace import Workspace
 from tests.conftest import make_sfinfo, make_ws
 
@@ -155,3 +155,12 @@ class TestMoveTmp:
 
         assert lt.processing_errors  # the OSError was captured
         assert not converted.status.added  # move did not complete
+
+
+class TestPruneEmptyDirs:
+    def test_keeps_an_empty_root(self, tmp_path: Path) -> None:
+        # regression: prune must not delete its own root -- write_logs writes _log.json into the tmp dir afterwards
+        root = tmp_path / "tmp"
+        root.mkdir()
+        prune_empty_dirs(root)
+        assert root.is_dir()

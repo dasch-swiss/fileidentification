@@ -7,11 +7,11 @@ from fileidentification.workspace import Workspace
 
 
 def prune_empty_dirs(root: Path) -> None:
-    """Recursively remove empty directories under `root` (bottom-up); no-op if `root` isn't a directory."""
+    """Recursively remove empty directories *under* `root` (bottom-up), keeping `root` itself; no-op if not a dir."""
     if not root.is_dir():
         return
     for path, _, _ in os.walk(root, topdown=False):
-        if not os.listdir(path):  # noqa: PTH208
+        if Path(path) != root and not os.listdir(path):  # noqa: PTH208
             Path(path).rmdir()
 
 
