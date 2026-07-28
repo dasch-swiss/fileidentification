@@ -421,3 +421,29 @@ def test_corrupt_folder_is_quarantined(stage: Callable[..., Path], fidr_image: s
     # negative control: the valid image is untouched
     assert (work / good).is_file(), f"{good} should not be removed"
     assert by_name[good]["status"].get("removed") is False
+
+
+def test_sipi_guard_quarantines_undecodable_image(stage: Callable[..., Path], fidr_image: str) -> None:
+    """With sipi_guard on (DaSCH), an image magick reads but sipi cannot decode is quarantined; a valid one stays.
+
+    sipi_reject.tif is a real 32-bit float TIFF: magick decodes it, but SIPI's TIFF reader rejects the bit depth
+    ("Unsupported bits/sample (32)"). The guard is the only thing that catches it — proving the shipped sipi
+    binary runs and the chain works end to end on a genuine image (not just an unsupported container).
+    """
+    good = "SampleJPGImage.jpg"  # negative control: sipi decodes it -> survives
+    reject = "sipi_reject.tif"
+    work = stage(good, reject)
+    (work / "pol.json").write_text('{"name": "t", "comment": "t", "sipi_guard": true, "policies": {}}')
+
+    proc = run_cli(fidr_image, work, "-i", "-p", f"{work}/pol.json")
+    assert proc.returncode == 0, proc.stderr
+
+    # the sipi-undecodable tiff is quarantined, with sipi's reason logged
+    assert not (work / reject).exists()
+    assert list((work / "__fileidentification").rglob(f"_REMOVED/**/{reject}"))
+    rec = next(f for f in _read_log(work)["files"] if f["filename"] == reject)
+    assert rec["status"].get("removed") is True
+    assert any(m["name"] == "sipi" for m in rec.get("processing_logs", []))
+
+    # negative control: the valid jpeg (magick + sipi ok) is untouched
+    assert (work / good).is_file()

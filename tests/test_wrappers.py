@@ -13,6 +13,7 @@ import pytest
 
 from fileidentification.wrappers import ffmpeg as ff
 from fileidentification.wrappers import imagemagick as im
+from fileidentification.wrappers import sipi as sp
 
 
 class TestFfmpeg:
@@ -154,3 +155,45 @@ class TestImagemagick:
         calls = self._patch(monkeypatch, stdout="JPEG 100x100")
         assert im.imagemagick_media_info(Path("i.jpg")) == "JPEG 100x100"
         assert "-ping" in calls[0]
+
+
+class TestSipi:
+    @staticmethod
+    def _patch(
+        monkeypatch: pytest.MonkeyPatch, *, stdout: str = "", stderr: str = "", returncode: int = 0
+    ) -> list[list[str]]:
+        calls: list[list[str]] = []
+
+        def fake_run(cmd: list[str], **kwargs: Any) -> SimpleNamespace:
+            calls.append(cmd)
+            return SimpleNamespace(stdout=stdout, stderr=stderr, returncode=returncode)
+
+        monkeypatch.setattr("fileidentification.wrappers.sipi.subprocess.run", fake_run)
+        return calls
+
+    def test_command_is_generic_verify_json(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        calls = self._patch(monkeypatch)
+        sp.sipi_verify(Path("i.jp2"))
+        assert calls[0] == ["sipi", "verify", "--json", "i.jp2"]
+
+    def test_json_status_error_is_corrupt(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        self._patch(monkeypatch, stdout=json.dumps({"status": "error", "error_message": "boom"}), returncode=1)
+        corrupt, msg = sp.sipi_verify(Path("i.jp2"))
+        assert corrupt is True
+        assert msg == "boom"
+
+    def test_json_status_ok_is_clean(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        self._patch(monkeypatch, stdout=json.dumps({"status": "ok"}))
+        assert sp.sipi_verify(Path("i.jp2")) == (False, "")
+
+    def test_non_json_nonzero_falls_back_to_exit_code(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # v6.2.2 verify prints plain text (not JSON): fall back to the exit code + captured output
+        self._patch(monkeypatch, stderr="verify: failed to decode i.gif", returncode=1)
+        corrupt, msg = sp.sipi_verify(Path("i.gif"))
+        assert corrupt is True
+        assert "failed to decode" in msg
+
+    def test_non_json_zero_is_clean(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # a valid file: empty stdout, exit 0 -> not JSON, but the exit code says OK
+        self._patch(monkeypatch, stdout="", returncode=0)
+        assert sp.sipi_verify(Path("i.jp2")) == (False, "")

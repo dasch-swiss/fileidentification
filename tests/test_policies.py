@@ -250,3 +250,17 @@ class TestResolvePolicies:
         assert res.policies[unknown].format_name == "hand-tuned"
         assert unknown not in (res.blank or [])  # promoted out of the blank list
         assert poljson.is_file()  # extended map written to the default location
+
+    def test_sipi_guard_read_from_the_resolved_file(self, tmp_path: Path) -> None:
+        poljson = tmp_path / "_policies.json"
+        external = tmp_path / "ext.json"
+        external.write_text(json.dumps({"sipi_guard": True, "policies": {"fmt/43": {"accepted": True}}}))
+        res = resolve_policies(["fmt/43"], poljson, Mode(), policies_path=external)
+        assert res.sipi_guard is True
+
+    def test_sipi_guard_defaults_false_and_persists_when_generated(self, tmp_path: Path) -> None:
+        # generating pulls sipi_guard from the default policies (false there) and writes it into the map
+        poljson = tmp_path / "_policies.json"
+        res = resolve_policies(["fmt/43"], poljson, Mode())
+        assert res.sipi_guard is False
+        assert json.loads(poljson.read_text())["sipi_guard"] is False

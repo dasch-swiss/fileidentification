@@ -8,6 +8,7 @@ the branch logic is exercised without any external binary or (except for ``_rena
 """
 
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -15,9 +16,9 @@ import pytest
 from fileidentification.definitions.models import PolicyParams, RunJournal
 from fileidentification.definitions.settings import Bin, FDMsg, FPMsg, LogLevel, REencMsg
 from fileidentification.tasks import inspection as insp
-from fileidentification.tasks.inspection import _has_error, _rename, assert_file_integrity, inspect_file
+from fileidentification.tasks.inspection import _has_error, _rename, _sipi_guard, assert_file_integrity, inspect_file
 from fileidentification.wrappers import tools
-from fileidentification.wrappers.tools import tool_for
+from fileidentification.wrappers.tools import ProbeResult, tool_for
 from tests.conftest import make_sfinfo, make_ws
 
 WS = make_ws()
@@ -238,3 +239,54 @@ class TestAssertFileIntegrity:
         s = make_sfinfo(puid="fmt/43")
         assert_file_integrity(s, {}, WS, RunJournal(), verbose=False)
         assert s.status.probed is True
+
+
+class TestSipiGuard:
+    """The DaSCH sipi guard runs at the end of inspect_file: only for magick-probed images when sipi_guard is set."""
+
+    def test_flags_error_when_guard_on_and_magick(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(insp, "_has_error", lambda *a, **k: False)  # magick considers it fine
+        monkeypatch.setattr(insp, "_sipi_guard", lambda *a: True)  # but sipi cannot decode it
+        s = make_sfinfo(puid="fmt/4", mime="image/gif")  # -> magick via the mime fallback
+        assert inspect_file(s, {}, WS, RunJournal(), verbose=False, sipi_guard=True) == FDMsg.ERROR
+
+    @staticmethod
+    def _guard_spy(monkeypatch: pytest.MonkeyPatch) -> list[bool]:
+        """Record whether _sipi_guard is consulted (and make it 'fail' if it is)."""
+        called: list[bool] = []
+
+        def spy(*_a: Any) -> bool:
+            called.append(True)
+            return True
+
+        monkeypatch.setattr(insp, "_sipi_guard", spy)
+        return called
+
+    def test_not_run_when_guard_off(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(insp, "_has_error", lambda *a, **k: False)
+        called = self._guard_spy(monkeypatch)
+        s = make_sfinfo(puid="fmt/4", mime="image/gif")
+        assert inspect_file(s, {}, WS, RunJournal(), verbose=False, sipi_guard=False) is None
+        assert not called  # the guard is never consulted when off
+
+    def test_not_run_when_tool_not_magick(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(insp, "_has_error", lambda *a, **k: False)
+        called = self._guard_spy(monkeypatch)
+        s = make_sfinfo(puid="fmt/199", mime="video/mp4")  # -> ffmpeg, not magick
+        assert inspect_file(s, {}, WS, RunJournal(), verbose=False, sipi_guard=True) is None
+        assert not called
+
+    def test_helper_flags_and_diagnoses_on_sipi_failure(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        fake = SimpleNamespace(probe=lambda path, verbose: ProbeResult(is_corrupt=True, warnings="sipi boom", specs=""))
+        monkeypatch.setattr(insp, "tool_for", lambda _bin: fake)
+        s = make_sfinfo("i.gif", puid="fmt/4")
+        journal = RunJournal()
+        assert _sipi_guard(s, make_ws(), journal) is True
+        assert FDMsg.ERROR.name in journal.diagnostics  # bucketed for the report
+        assert any("sipi boom" in log.msg for log in s.processing_logs)
+
+    def test_helper_passes_when_sipi_ok(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        fake = SimpleNamespace(probe=lambda path, verbose: ProbeResult(is_corrupt=False, warnings="", specs=""))
+        monkeypatch.setattr(insp, "tool_for", lambda _bin: fake)
+        s = make_sfinfo("i.jp2", puid="x-fmt/392")
+        assert _sipi_guard(s, make_ws(), RunJournal()) is False

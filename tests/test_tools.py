@@ -13,7 +13,7 @@ import pytest
 from fileidentification.definitions.models import PolicyParams
 from fileidentification.definitions.settings import PDFSETTINGS, Bin
 from fileidentification.wrappers import tools
-from fileidentification.wrappers.tools import Ffmpeg, Imagemagick, Soffice, tool_for, tool_from_mime
+from fileidentification.wrappers.tools import Ffmpeg, Imagemagick, Sipi, Soffice, tool_for, tool_from_mime
 
 
 class TestResolution:
@@ -21,6 +21,7 @@ class TestResolution:
         assert isinstance(tool_for(Bin.FFMPEG), Ffmpeg)
         assert isinstance(tool_for(Bin.MAGICK), Imagemagick)
         assert isinstance(tool_for(Bin.SOFFICE), Soffice)
+        assert isinstance(tool_for(Bin.SIPI), Sipi)
 
     def test_tool_for_plain_string_bin(self) -> None:
         # policies carry the bin as a plain str, which must resolve just like the enum
@@ -42,6 +43,7 @@ class TestResolution:
         assert Soffice().serial is True
         assert Ffmpeg().serial is False
         assert Imagemagick().serial is False
+        assert Sipi().serial is False
 
 
 class TestBuildCommand:
@@ -72,6 +74,11 @@ class TestBuildCommand:
         args = self._args(bin="soffice", target_container="docx", processing_args="--headless --convert-to")
         cmd = Soffice().build_command(Path("/in/d.doc"), args, Path("/w/d.docx"), Path("/w"))
         assert "docx" in cmd
+
+    def test_sipi_does_not_convert(self) -> None:
+        # sipi is a probe-only tool: build_command is not implemented
+        with pytest.raises(NotImplementedError):
+            Sipi().build_command(Path("/in/i.jp2"), self._args(bin="sipi"), Path("/w/x"), Path("/w"))
 
 
 class TestReadLog:
@@ -115,6 +122,20 @@ class TestProbe:
 
     def test_soffice_does_not_probe(self) -> None:
         assert Soffice().probe(Path("d.docx"), verbose=False) is None
+
+    def test_sipi_probe_maps_verify_failure(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(tools, "sipi_verify", lambda path: (True, "boom"))
+        result = Sipi().probe(Path("i.jp2"), verbose=False)
+        assert result is not None
+        assert result.is_corrupt is True
+        assert result.warnings == "boom"
+        assert result.specs == ""
+
+    def test_sipi_probe_clean_when_verify_ok(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr(tools, "sipi_verify", lambda path: (False, ""))
+        result = Sipi().probe(Path("i.jp2"), verbose=False)
+        assert result is not None
+        assert result.is_corrupt is False
 
 
 class TestMediaInfo:
