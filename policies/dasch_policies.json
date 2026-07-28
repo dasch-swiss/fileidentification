@@ -1,6 +1,7 @@
 {
     "name": "policies/dasch.json",
     "comment": "some pixelbased images dont need to be converted, as SIPI does convert them to jp2",
+    "sipi_guard": true,
     "policies": {
         "x-fmt/392": {
             "format_name": "JP2 (JPEG 2000 part 1)",

@@ -44,6 +44,7 @@ class Bin(StrEnum):
     MAGICK = "magick"
     FFMPEG = "ffmpeg"
     SOFFICE = "soffice"
+    SIPI = "sipi"
     # INCSCAPE = "inkscape"
     EMPTY = ""
 

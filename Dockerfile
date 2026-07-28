@@ -24,6 +24,9 @@ RUN apt-get install --no-install-recommends -y \
     libreoffice-nogui \
     && rm -rf /var/lib/apt/lists/*
 
+# sipi: DaSCH service-file verifier (statically linked binary, copied from the official image)
+COPY --from=daschswiss/sipi:v6.2.2 /sbin/sipi /usr/local/bin/sipi
+
 WORKDIR /app
 
 # add the py env

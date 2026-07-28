@@ -7,7 +7,7 @@ bin) or ``tool_from_mime`` (from a mimetype); both return None when no tool appl
 import json
 import platform
 import shlex
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from pathlib import Path
 from subprocess import CompletedProcess
@@ -16,6 +16,7 @@ from fileidentification.definitions.models import LogMsg, PolicyParams
 from fileidentification.definitions.settings import PDFSETTINGS, Bin, LOPath, REencMsg
 from fileidentification.wrappers.ffmpeg import ffmpeg_collect_warnings, ffmpeg_media_info
 from fileidentification.wrappers.imagemagick import imagemagick_collect_warnings, imagemagick_media_info
+from fileidentification.wrappers.sipi import sipi_verify
 
 _SOFFICE = LOPath.Linux if platform.system() == LOPath.Linux.name else LOPath.Darwin
 
@@ -44,9 +45,9 @@ class MediaTool(ABC):
     bin: str
     serial: bool = False
 
-    @abstractmethod
     def build_command(self, source: Path, args: PolicyParams, target: Path, wdir: Path) -> list[str]:
-        """Return the argv list that converts ``source`` to ``target`` inside ``wdir``."""
+        """Return the argv that converts ``source`` to ``target`` inside ``wdir`` (probe-only tools don't)."""
+        raise NotImplementedError(f"{self.bin} does not convert")  # noqa: EM102
 
     def read_log(self, result: CompletedProcess[str]) -> str:
         """Return the tool's log output from a finished conversion (stderr by default)."""
@@ -120,7 +121,17 @@ class Soffice(MediaTool):
         return result.stdout + result.stderr
 
 
-_TOOLS: dict[str, MediaTool] = {tool.bin: tool for tool in (Ffmpeg(), Imagemagick(), Soffice())}
+class Sipi(MediaTool):
+    """sipi: validates DaSCH service files (JP2 / pyramidal TIFF). Probe-only guard — does not convert."""
+
+    bin = Bin.SIPI
+
+    def probe(self, path: Path, verbose: bool) -> ProbeResult | None:
+        is_corrupt, warnings = sipi_verify(path)
+        return ProbeResult(is_corrupt=is_corrupt, warnings=warnings, specs="")
+
+
+_TOOLS: dict[str, MediaTool] = {tool.bin: tool for tool in (Ffmpeg(), Imagemagick(), Soffice(), Sipi())}
 
 
 def tool_for(bin_: str) -> MediaTool | None:

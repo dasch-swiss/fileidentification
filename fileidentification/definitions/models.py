@@ -224,10 +224,11 @@ Policies = dict[str, PolicyParams]
 
 
 class PoliciesFile(BaseModel):
-    """On-disk structure of a policies.json: the output path (name), a generated comment, and the PUID->policy map."""
+    """On-disk structure of a policies.json: name, comment, the DaSCH sipi_guard flag, and the PUID->policy map."""
 
     name: Path = Field(default_factory=Path)
     comment: str = Field(default_factory=str)
+    sipi_guard: bool = Field(default=False)
     policies: Policies = Field(default_factory=Policies)
 
 

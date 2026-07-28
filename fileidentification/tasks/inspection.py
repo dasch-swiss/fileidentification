@@ -1,12 +1,12 @@
 from fileidentification.definitions.models import LogMsg, Policies, RunJournal, SfInfo
-from fileidentification.definitions.settings import FMT_INFO, FDMsg, FPMsg, LogLevel
+from fileidentification.definitions.settings import FMT_INFO, Bin, FDMsg, FPMsg, LogLevel
 from fileidentification.tasks.os_tasks import remove
 from fileidentification.workspace import Workspace
 from fileidentification.wrappers.tools import MediaTool, tool_for, tool_from_mime
 
 
 def assert_file_integrity(
-    sfinfo: SfInfo, policies: Policies, ws: Workspace, journal: RunJournal, verbose: bool
+    sfinfo: SfInfo, policies: Policies, ws: Workspace, journal: RunJournal, verbose: bool, sipi_guard: bool = False
 ) -> None:
     """
     Probe the file and act on the result: remove it if corrupt, rename it if the extension is wrong.
@@ -14,7 +14,7 @@ def assert_file_integrity(
     otherwise it is flagged in the diagnostics for a manual rename.
     """
     sfinfo.status.probed = True  # mark it so a re-run does not re-probe / re-log it
-    res: FDMsg | None = inspect_file(sfinfo, policies, ws, journal, verbose)
+    res: FDMsg | None = inspect_file(sfinfo, policies, ws, journal, verbose, sipi_guard)
     if res == FDMsg.ERROR:
         remove(sfinfo, ws, journal)
     if res == FDMsg.EXTMISMATCH:
@@ -25,11 +25,14 @@ def assert_file_integrity(
             sfinfo.processing_logs.append(LogMsg(name="fidr", msg="you should manually rename the file"))
 
 
-def inspect_file(sfinfo: SfInfo, policies: Policies, ws: Workspace, journal: RunJournal, verbose: bool) -> FDMsg | None:
+def inspect_file(
+    sfinfo: SfInfo, policies: Policies, ws: Workspace, journal: RunJournal, verbose: bool, sipi_guard: bool = False
+) -> FDMsg | None:
     """
     Probe the file without making any filesystem changes.
     Returns ERROR if the file is corrupt, EXTMISMATCH if the extension is wrong, or None if the file is OK.
     Populates sfinfo.media_info and records any warnings / errors in the journal (which also logs them on the file).
+    When sipi_guard is set (DaSCH), an image otherwise OK is also run past sipi and marked ERROR if sipi can't decode it.
     """
     if not sfinfo.processed_as:
         msg = LogMsg(name="fidr", msg=f"{FPMsg.PUIDFAIL} for {sfinfo.filename}", level=LogLevel.ERROR)
@@ -60,7 +63,21 @@ def inspect_file(sfinfo: SfInfo, policies: Policies, ws: Workspace, journal: Run
         journal.diagnose(sfinfo, FDMsg.EXTMISMATCH, LogMsg(name="fidr", msg=msg_txt))
         return FDMsg.EXTMISMATCH
 
+    # DaSCH sipi guard: an image magick considers fine is only kept if sipi can decode it too
+    if sipi_guard and tool is not None and tool.bin == Bin.MAGICK and _sipi_guard(sfinfo, ws, journal):
+        return FDMsg.ERROR
+
     return None
+
+
+def _sipi_guard(sfinfo: SfInfo, ws: Workspace, journal: RunJournal) -> bool:
+    """DaSCH guard: return True (file treated as corrupt) if sipi cannot decode it. Probes via the sipi MediaTool."""
+    tool = tool_for(Bin.SIPI)
+    result = tool.probe(ws.abs_path(sfinfo.filename), verbose=False) if tool else None
+    if result and result.is_corrupt:
+        journal.diagnose(sfinfo, FDMsg.ERROR, LogMsg(name=f"{Bin.SIPI}", msg=result.warnings))
+        return True
+    return False
 
 
 def _rename(sfinfo: SfInfo, ext: str, ws: Workspace, journal: RunJournal) -> None:

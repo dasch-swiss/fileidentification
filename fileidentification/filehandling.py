@@ -47,6 +47,7 @@ class FileHandler:
         self.ba = BasicAnalytics()
         self.stack: list[SfInfo] = []
         self.ws: Workspace = Workspace(Path(), Path())  # replaced in run() once root_folder / tmp are resolved
+        self.sipi_guard: bool = False  # DaSCH: verify images with sipi during inspection (set from the policies file)
         self._stack_lock = threading.Lock()
 
     def _build_stack(self, root_folder: Path) -> None:
@@ -101,6 +102,7 @@ class FileHandler:
 
         self.policies = resolution.policies
         self.ba.blank = resolution.blank
+        self.sipi_guard = resolution.sipi_guard
         print_fmts(list(self.ba.puid_unique), self.ba, self.policies, self.mode)
 
     def _test_policies(self, puid: str | None = None) -> None:
@@ -147,7 +149,9 @@ class FileHandler:
         self._run_parallel(
             active,
             "Probing the files ...",
-            lambda sfinfo: inspect_file(sfinfo, self.policies, self.ws, self.journal, self.mode.VERBOSE),
+            lambda sfinfo: inspect_file(
+                sfinfo, self.policies, self.ws, self.journal, self.mode.VERBOSE, self.sipi_guard
+            ),
         )
 
         print_diagnostic(journal=self.journal, mode=self.mode)
@@ -159,7 +163,9 @@ class FileHandler:
         self._run_parallel(
             active,
             "Probing the files ...",
-            lambda sfinfo: assert_file_integrity(sfinfo, self.policies, self.ws, self.journal, self.mode.VERBOSE),
+            lambda sfinfo: assert_file_integrity(
+                sfinfo, self.policies, self.ws, self.journal, self.mode.VERBOSE, self.sipi_guard
+            ),
         )
 
         print_diagnostic(journal=self.journal, mode=self.mode)

@@ -1,6 +1,7 @@
 {
     "name": "default policies",
     "comment": "policies for converting files in regard of long term preservation. please note that it catches some of the most common file formats, but not all",
+    "sipi_guard": false,
     "policies": {
         "x-fmt/392": {
             "format_name": "JP2 (JPEG 2000 part 1)",
