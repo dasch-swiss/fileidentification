@@ -25,7 +25,7 @@ RUN apt-get install --no-install-recommends -y \
     && rm -rf /var/lib/apt/lists/*
 
 # sipi: DaSCH service-file verifier (statically linked binary, copied from the official image)
-COPY --from=daschswiss/sipi:v6.2.2 /sbin/sipi /usr/local/bin/sipi
+COPY --from=daschswiss/sipi:latest /sbin/sipi /usr/local/bin/sipi
 
 WORKDIR /app
 
