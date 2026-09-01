@@ -1,7 +1,7 @@
 """End-to-end tests that drive the shipped Docker image and CLI (ENTRYPOINT identify.py), exercising the real
 delivery artifact with its bundled ffmpeg / imagemagick / libreoffice.
 
-Marked ``docker`` (run the fast suite with ``pytest -m "not docker"``). Skipped when Docker is unavailable; the
+Marked ``docker`` (run the fast suite with ``pytest -m "not docker"``). fails when Docker is unavailable; the
 image is built once per session if missing (FIDR_NO_BUILD=1 requires a pre-built one, FIDR_IMAGE picks a tag).
 Each test bind-mounts a tmp dir; the container runs as root, so ownership is reclaimed afterwards for cleanup.
 """
@@ -99,16 +99,16 @@ def _puids(log: dict[str, Any]) -> set[str]:
 def fidr_image() -> str:
     """Ensure the fileidentification image exists, building it once if needed."""
     if not _docker_ready():
-        pytest.skip("docker is not available")
+        pytest.fail("docker is not available")
     present = subprocess.run(["docker", "image", "inspect", IMAGE], capture_output=True, check=False).returncode == 0
     if not present:
         if os.environ.get("FIDR_NO_BUILD"):
-            pytest.skip(f"docker image '{IMAGE}' not found and FIDR_NO_BUILD is set")
+            pytest.fail(f"docker image '{IMAGE}' not found and FIDR_NO_BUILD is set")
         build = subprocess.run(
             ["docker", "build", "-t", IMAGE, str(REPO_ROOT)], capture_output=True, text=True, check=False
         )
         if build.returncode != 0:
-            pytest.skip(f"failed to build docker image '{IMAGE}':\n{build.stderr[-2000:]}")
+            pytest.fail(f"failed to build docker image '{IMAGE}':\n{build.stderr[-2000:]}")
     return IMAGE
 
 
@@ -397,7 +397,7 @@ def _diagnose_not_quarantined(image: str, work: Path, name: str, rec: dict[str, 
 
 def test_corrupt_folder_is_quarantined(stage: Callable[..., Path], fidr_image: str) -> None:
     """`fidr -i -v` on the corrupt fixtures quarantines every corrupt image."""
-
+    assert CORRUPT_FIXTURES, "testdata/corrupt/ is empty"
     good = "SampleJPGImage.jpg"  # negative control: a valid image must survive
     work = stage(good, *(f"corrupt/{name}" for name in CORRUPT_FIXTURES))
     proc = run_cli(fidr_image, work, "-i", "-v")
